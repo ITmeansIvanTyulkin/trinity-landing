@@ -15,6 +15,7 @@
   --ring: #7eb6d4;
   --gold: #c4a35a;
   --gold-soft: rgba(196, 163, 90, 0.14);
+  --slate: #8a939b;
   --ok: #1f7a45;
   --warn: #b7791f;
   --danger: #c53030;
@@ -154,18 +155,21 @@ h2 {
 .nav-cta {
   display: inline-flex;
   align-items: center;
-  padding: 0.55rem 1rem;
+  padding: 0.52rem 1.15rem;
   border: 1px solid rgba(247, 244, 238, 0.28);
+  border-radius: 999px;
   color: #f7f4ee !important;
   text-decoration: none !important;
   font-size: 0.88rem;
   font-weight: 600;
-  transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
+  letter-spacing: 0.01em;
+  transition: background 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
 
 .nav-cta:hover {
   background: rgba(247, 244, 238, 0.08);
-  border-color: rgba(247, 244, 238, 0.5);
+  border-color: rgba(247, 244, 238, 0.55);
+  box-shadow: 0 0 0 1px rgba(247, 244, 238, 0.08);
 }
 
 .nav-toggle {
@@ -173,59 +177,74 @@ h2 {
   width: 2.5rem;
   height: 2.5rem;
   border: 1px solid rgba(247, 244, 238, 0.28);
+  border-radius: 999px;
   background: transparent;
   color: #f7f4ee;
   cursor: pointer;
 }
 
-/* —— Logo rings —— */
+/* —— Logo rings (Venn — as on operator dashboard) —— */
 .trinity-logo {
   position: relative;
-  width: 2.35rem;
-  height: 2.35rem;
+  width: 2.6rem;
+  height: 2.6rem;
   flex-shrink: 0;
 }
 
 .trinity-logo .ring {
   position: absolute;
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1.35rem;
+  height: 1.35rem;
   border-radius: 50%;
-  border: 2.2px solid transparent;
+  border: 2.5px solid transparent;
   box-sizing: border-box;
 }
 
+/* left — ring blue */
 .trinity-logo .ring-a {
-  top: 0;
-  left: 0.55rem;
+  left: 0.05rem;
+  top: 0.55rem;
   border-color: var(--ring);
 }
 
+/* right — gold */
 .trinity-logo .ring-b {
-  bottom: 0.1rem;
-  left: 0;
-  border-color: var(--accent);
-}
-
-.trinity-logo .ring-c {
-  bottom: 0.1rem;
-  right: 0;
+  left: 1.15rem;
+  top: 0.55rem;
   border-color: var(--gold);
 }
 
+/* top — slate / silver */
+.trinity-logo .ring-c {
+  left: 0.6rem;
+  top: 0.05rem;
+  border-color: var(--slate);
+}
+
 .trinity-logo.lg {
-  width: 3.4rem;
-  height: 3.4rem;
+  width: 3.6rem;
+  height: 3.6rem;
 }
 
 .trinity-logo.lg .ring {
-  width: 1.7rem;
-  height: 1.7rem;
-  border-width: 2.6px;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-width: 2.7px;
 }
 
 .trinity-logo.lg .ring-a {
-  left: 0.85rem;
+  left: 0.08rem;
+  top: 0.78rem;
+}
+
+.trinity-logo.lg .ring-b {
+  left: 1.6rem;
+  top: 0.78rem;
+}
+
+.trinity-logo.lg .ring-c {
+  left: 0.84rem;
+  top: 0.08rem;
 }
 
 /* —— Buttons —— */
@@ -234,14 +253,21 @@ h2 {
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  padding: 0.9rem 1.35rem;
+  padding: 0.92rem 1.55rem;
   font: inherit;
   font-weight: 600;
   font-size: 0.95rem;
+  letter-spacing: 0.015em;
   border: none;
+  border-radius: 999px;
   cursor: pointer;
   text-decoration: none !important;
-  transition: background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.2s var(--ease);
+  transition:
+    background 0.25s var(--ease),
+    color 0.25s var(--ease),
+    border-color 0.25s var(--ease),
+    box-shadow 0.25s var(--ease),
+    transform 0.2s var(--ease);
 }
 
 .btn:active {
@@ -249,44 +275,55 @@ h2 {
 }
 
 .btn-primary {
-  background: var(--accent);
+  background: linear-gradient(180deg, #0e8a74 0%, var(--accent) 100%);
   color: #fff !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.14) inset,
+    0 8px 22px rgba(11, 122, 102, 0.28);
 }
 
 .btn-primary:hover {
-  background: var(--accent-hover);
+  background: linear-gradient(180deg, #10967e 0%, var(--accent-hover) 100%);
   color: #fff !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.16) inset,
+    0 12px 28px rgba(11, 122, 102, 0.36);
 }
 
 .btn-ghost {
-  background: transparent;
+  background: rgba(247, 244, 238, 0.04);
   color: #f7f4ee !important;
-  border: 1px solid rgba(247, 244, 238, 0.35);
+  border: 1px solid rgba(247, 244, 238, 0.32);
+  backdrop-filter: blur(6px);
 }
 
 .btn-ghost:hover {
-  border-color: #f7f4ee;
+  border-color: rgba(247, 244, 238, 0.7);
+  background: rgba(247, 244, 238, 0.1);
   color: #fff !important;
 }
 
 .btn-dark {
-  background: var(--navy);
+  background: linear-gradient(180deg, #2f414c 0%, var(--navy) 100%);
   color: #f7f4ee !important;
+  box-shadow: 0 8px 20px rgba(30, 42, 50, 0.18);
 }
 
 .btn-dark:hover {
-  background: var(--navy-2);
+  background: linear-gradient(180deg, #3a4e5a 0%, var(--navy-2) 100%);
   color: #fff !important;
 }
 
 .btn-line {
-  background: transparent;
+  background: #fff;
   color: var(--navy) !important;
   border: 1px solid var(--line);
+  box-shadow: 0 4px 14px rgba(30, 42, 50, 0.05);
 }
 
 .btn-line:hover {
-  border-color: var(--navy);
+  border-color: #c5ced6;
+  box-shadow: 0 8px 20px rgba(30, 42, 50, 0.08);
 }
 
 /* —— Hero —— */
@@ -306,14 +343,92 @@ h2 {
   z-index: 0;
 }
 
+.hero-candles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.52;
+  mask-image: linear-gradient(
+    105deg,
+    transparent 0%,
+    #000 8%,
+    #000 55%,
+    rgba(0, 0, 0, 0.45) 78%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    105deg,
+    transparent 0%,
+    #000 8%,
+    #000 55%,
+    rgba(0, 0, 0, 0.45) 78%,
+    transparent 100%
+  );
+}
+
+.candle-track {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  align-items: flex-end;
+  padding-bottom: 10%;
+  animation: candles-scroll 110s linear infinite;
+  will-change: transform;
+}
+
+.candle-strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.72rem;
+  height: 62%;
+  padding: 0 0.4rem;
+}
+
+.candle {
+  position: relative;
+  width: 0.72rem;
+  flex-shrink: 0;
+  border-radius: 1px;
+}
+
+.candle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: var(--wick-top, -18%);
+  bottom: var(--wick-bottom, -14%);
+  width: 1px;
+  transform: translateX(-50%);
+  background: currentColor;
+  opacity: 0.65;
+}
+
+.candle.up {
+  color: rgba(126, 182, 212, 0.95);
+  background: linear-gradient(180deg, rgba(126, 182, 212, 0.62), rgba(126, 182, 212, 0.2));
+  border: 1px solid rgba(126, 182, 212, 0.42);
+}
+
+.candle.down {
+  color: rgba(196, 163, 90, 0.95);
+  background: linear-gradient(180deg, rgba(196, 163, 90, 0.28), rgba(196, 163, 90, 0.58));
+  border: 1px solid rgba(196, 163, 90, 0.4);
+}
+
+@keyframes candles-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
 .hero-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(126, 182, 212, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(126, 182, 212, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(126, 182, 212, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(126, 182, 212, 0.05) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 70% 60% at 70% 45%, #000 20%, transparent 75%);
+  opacity: 0.7;
 }
 
 .hero-glow {
@@ -390,8 +505,9 @@ h2 {
   font-family: var(--mono);
   font-size: 0.72rem;
   letter-spacing: 0.1em;
-  padding: 0.35rem 0.65rem;
+  padding: 0.35rem 0.75rem;
   border: 1px solid currentColor;
+  border-radius: 999px;
   min-width: 7.5rem;
   text-align: center;
   transition: color 0.4s var(--ease), border-color 0.4s var(--ease), background 0.4s var(--ease);
@@ -920,7 +1036,8 @@ h2 {
   text-transform: uppercase;
   color: var(--accent);
   background: var(--accent-soft);
-  padding: 0.3rem 0.5rem;
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
 }
 
 .price h3 {
