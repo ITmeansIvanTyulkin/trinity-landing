@@ -33,44 +33,7 @@
     }, 3200);
   }
 
-  /* Hero candlesticks — slow forward scroll */
-  const candlesHost = document.querySelector("[data-candles]");
-  if (candlesHost) {
-    const pattern = [
-      [42, "up"], [28, "down"], [55, "up"], [36, "down"], [48, "up"],
-      [22, "down"], [61, "up"], [33, "down"], [40, "up"], [58, "down"],
-      [30, "up"], [47, "up"], [25, "down"], [53, "up"], [38, "down"],
-      [44, "up"], [29, "down"], [57, "up"], [34, "down"], [49, "up"],
-      [31, "down"], [52, "up"], [27, "down"], [46, "up"], [39, "down"],
-      [60, "up"], [24, "down"], [50, "up"], [35, "down"], [43, "up"],
-      [32, "down"], [56, "up"], [26, "down"], [45, "up"], [37, "down"],
-      [54, "up"], [23, "down"], [51, "up"], [41, "down"], [59, "up"],
-    ];
-
-    function makeStrip() {
-      const strip = document.createElement("div");
-      strip.className = "candle-strip";
-      pattern.forEach(([h, dir], i) => {
-        const c = document.createElement("span");
-        c.className = `candle ${dir}`;
-        c.style.height = `${h}%`;
-        c.style.marginBottom = `${(i % 7) * 1.1}%`;
-        c.style.setProperty("--wick-top", `${8 + (i % 5)}%`);
-        c.style.setProperty("--wick-bottom", `${6 + (i % 4)}%`);
-        strip.appendChild(c);
-      });
-      return strip;
-    }
-
-    const track = document.createElement("div");
-    track.className = "candle-track";
-    track.appendChild(makeStrip());
-    track.appendChild(makeStrip());
-    if (reduceMotion) {
-      track.style.animation = "none";
-    }
-    candlesHost.appendChild(track);
-  }
+  /* Hero candlesticks — replaced by assets/hero-chart.png pan in CSS */
 
   /* Mobile nav */
   const toggle = document.querySelector("[data-nav-toggle]");

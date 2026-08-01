@@ -334,7 +334,9 @@ h2 {
   align-items: end;
   color: #f7f4ee;
   overflow: hidden;
-  background: var(--navy-deep);
+  background:
+    radial-gradient(ellipse 80% 70% at 70% 55%, rgba(0, 90, 140, 0.35), transparent 60%),
+    #040a15;
 }
 
 .hero-visual {
@@ -345,90 +347,52 @@ h2 {
 
 .hero-candles {
   position: absolute;
-  inset: 0;
+  inset: -4% -2% 0;
   overflow: hidden;
-  opacity: 0.52;
-  mask-image: linear-gradient(
-    105deg,
-    transparent 0%,
-    #000 8%,
-    #000 55%,
-    rgba(0, 0, 0, 0.45) 78%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    105deg,
-    transparent 0%,
-    #000 8%,
-    #000 55%,
-    rgba(0, 0, 0, 0.45) 78%,
-    transparent 100%
-  );
 }
 
-.candle-track {
+.chart-pan {
+  position: absolute;
+  inset: 0;
   display: flex;
-  width: max-content;
-  height: 100%;
-  align-items: flex-end;
-  padding-bottom: 10%;
-  animation: candles-scroll 110s linear infinite;
+  align-items: center;
+}
+
+.chart-pan img {
+  width: 128%;
+  max-width: none;
+  height: 108%;
+  object-fit: cover;
+  object-position: 18% 55%;
+  filter: saturate(1.05) contrast(1.05);
+  animation: chart-drift 55s ease-in-out infinite alternate;
   will-change: transform;
 }
 
-.candle-strip {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.72rem;
-  height: 62%;
-  padding: 0 0.4rem;
-}
-
-.candle {
-  position: relative;
-  width: 0.72rem;
-  flex-shrink: 0;
-  border-radius: 1px;
-}
-
-.candle::before {
-  content: "";
+.chart-veil {
   position: absolute;
-  left: 50%;
-  top: var(--wick-top, -18%);
-  bottom: var(--wick-bottom, -14%);
-  width: 1px;
-  transform: translateX(-50%);
-  background: currentColor;
-  opacity: 0.65;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(4, 10, 21, 0.88) 0%, rgba(4, 10, 21, 0.55) 38%, rgba(4, 10, 21, 0.22) 68%, rgba(4, 10, 21, 0.45) 100%),
+    linear-gradient(180deg, rgba(4, 10, 21, 0.55) 0%, transparent 28%, transparent 62%, rgba(4, 10, 21, 0.72) 100%);
+  pointer-events: none;
 }
 
-.candle.up {
-  color: rgba(126, 182, 212, 0.95);
-  background: linear-gradient(180deg, rgba(126, 182, 212, 0.62), rgba(126, 182, 212, 0.2));
-  border: 1px solid rgba(126, 182, 212, 0.42);
-}
-
-.candle.down {
-  color: rgba(196, 163, 90, 0.95);
-  background: linear-gradient(180deg, rgba(196, 163, 90, 0.28), rgba(196, 163, 90, 0.58));
-  border: 1px solid rgba(196, 163, 90, 0.4);
-}
-
-@keyframes candles-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+@keyframes chart-drift {
+  from { transform: translate3d(0, 0, 0) scale(1.02); }
+  to { transform: translate3d(-14%, -1.5%, 0) scale(1.06); }
 }
 
 .hero-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(126, 182, 212, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(126, 182, 212, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(126, 182, 212, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(126, 182, 212, 0.035) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 70% 60% at 70% 45%, #000 20%, transparent 75%);
-  opacity: 0.7;
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .hero-glow {
@@ -438,8 +402,9 @@ h2 {
   right: -10%;
   top: 10%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(11, 122, 102, 0.28), transparent 62%);
+  background: radial-gradient(circle, rgba(0, 120, 160, 0.22), transparent 62%);
   animation: glow-drift 12s ease-in-out infinite alternate;
+  pointer-events: none;
 }
 
 .hero-glow.gold {
@@ -449,7 +414,7 @@ h2 {
   top: auto;
   bottom: -10%;
   right: auto;
-  background: radial-gradient(circle, rgba(196, 163, 90, 0.18), transparent 65%);
+  background: radial-gradient(circle, rgba(196, 163, 90, 0.1), transparent 65%);
   animation-delay: -4s;
 }
 
@@ -1394,6 +1359,18 @@ h2 {
     place-items: center;
   }
 
+  /* Mobile: quieter chart so copy stays readable */
+  .chart-pan img {
+    width: 160%;
+    animation-duration: 70s;
+  }
+
+  .chart-veil {
+    background:
+      linear-gradient(90deg, rgba(4, 10, 21, 0.9) 0%, rgba(4, 10, 21, 0.62) 55%, rgba(4, 10, 21, 0.5) 100%),
+      linear-gradient(180deg, rgba(4, 10, 21, 0.5) 0%, transparent 30%, rgba(4, 10, 21, 0.78) 100%);
+  }
+
   .dash-stage {
     right: 6%;
     left: 6%;
@@ -1437,5 +1414,9 @@ h2 {
   .reveal {
     opacity: 1;
     transform: none;
+  }
+
+  .chart-pan img {
+    transform: none !important;
   }
 }
