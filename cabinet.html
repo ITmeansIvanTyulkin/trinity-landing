@@ -8,10 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1785852000" />
+  <link rel="stylesheet" href="css/styles.css?v=1785854400" />
 </head>
 <body class="cabinet-page cabinet-locked">
-  <!-- Soft gate: same password as IMOEX dashboard API -->
+  <!-- Supabase email/password + confirm (shared IdP with future IMOEX Phase 2) -->
   <div id="cabinet-gate" class="cabinet-gate" role="dialog" aria-modal="true" aria-labelledby="cabinet-gate-title">
     <div class="cabinet-gate-card">
       <div class="cabinet-gate-brand">
@@ -24,25 +24,74 @@
       </div>
       <h1 id="cabinet-gate-title">Вход в кабинет</h1>
       <p class="cabinet-gate-lead">
-        Тот же пароль, что API password на дашборде IMOEX
-        (<code>imoex.auth.password</code>). Soft-gate для статического сайта.
+        Один аккаунт: email и пароль. После подтверждения почты тот же логин
+        откроет кабинет — и позже дашборд IMOEX.
       </p>
-      <form id="cabinet-gate-form" class="cabinet-gate-form" autocomplete="on">
-        <label for="cabinet-gate-pass">Пароль</label>
-        <input
-          id="cabinet-gate-pass"
-          name="password"
-          type="password"
-          autocomplete="current-password"
-          required
-          placeholder="Пароль дашборда"
-        />
-        <p class="cabinet-gate-error" data-gate-error hidden></p>
-        <button type="submit" class="btn btn-primary">Войти</button>
-      </form>
+
+      <p class="cabinet-gate-error" data-gate-error hidden></p>
+      <p class="cabinet-gate-info" data-gate-info hidden></p>
+
+      <div data-auth-panel="setup" hidden>
+        <p class="cabinet-gate-lead">
+          Нужен проект Supabase. Скопируйте
+          <code>js/cabinet-config.example.js</code> →
+          <code>js/cabinet-config.local.js</code> и укажите URL + anon key.
+        </p>
+        <p class="cabinet-gate-foot">
+          <a href="docs/SUPABASE_SETUP.md">Инструкция</a>
+          · <a href="index.html">← На лендинг</a>
+        </p>
+      </div>
+
+      <div data-auth-panel="login">
+        <form id="cabinet-login-form" class="cabinet-gate-form" autocomplete="on">
+          <label for="cabinet-login-email">Email</label>
+          <input id="cabinet-login-email" name="email" type="email" autocomplete="username" required placeholder="you@example.com" />
+          <label for="cabinet-login-pass">Пароль</label>
+          <input id="cabinet-login-pass" name="password" type="password" autocomplete="current-password" required minlength="6" />
+          <button type="submit" class="btn btn-primary">Войти</button>
+        </form>
+        <p class="cabinet-gate-switch">
+          Нет аккаунта?
+          <button type="button" class="nav-text-btn" data-auth-goto="register">Зарегистрироваться</button>
+        </p>
+      </div>
+
+      <div data-auth-panel="register" hidden>
+        <form id="cabinet-register-form" class="cabinet-gate-form" autocomplete="on">
+          <label for="cabinet-reg-name">Имя (необязательно)</label>
+          <input id="cabinet-reg-name" name="name" type="text" autocomplete="nickname" placeholder="Как к вам обращаться" />
+          <label for="cabinet-reg-email">Email</label>
+          <input id="cabinet-reg-email" name="email" type="email" autocomplete="username" required placeholder="you@example.com" />
+          <label for="cabinet-reg-pass">Пароль</label>
+          <input id="cabinet-reg-pass" name="password" type="password" autocomplete="new-password" required minlength="6" />
+          <label class="cabinet-check">
+            <input id="cabinet-reg-marketing" type="checkbox" checked />
+            <span>Согласен на продуктовые письма и новости TRINITY</span>
+          </label>
+          <button type="submit" class="btn btn-primary">Создать аккаунт</button>
+        </form>
+        <p class="cabinet-gate-switch">
+          Уже есть аккаунт?
+          <button type="button" class="nav-text-btn" data-auth-goto="login">Войти</button>
+        </p>
+      </div>
+
+      <div data-auth-panel="check-email" hidden>
+        <p class="cabinet-gate-lead">
+          Мы отправили письмо на
+          <strong class="mono" data-check-email-addr></strong>.
+          Откройте ссылку подтверждения, затем войдите.
+        </p>
+        <button type="button" class="btn btn-line" data-auth-resend>Отправить письмо ещё раз</button>
+        <p class="cabinet-gate-switch">
+          <button type="button" class="nav-text-btn" data-auth-goto="login">К входу</button>
+        </p>
+      </div>
+
       <p class="cabinet-gate-foot">
         <a href="index.html">← На лендинг</a>
-        · Калькулятор капитала — на <a href="index.html#calculator">главной</a>
+        · Калькулятор — на <a href="index.html#calculator">главной</a>
       </p>
     </div>
   </div>
@@ -68,6 +117,7 @@
         <li><a href="#charts">Метрики</a></li>
         <li><a href="#lab">Лаборатория</a></li>
         <li><a href="#account">Аккаунт</a></li>
+        <li><span class="cab-user-email mono" data-cab-user-email></span></li>
         <li><button type="button" class="nav-text-btn" data-cab-logout>Выйти</button></li>
         <li><a class="nav-cta" href="index.html">← На лендинг</a></li>
       </ul>
@@ -412,7 +462,10 @@
   </footer>
   </div><!-- /.cabinet-shell -->
 
-  <script src="js/cabinet-data.js?v=1785852000"></script>
-  <script src="js/cabinet.js?v=1785852000"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+  <script src="js/cabinet-config.js?v=1785854400"></script>
+  <script src="js/cabinet-data.js?v=1785854400"></script>
+  <script src="js/cabinet-auth.js?v=1785854400"></script>
+  <script src="js/cabinet.js?v=1785854400"></script>
 </body>
 </html>

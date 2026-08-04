@@ -1,30 +1,15 @@
 /**
  * TRINITY cabinet — mock / demo metrics (standalone).
  *
- * Later (optional, same-machine): fetch read-only paper summary from IMOEX
+ * Auth config: js/cabinet-config.js (+ optional cabinet-config.local.js).
+ * Auth runtime: js/cabinet-auth.js (Supabase).
+ *
+ * Optional IMOEX stub:
  *   GET http://localhost:8080/api/paper/journal
- *   GET http://localhost:8080/api/broker/status
- * Regime: no public /api/regime yet — mock; optional stub probe.
- * Set CABINET_CONFIG.imoexBase (or leave null) — default stays rich mock data
- * so the marketing cabinet works without the Java app.
+ * Set CABINET_CONFIG.imoexBase — mock used when null/unreachable.
  *
  * NO order placement, NO broker token entry here. Trading stays in IMOEX /view.
- *
- * Auth: same password as IMOEX dashboard API (imoex.auth.password).
- * Only the SHA-256 hash is stored here — never the plaintext.
- * Soft client-side gate for a static marketing site.
  */
-window.CABINET_CONFIG = {
-  /* Optional: "http://localhost:8080" — stub only; mock used when null/unreachable */
-  imoexBase: null,
-  /* SHA-256 of IMOEX dashboard API password (imoex.auth.password / application-local.yml) */
-  authHash:
-    "ebbe2d453c1661976860f0e147c2f076dfb41486f2b3c91c0dbdcc21f18db6ae",
-  /* Reuse IMOEX operator localStorage key for SSO in the same browser */
-  imoexPassKey: "imoex.ops.pass",
-  sessionKey: "trinity.cabinet.auth",
-};
-
 window.CABINET_DATA = {
   subscription: {
     tier: "Оператор",
@@ -87,7 +72,6 @@ window.CABINET_DATA = {
     { label: "Arbitrage", detail: "roadmap · Full Core", status: "soon" },
   ],
 
-  /* Decision Lab — illustrative DAILY pairs pipeline sandbox */
   labPairs: [
     {
       id: "magn-nlmk",

@@ -10,113 +10,6 @@
   const Z_ENTER = 1.8;
   const Z_WATCH = 1.4;
 
-  /* —— Auth (same password as IMOEX dashboard) —— */
-  async function sha256Hex(text) {
-    const buf = await crypto.subtle.digest(
-      "SHA-256",
-      new TextEncoder().encode(text)
-    );
-    return [...new Uint8Array(buf)]
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-  }
-
-  async function passwordMatches(pass) {
-    if (!pass || !config.authHash) return false;
-    const hash = await sha256Hex(pass);
-    return hash === config.authHash;
-  }
-
-  function unlockCabinet() {
-    try {
-      sessionStorage.setItem(config.sessionKey || "trinity.cabinet.auth", "1");
-    } catch {
-      /* ignore */
-    }
-    document.body.classList.remove("cabinet-locked");
-    const gate = document.getElementById("cabinet-gate");
-    if (gate) gate.hidden = true;
-  }
-
-  function isSessionOk() {
-    try {
-      return sessionStorage.getItem(config.sessionKey || "trinity.cabinet.auth") === "1";
-    } catch {
-      return false;
-    }
-  }
-
-  async function trySsoFromImoex() {
-    try {
-      const stored = localStorage.getItem(config.imoexPassKey || "imoex.ops.pass");
-      if (stored && (await passwordMatches(stored))) {
-        unlockCabinet();
-        return true;
-      }
-    } catch {
-      /* ignore */
-    }
-    return false;
-  }
-
-  async function setupAuth() {
-    const gate = document.getElementById("cabinet-gate");
-    const form = document.getElementById("cabinet-gate-form");
-    const input = document.getElementById("cabinet-gate-pass");
-    const err = document.querySelector("[data-gate-error]");
-    const logout = document.querySelector("[data-cab-logout]");
-
-    if (isSessionOk()) {
-      unlockCabinet();
-    } else if (await trySsoFromImoex()) {
-      /* unlocked via IMOEX localStorage */
-    } else {
-      document.body.classList.add("cabinet-locked");
-      if (gate) gate.hidden = false;
-      if (input) setTimeout(() => input.focus(), 80);
-    }
-
-    if (form && input) {
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const ok = await passwordMatches(input.value);
-        if (ok) {
-          if (err) err.hidden = true;
-          /* Align with IMOEX operator storage for same-browser SSO */
-          try {
-            localStorage.setItem(config.imoexPassKey || "imoex.ops.pass", input.value);
-          } catch {
-            /* ignore */
-          }
-          input.value = "";
-          unlockCabinet();
-        } else {
-          if (err) {
-            err.hidden = false;
-            err.textContent = "Неверный пароль. Тот же, что API password на дашборде IMOEX.";
-          }
-          input.select();
-        }
-      });
-    }
-
-    if (logout) {
-      logout.addEventListener("click", () => {
-        try {
-          sessionStorage.removeItem(config.sessionKey || "trinity.cabinet.auth");
-        } catch {
-          /* ignore */
-        }
-        document.body.classList.add("cabinet-locked");
-        if (gate) gate.hidden = false;
-        if (input) {
-          input.value = "";
-          input.focus();
-        }
-      });
-    }
-  }
-
   /* —— Optional IMOEX stub (read-only) —— */
   async function tryImoexStub() {
     const base = config.imoexBase;
@@ -633,7 +526,7 @@
     }
   }
 
-  setupAuth().then(() => {
+  function bootCabinetUi() {
     renderOverview();
     renderOps();
     drawEquity();
@@ -645,7 +538,24 @@
     setupNav();
     setupReveal();
     tryImoexStub();
-  });
+
+    const email =
+      (window.localStorage &&
+        localStorage.getItem(
+          (window.TrinityCabinetAuth && window.TrinityCabinetAuth.userKey) ||
+            "trinity.supabase.user_email"
+        )) ||
+      "";
+    const label = document.querySelector("[data-cab-user-email]");
+    if (label && email) label.textContent = email;
+  }
+
+  const auth = window.TrinityCabinetAuth;
+  if (auth && typeof auth.setupAuth === "function") {
+    auth.setupAuth().then(bootCabinetUi).catch(() => bootCabinetUi());
+  } else {
+    bootCabinetUi();
+  }
 
   window.addEventListener("resize", () => {
     drawEquity();

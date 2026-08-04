@@ -1,6 +1,6 @@
 # TRINITY Landing
 
-Публичный лендинг продукта **TRINITY** (маркетинг / тарифы / FAQ).
+Публичный лендинг продукта **TRINITY** (маркетинг / тарифы / FAQ / кабинет).
 
 Операторское приложение живёт отдельно: репозиторий IMOEX (Spring Boot + `/view`).
 
@@ -8,41 +8,48 @@
 
 Статический сайт: HTML + CSS + JS. Без сборки и без Node.
 
+Auth кабинета: **Supabase** (email + пароль + confirm). См. [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md).
+
 ## Локальный просмотр
 
-Из корня репозитория:
-
 ```bash
-# Python
 python3 -m http.server 5173
-
-# или PHP
-php -S localhost:5173
 ```
 
-Откройте [http://localhost:5173](http://localhost:5173).
+- Лендинг: [http://127.0.0.1:5173/](http://127.0.0.1:5173/)
+- Кабинет: [http://127.0.0.1:5173/cabinet.html](http://127.0.0.1:5173/cabinet.html)
+- Калькулятор капитала: `#calculator` на главной
 
-Либо просто откройте `index.html` в браузере.
+Auth:
+
+```bash
+cp js/cabinet-config.example.js js/cabinet-config.local.js
+# впишите supabaseUrl + supabaseAnonKey
+```
 
 ## Структура
 
 ```
-index.html      # страница
-css/styles.css  # стили
-js/main.js      # режим рынка, меню, калькулятор, reveal
+index.html              # лендинг + калькулятор
+cabinet.html            # кабинет (Supabase gate)
+css/styles.css
+js/main.js              # hero / nav / reveal
+js/calc.js              # Capital Allocator сценарий
+js/cabinet-*.js         # кабинет + auth
+supabase/profiles.sql   # профиль / рассылка
+docs/SUPABASE_SETUP.md
 ```
 
 ## Продуктовая честность
 
-Лендинг следует тону промпта, но не выдумывает PnL:
-
 - **Pairs / DAILY** — live paper
 - **Trend / Arbitrage** — early access / roadmap (Full Core)
-- **Volume ML** — roadmap после валидации paper
-- Дисклеймер: research / decision-support, не гарантия прибыли
+- **Volume ML** — roadmap
+- Кабинет не торгует и не хранит токен брокера
+- Research / decision-support, не гарантия прибыли
 
 ## Деплой
 
 Любой static host: GitHub Pages, Cloudflare Pages, Netlify.
 
-Для GitHub Pages: Settings → Pages → Deploy from branch `main` / root.
+На деплое подставьте Supabase URL/anon в `js/cabinet-config.js` (или сгенерируйте файл в CI).

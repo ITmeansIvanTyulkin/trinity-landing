@@ -1,3 +1,8 @@
+# Local secrets / overrides (do not commit)
+.env
+.env.*
+!.env.example
+
 # OS / IDE
 .DS_Store
 Thumbs.db
@@ -7,11 +12,11 @@ Thumbs.db
 *.swp
 .PVS-Studio/
 
-# Logs / local
+# Logs
 *.log
-.env
-.env.*
-!.env.example
+
+# Cabinet Supabase keys (copy from cabinet-config.example.js)
+js/cabinet-config.local.js
 
 # Node (if added later)
 node_modules/
