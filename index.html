@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1785785200" />
+  <link rel="stylesheet" href="css/styles.css?v=1785852000" />
 </head>
 <body>
   <header class="site-nav">
@@ -30,6 +30,7 @@
         <li><a href="#strategies">Стратегии</a></li>
         <li><a href="#product">Продукт</a></li>
         <li><a href="#pricing">Тарифы</a></li>
+        <li><a href="#calculator">Калькулятор</a></li>
         <li><a href="#faq">FAQ</a></li>
         <li><a href="cabinet.html">Кабинет</a></li>
         <li><a class="nav-cta" href="cabinet.html">Триал 14 дней</a></li>
@@ -402,7 +403,7 @@
         <div class="section-head reveal">
           <p class="eyebrow">Личный кабинет</p>
           <h2>Подписка и ключи — в одном месте</h2>
-          <p class="lead">Подписка, paper-метрики и сценарий-калькулятор — без торговли и токенов брокера.</p>
+          <p class="lead">Подписка, paper-метрики и пайплайн-лаборатория — без торговли и токенов брокера. Калькулятор капитала — ниже на этой странице.</p>
         </div>
         <div class="cabinet-grid">
           <article class="cabinet-item reveal">
@@ -410,16 +411,16 @@
             <p>Активный тариф, дата следующего списания, смена плана (апгрейд / даунгрейд).</p>
           </article>
           <article class="cabinet-item reveal">
-            <h3>Unlock-ключи</h3>
-            <p>Ключ вида TRINITY-XXXX-…, перевыпуск, история активаций (дата, IP, устройство).</p>
+            <h3>Пайплайн-лаборатория</h3>
+            <p>Интерактивный sandbox: почему ENTER / WATCH / BLOCK — гейты техники, regime, cluster, FA.</p>
           </article>
           <article class="cabinet-item reveal">
-            <h3>Платежи</h3>
-            <p>Список списаний, скачивание чека / акта для бухгалтерии.</p>
+            <h3>Unlock-ключи и платежи</h3>
+            <p>Ключ TRINITY-XXXX-…, перевыпуск, история списаний и чеки (mock до биллинга).</p>
           </article>
           <article class="cabinet-item reveal">
             <h3>Документация и поддержка</h3>
-            <p>Инструкция по установке, FAQ, кнопка «Задать вопрос» / Telegram.</p>
+            <p>FAQ, дорожная карта, кнопка «Задать вопрос» / Telegram.</p>
           </article>
         </div>
         <p style="margin-top:2rem" class="reveal">
@@ -432,34 +433,141 @@
     <section class="section calc" id="calculator">
       <div class="wrap">
         <div class="section-head reveal">
-          <p class="eyebrow">Калькулятор</p>
-          <h2>Оценка масштаба на вашем капитале</h2>
-          <p class="lead">Иллюстративный расчёт слотов Capital Allocator — не прогноз доходности.</p>
-        </div>
-        <div class="calc-box reveal">
-          <div class="calc-field">
-            <label for="equity">Капитал, ₽</label>
-            <input id="equity" type="range" min="100000" max="2000000" step="50000" value="200000" />
-            <p class="calc-value" data-equity-label>200 000 ₽</p>
-          </div>
-          <div class="calc-out">
-            <div class="calc-metric">
-              <span>Открытых DAILY слотов</span>
-              <strong data-slots>—</strong>
-            </div>
-            <div class="calc-metric">
-              <span>Gross на DAILY</span>
-              <strong data-gross>—</strong>
-            </div>
-            <div class="calc-metric">
-              <span>INTRADAY</span>
-              <strong>research only</strong>
-            </div>
-          </div>
-          <p class="calc-disclaimer">
-            При equity &lt; 1&nbsp;000&nbsp;000 ₽ — без плеча. Цифры соответствуют текущей логике allocator в продукте;
-            PnL на лендинге намеренно не показываем.
+          <p class="eyebrow">Сценарий-калькулятор</p>
+          <h2>Оценка масштаба на капитале</h2>
+          <p class="lead">
+            Иллюстративный сценарий в духе Capital Allocator.
+            Диапазон «в месяц» — <strong>не прогноз и не обещание</strong>, а порядок величины для планирования слотов.
           </p>
+        </div>
+
+        <div class="cab-calc-layout reveal">
+          <div class="cab-calc">
+            <div class="cab-calc-controls">
+              <div class="calc-field">
+                <label for="calc-capital">Капитал, ₽</label>
+                <input id="calc-capital" type="range" min="100000" max="2000000" step="50000" value="200000" />
+                <p class="calc-value" data-calc-capital>200 000 ₽</p>
+              </div>
+
+              <fieldset class="cab-regime-pick">
+                <legend>Режим рынка (сценарий)</legend>
+                <div class="cab-regime-seg" role="radiogroup" aria-label="Режим рынка">
+                  <label class="cab-regime-opt">
+                    <input type="radio" name="calc-regime" value="SIDEWAYS" checked />
+                    <span>SIDEWAYS</span>
+                  </label>
+                  <label class="cab-regime-opt">
+                    <input type="radio" name="calc-regime" value="NEUTRAL" />
+                    <span>NEUTRAL</span>
+                  </label>
+                  <label class="cab-regime-opt">
+                    <input type="radio" name="calc-regime" value="TREND" />
+                    <span>TREND</span>
+                  </label>
+                </div>
+                <p class="cab-regime-why" data-calc-regime-why></p>
+              </fieldset>
+
+              <fieldset class="cab-strat-pick">
+                <legend>Стратегии в сценарии</legend>
+                <label class="cab-radio">
+                  <input type="radio" name="calc-strategies" value="1" checked />
+                  <span>
+                    <strong>1 · Pairs only</strong>
+                    <em>Live paper · Оператор</em>
+                  </span>
+                </label>
+                <label class="cab-radio">
+                  <input type="radio" name="calc-strategies" value="2" />
+                  <span>
+                    <strong>2 · Pairs + Trend EA</strong>
+                    <em>Early access · Full Core</em>
+                  </span>
+                </label>
+                <label class="cab-radio">
+                  <input type="radio" name="calc-strategies" value="3" />
+                  <span>
+                    <strong>3 · Full Trinity</strong>
+                    <em>Pairs + Trend EA + Arb roadmap</em>
+                  </span>
+                </label>
+              </fieldset>
+              <p class="cab-strat-warn" data-calc-strategy-warn></p>
+            </div>
+
+            <div class="cab-calc-out">
+              <div class="calc-metric">
+                <span>DAILY слотов (оценка)</span>
+                <strong data-calc-slots>—</strong>
+              </div>
+              <div class="calc-metric">
+                <span>Gross allocation</span>
+                <strong data-calc-gross>—</strong>
+              </div>
+              <div class="calc-metric">
+                <span>Сценарий Capital Allocator <em class="cab-split-hint">по режиму</em></span>
+                <strong class="cab-split-text" data-calc-split>—</strong>
+              </div>
+              <div class="cab-mini-alloc" data-calc-mini-alloc aria-hidden="true"></div>
+              <div class="calc-metric calc-metric-range">
+                <span>Сценарий «в месяц» (иллюстрация)</span>
+                <strong data-calc-range>—</strong>
+                <em class="cab-range-capital" data-calc-range-capital></em>
+              </div>
+              <p class="cab-meta" data-calc-leverage></p>
+              <p class="calc-disclaimer cab-calc-disclaimer">
+                <strong>Иллюстративный сценарий Capital Allocator по режиму — не прогноз доходности.</strong>
+                Диапазон — порядок величины от капитала (%), не бэктест и не обещание дохода.
+                Pairs — sideways-only; Trend / Arb — EA / roadmap на Full Core.
+                Исполнение — только в операторском приложении IMOEX.
+              </p>
+            </div>
+          </div>
+
+          <details class="cab-how">
+            <summary class="cab-how-summary">
+              <span class="cab-how-title">Как это работает?</span>
+              <span class="cab-how-sub">Почему такой split · Capital Allocator</span>
+              <span class="cab-how-chev" aria-hidden="true"></span>
+            </summary>
+            <div class="cab-how-body">
+              <p>
+                <strong>TRINITY</strong> — три стратегии в одном портфельном контуре.
+                <em>Capital Allocator</em> показывает, как капитал мог бы распределяться между ними
+                в зависимости от режима рынка — это сценарий для планирования, не приказ брокеру.
+              </p>
+              <h4>Pairs — только боковик</h4>
+              <p>
+                Коинтеграция / mean-reversion работает, когда рынок в <strong>SIDEWAYS</strong>
+                (ADX низкий). В режиме <strong>TREND</strong> новые входы по парам блокируются —
+                сделки редки, поэтому pairs не держат фиксированные 55% капитала.
+              </p>
+              <h4>Почему % меняются</h4>
+              <ul>
+                <li><strong>SIDEWAYS</strong> — pairs ~70–80%, trend/arb ~10–15% каждый.</li>
+                <li><strong>NEUTRAL</strong> — pairs ~50%, trend и arb ~25%.</li>
+                <li><strong>TREND</strong> — pairs ~10–20% (standby), trend ~50–60%, arb ~25–30%.</li>
+              </ul>
+              <p>
+                Одна стратегия → 100% pairs. Две (pairs + trend) → те же веса, но только между ними.
+              </p>
+              <h4>Trend и Arbitrage</h4>
+              <p>
+                Early access / roadmap на Full Core. В калькуляторе — иллюстрация будущих books,
+                не live-брокер и не гарантия доступности прямо сейчас.
+              </p>
+              <h4>Пайплайн в продукте</h4>
+              <p>
+                Свечи MOEX → техника → cluster-gate → FA → paper-рекомендации.
+                Брокер и ордера — отдельно, в операторском приложении (<code>/view</code>), не на лендинге.
+              </p>
+              <p class="cab-how-foot">
+                Research / decision-support. Цифры «в месяц» — иллюстративный % от капитала,
+                не обещание доходности и не автоторговля.
+              </p>
+            </div>
+          </details>
         </div>
       </div>
     </section>
@@ -550,6 +658,7 @@
             <li><a href="#strategies">Стратегии</a></li>
             <li><a href="#pricing">Тарифы</a></li>
             <li><a href="#roadmap">Дорожная карта</a></li>
+            <li><a href="#calculator">Калькулятор</a></li>
             <li><a href="#faq">FAQ</a></li>
             <li><a href="cabinet.html">Кабинет</a></li>
           </ul>
@@ -570,6 +679,7 @@
     </div>
   </footer>
 
-  <script src="js/main.js"></script>
+  <script src="js/main.js?v=1785852000"></script>
+  <script src="js/calc.js?v=1785852000"></script>
 </body>
 </html>

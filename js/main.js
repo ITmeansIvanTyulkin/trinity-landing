@@ -70,31 +70,5 @@
     reveals.forEach((el) => el.classList.add("visible"));
   }
 
-  /* Capital calculator — mirrors product allocator spirit */
-  const equity = document.getElementById("equity");
-  const equityLabel = document.querySelector("[data-equity-label]");
-  const slotsEl = document.querySelector("[data-slots]");
-  const grossEl = document.querySelector("[data-gross]");
-
-  function formatRub(n) {
-    return new Intl.NumberFormat("ru-RU").format(n) + " ₽";
-  }
-
-  function updateCalc() {
-    if (!equity) return;
-    const value = Number(equity.value);
-    if (equityLabel) equityLabel.textContent = formatRub(value);
-
-    let slots = Math.max(1, Math.floor(value / 100000));
-    if (value >= 1000000) slots = Math.min(slots, 12);
-    else slots = Math.min(slots, 8);
-
-    if (slotsEl) slotsEl.textContent = String(slots);
-    if (grossEl) grossEl.textContent = formatRub(value);
-  }
-
-  if (equity) {
-    equity.addEventListener("input", updateCalc);
-    updateCalc();
-  }
+  /* Capital Allocator scenario calculator → js/calc.js */
 })();

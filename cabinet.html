@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TRINITY — Личный кабинет</title>
+  <meta name="description" content="Личный кабинет TRINITY: подписка, paper-метрики, пайплайн-лаборатория. Research / decision-support — без торговли и токенов брокера." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=1785852000" />
+</head>
+<body class="cabinet-page cabinet-locked">
+  <!-- Soft gate: same password as IMOEX dashboard API -->
+  <div id="cabinet-gate" class="cabinet-gate" role="dialog" aria-modal="true" aria-labelledby="cabinet-gate-title">
+    <div class="cabinet-gate-card">
+      <div class="cabinet-gate-brand">
+        <span class="trinity-logo" aria-hidden="true">
+          <span class="ring ring-c"></span>
+          <span class="ring ring-a"></span>
+          <span class="ring ring-b"></span>
+        </span>
+        <span>TRINITY</span>
+      </div>
+      <h1 id="cabinet-gate-title">Вход в кабинет</h1>
+      <p class="cabinet-gate-lead">
+        Тот же пароль, что API password на дашборде IMOEX
+        (<code>imoex.auth.password</code>). Soft-gate для статического сайта.
+      </p>
+      <form id="cabinet-gate-form" class="cabinet-gate-form" autocomplete="on">
+        <label for="cabinet-gate-pass">Пароль</label>
+        <input
+          id="cabinet-gate-pass"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+          placeholder="Пароль дашборда"
+        />
+        <p class="cabinet-gate-error" data-gate-error hidden></p>
+        <button type="submit" class="btn btn-primary">Войти</button>
+      </form>
+      <p class="cabinet-gate-foot">
+        <a href="index.html">← На лендинг</a>
+        · Калькулятор капитала — на <a href="index.html#calculator">главной</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="cabinet-shell">
+  <header class="site-nav cabinet-nav">
+    <div class="wrap">
+      <a class="nav-brand" href="index.html" aria-label="TRINITY — на лендинг">
+        <span class="trinity-logo" aria-hidden="true">
+          <span class="ring ring-c"></span>
+          <span class="ring ring-a"></span>
+          <span class="ring ring-b"></span>
+        </span>
+        TRINITY
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Меню" aria-expanded="false" data-nav-toggle>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <ul class="nav-links" data-nav-links>
+        <li><a href="#overview">Обзор</a></li>
+        <li><a href="#charts">Метрики</a></li>
+        <li><a href="#lab">Лаборатория</a></li>
+        <li><a href="#account">Аккаунт</a></li>
+        <li><button type="button" class="nav-text-btn" data-cab-logout>Выйти</button></li>
+        <li><a class="nav-cta" href="index.html">← На лендинг</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="cab-hero">
+      <div class="wrap">
+        <p class="eyebrow">Личный кабинет</p>
+        <h1>Операторский контур</h1>
+        <p class="lead cab-hero-lead">
+          Подписка, paper-метрики и пайплайн-лаборатория.
+          Здесь нет ордеров и токенов брокера — торговля остаётся в IMOEX
+          <a href="http://localhost:8080/view" rel="noopener">/view</a>.
+          Калькулятор капитала — на <a href="index.html#calculator">лендинге</a>.
+        </p>
+        <p class="cab-source" data-data-source>
+          Mock-данные (standalone). Опционально: <code>CABINET_CONFIG.imoexBase</code> → read-only IMOEX API.
+        </p>
+      </div>
+    </section>
+
+    <!-- Overview -->
+    <section class="section cab-section" id="overview">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Подписка</p>
+          <h2>Обзор аккаунта</h2>
+        </div>
+
+        <div class="cab-overview reveal">
+          <article class="cab-card cab-card-tier">
+            <div class="cab-card-top">
+              <span class="cab-label">Тариф</span>
+              <span class="trial-pill" data-trial-badge>Триал</span>
+            </div>
+            <h3 data-tier>Оператор</h3>
+            <p class="cab-price" data-tier-price>7 500 ₽/мес</p>
+            <p class="cab-meta">Доставка: <strong data-delivery>Core Lite</strong></p>
+            <div class="trial-track" aria-hidden="true">
+              <i data-trial-bar></i>
+            </div>
+            <p class="cab-meta muted">Следующее списание: <span data-next-billing>—</span></p>
+          </article>
+
+          <article class="cab-card">
+            <span class="cab-label">Режим рынка</span>
+            <div class="cab-regime-row">
+              <span class="mode-pill" data-regime-pill data-mode="SIDEWAYS">SIDEWAYS</span>
+              <span class="cab-book" data-regime-book>DAILY</span>
+            </div>
+            <p class="cab-meta" data-regime-note></p>
+          </article>
+
+          <article class="cab-card cab-card-note">
+            <span class="cab-label">Reverse-trial</span>
+            <p data-trial-note></p>
+            <p class="cab-boundary">
+              Research / decision-support. Без flatten-all и place order в кабинете.
+            </p>
+          </article>
+        </div>
+
+        <div class="road-chips reveal" data-roadmap-chips aria-label="Статус стратегий"></div>
+      </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="section cab-section cab-charts" id="charts">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Paper-like metrics</p>
+          <h2>Метрики (демо)</h2>
+          <p class="lead">Иллюстративные графики из mock-данных. Не живой PnL и не обещание доходности.</p>
+        </div>
+
+        <div class="cab-charts-grid">
+          <article class="cab-panel reveal">
+            <div class="cab-panel-head">
+              <div>
+                <h3>Equity curve</h3>
+                <p class="cab-panel-sub">Paper-like mock · не исторический результат</p>
+              </div>
+              <strong class="cab-equity-end mono" data-equity-end>—</strong>
+            </div>
+            <canvas id="equity-chart" width="640" height="260" aria-label="Кривая капитала (иллюстрация)"></canvas>
+          </article>
+
+          <article class="cab-panel reveal">
+            <div class="cab-panel-head">
+              <div>
+                <h3>Аллокация</h3>
+                <p class="cab-panel-sub">Capital Allocator · сейчас 100% pairs</p>
+              </div>
+            </div>
+            <div class="alloc-bars" data-alloc-bars></div>
+          </article>
+        </div>
+
+        <article class="cab-panel reveal" style="margin-top:1.15rem">
+          <div class="cab-panel-head">
+            <div>
+              <h3>Открытые слоты</h3>
+              <p class="cab-panel-sub">Демо-журнал · позже можно подтянуть /api/paper/journal</p>
+            </div>
+          </div>
+          <div class="cab-table-wrap">
+            <table class="cab-table">
+              <thead>
+                <tr>
+                  <th>Пара</th>
+                  <th>Book</th>
+                  <th>Z</th>
+                  <th>Статус</th>
+                  <th>Size</th>
+                </tr>
+              </thead>
+              <tbody data-slots-body></tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Decision Lab -->
+    <section class="section cab-section" id="lab">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Пайплайн-лаборатория</p>
+          <h2>Почему ENTER / WATCH / BLOCK</h2>
+          <p class="lead">
+            Интерактивный sandbox пайплайна DAILY pairs:
+            техника → regime → cluster → FA → вердикт.
+            Не ордер и не live-брокер — обучение логике продукта.
+          </p>
+        </div>
+
+        <div class="lab-layout reveal">
+          <div class="lab-controls cab-panel">
+            <div class="lab-field">
+              <label for="lab-pair">Пара</label>
+              <select id="lab-pair"></select>
+              <p class="lab-hint" data-lab-pair-note></p>
+            </div>
+
+            <div class="lab-field">
+              <label for="lab-z">|Z|-score <span class="mono" data-lab-z>1.80</span></label>
+              <input id="lab-z" type="range" min="0.5" max="3" step="0.05" value="1.85" />
+              <p class="lab-hint">Пороги: WATCH ≥ 1.4 · вход ≥ 1.8 (иллюстрация)</p>
+            </div>
+
+            <fieldset class="cab-regime-pick">
+              <legend>Режим рынка</legend>
+              <div class="cab-regime-seg" role="radiogroup" aria-label="Режим">
+                <label class="cab-regime-opt">
+                  <input type="radio" name="lab-regime" value="SIDEWAYS" checked />
+                  <span>SIDEWAYS</span>
+                </label>
+                <label class="cab-regime-opt">
+                  <input type="radio" name="lab-regime" value="NEUTRAL" />
+                  <span>NEUTRAL</span>
+                </label>
+                <label class="cab-regime-opt">
+                  <input type="radio" name="lab-regime" value="TREND" />
+                  <span>TREND</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="lab-seg-field">
+              <legend>Cluster eligible</legend>
+              <div class="lab-seg" role="radiogroup">
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-cluster" value="yes" checked />
+                  <span>Да</span>
+                </label>
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-cluster" value="no" />
+                  <span>Нет</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="lab-seg-field">
+              <legend>Фундамент (FA)</legend>
+              <div class="lab-seg lab-seg-3" role="radiogroup">
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-fa" value="pass" checked />
+                  <span>Pass</span>
+                </label>
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-fa" value="weak" />
+                  <span>Weak</span>
+                </label>
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-fa" value="fail" />
+                  <span>Fail</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="lab-seg-field">
+              <legend>Book</legend>
+              <div class="lab-seg" role="radiogroup">
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-book" value="DAILY" checked />
+                  <span>DAILY</span>
+                </label>
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-book" value="INTRADAY" />
+                  <span>INTRADAY</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="lab-seg-field" data-lab-atas-wrap hidden>
+              <legend>ATAS / volume (INTRADAY)</legend>
+              <div class="lab-seg" role="radiogroup">
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-atas" value="pass" checked />
+                  <span>Pass</span>
+                </label>
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-atas" value="block" />
+                  <span>Block</span>
+                </label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="lab-result cab-panel">
+            <div class="lab-verdict-wrap">
+              <span class="cab-label">Вердикт пайплайна</span>
+              <p class="lab-verdict lab-out-enter" data-lab-verdict>PAPER OPEN</p>
+              <p class="lab-why" data-lab-why></p>
+            </div>
+            <ol class="lab-steps" data-lab-steps></ol>
+            <p class="calc-disclaimer cab-calc-disclaimer">
+              Иллюстрация порядка гейтов в продукте. Не автоторговля и не сигнал «купить сейчас».
+              Реальные решения — в IMOEX <code>/view</code> после FA.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Account -->
+    <section class="section cab-section cab-account" id="account">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Аккаунт</p>
+          <h2>Ключ, платежи, поддержка</h2>
+        </div>
+
+        <div class="cab-account-grid">
+          <article class="cab-panel reveal">
+            <h3>Unlock-ключ</h3>
+            <p class="cab-panel-sub">Маскированный ключ активации (mock). Перевыпуск — демо UI.</p>
+            <p class="cab-key mono" data-key-masked>TRINITY-••••</p>
+            <p class="cab-meta muted" data-key-rotated></p>
+            <div class="cab-actions">
+              <button type="button" class="btn btn-line" data-key-toggle>Показать</button>
+              <button type="button" class="btn btn-dark" data-key-regen>Перевыпустить</button>
+            </div>
+          </article>
+
+          <article class="cab-panel reveal">
+            <h3>Документы и поддержка</h3>
+            <ul class="cab-link-list">
+              <li><a href="index.html#faq">FAQ на лендинге</a></li>
+              <li><a href="index.html#calculator">Калькулятор капитала</a></li>
+              <li><a href="index.html#roadmap">Дорожная карта</a></li>
+              <li><a href="index.html#product">Обзор продукта</a></li>
+              <li><a href="https://t.me/" rel="noopener noreferrer">Telegram · задать вопрос</a></li>
+              <li><a href="mailto:hello@trinity.local?subject=TRINITY%20cabinet">Написать в поддержку</a></li>
+            </ul>
+            <p class="cab-boundary" style="margin-top:1rem">
+              Торговый UI: <a href="http://localhost:8080/view">localhost:8080/view</a>
+            </p>
+          </article>
+        </div>
+
+        <article class="cab-panel reveal" style="margin-top:1.15rem">
+          <h3>История платежей</h3>
+          <p class="cab-panel-sub">Mock-таблица. Реальный биллинг появится позже.</p>
+          <div class="cab-table-wrap">
+            <table class="cab-table">
+              <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>План</th>
+                  <th>Сумма</th>
+                  <th>Статус</th>
+                  <th>Чек</th>
+                </tr>
+              </thead>
+              <tbody data-payments-body></tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">
+            <span class="trinity-logo" aria-hidden="true">
+              <span class="ring ring-c"></span>
+              <span class="ring ring-a"></span>
+              <span class="ring ring-b"></span>
+            </span>
+            TRINITY
+          </div>
+          <p>Research / decision-support. Кабинет не размещает ордера и не хранит токены брокера.</p>
+        </div>
+        <div>
+          <h4>Навигация</h4>
+          <ul>
+            <li><a href="index.html">Лендинг</a></li>
+            <li><a href="#lab">Лаборатория</a></li>
+            <li><a href="index.html#calculator">Калькулятор</a></li>
+            <li><a href="index.html#pricing">Тарифы</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Связь</h4>
+          <ul>
+            <li><a href="https://t.me/" rel="noopener noreferrer">Telegram</a></li>
+            <li><a href="mailto:hello@trinity.local">hello@trinity.local</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <span>TRINITY © 2026. Дизайн — TRINITY Lab.</span>
+        <span>Метрики в кабинете — демо / mock, пока не подключён биллинг.</span>
+      </div>
+    </div>
+  </footer>
+  </div><!-- /.cabinet-shell -->
+
+  <script src="js/cabinet-data.js?v=1785852000"></script>
+  <script src="js/cabinet.js?v=1785852000"></script>
+</body>
+</html>

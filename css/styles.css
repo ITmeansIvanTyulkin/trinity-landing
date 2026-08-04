@@ -2165,6 +2165,10 @@ h2 {
   .cab-calc-layout {
     grid-template-columns: 1fr;
   }
+
+  .lab-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 960px) {
@@ -2178,4 +2182,366 @@ h2 {
   .cab-regime-seg {
     grid-template-columns: 1fr;
   }
+
+  .lab-seg-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* —— Cabinet auth gate —— */
+.cabinet-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(11, 122, 102, 0.18), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 80%, rgba(196, 163, 90, 0.14), transparent 50%),
+    linear-gradient(160deg, #0c1a22 0%, #132833 45%, #0f1f28 100%);
+}
+
+.cabinet-gate[hidden] {
+  display: none !important;
+}
+
+.cabinet-gate-card {
+  width: min(100%, 26rem);
+  padding: 2rem 1.75rem 1.5rem;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.cabinet-gate-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: "Syne", sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  margin-bottom: 1.25rem;
+}
+
+.cabinet-gate-card h1 {
+  font-family: "Syne", sans-serif;
+  font-size: 1.55rem;
+  margin: 0;
+  color: var(--ink);
+}
+
+.cabinet-gate-lead {
+  margin: 0.65rem 0 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.cabinet-gate-lead code {
+  font-family: var(--mono);
+  font-size: 0.78em;
+  background: rgba(11, 122, 102, 0.08);
+  padding: 0.05rem 0.3rem;
+}
+
+.cabinet-gate-form label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.cabinet-gate-form input[type="password"] {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line);
+  background: #fbfcfd;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  margin-bottom: 0.85rem;
+}
+
+.cabinet-gate-form input[type="password"]:focus {
+  outline: 2px solid rgba(11, 122, 102, 0.35);
+  border-color: var(--accent);
+}
+
+.cabinet-gate-form .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.cabinet-gate-error {
+  margin: 0 0 0.75rem;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.82rem;
+  color: #8a3a3a;
+  background: rgba(180, 60, 60, 0.08);
+  border: 1px solid rgba(180, 60, 60, 0.22);
+}
+
+.cabinet-gate-foot {
+  margin: 1.15rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.cabinet-gate-foot a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.cabinet-gate-foot a:hover {
+  text-decoration: underline;
+}
+
+body.cabinet-locked .cabinet-shell {
+  visibility: hidden;
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+}
+
+body.cabinet-page:not(.cabinet-locked) .cabinet-shell {
+  visibility: visible;
+  height: auto;
+  overflow: visible;
+  pointer-events: auto;
+}
+
+.nav-text-btn {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.nav-text-btn:hover {
+  color: var(--accent);
+}
+
+/* —— Decision Lab —— */
+.lab-layout {
+  display: grid;
+  grid-template-columns: 0.95fr 1.15fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.lab-controls,
+.lab-result {
+  padding: 1.5rem 1.4rem;
+}
+
+.lab-field {
+  margin-bottom: 1.15rem;
+}
+
+.lab-field label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+}
+
+.lab-field select,
+.lab-field input[type="range"] {
+  width: 100%;
+}
+
+.lab-field select {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--line);
+  background: #fbfcfd;
+  font-family: inherit;
+  font-size: 0.92rem;
+}
+
+.lab-hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.lab-seg-field {
+  margin: 1.1rem 0 0;
+  padding: 0;
+  border: none;
+}
+
+.lab-seg-field legend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  padding: 0;
+}
+
+.lab-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.lab-seg-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.lab-seg-opt {
+  cursor: pointer;
+}
+
+.lab-seg-opt input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lab-seg-opt span {
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 0.55rem 0.35rem;
+  border: 1px solid var(--line);
+  background: #fbfcfd;
+  color: var(--muted);
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.lab-seg-opt:has(input:checked) span {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.lab-verdict-wrap {
+  margin-bottom: 1.15rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.lab-verdict {
+  margin: 0.45rem 0 0.55rem;
+  font-family: "Syne", sans-serif;
+  font-weight: 800;
+  font-size: 1.65rem;
+  letter-spacing: 0.02em;
+}
+
+.lab-out-enter {
+  color: var(--accent);
+}
+
+.lab-out-watch {
+  color: #8a6d2f;
+}
+
+.lab-out-block {
+  color: #8a3a3a;
+}
+
+.lab-out-research {
+  color: #3d6a82;
+}
+
+.lab-why {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #3d4a52;
+}
+
+.lab-steps {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.lab-step {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  background: #fbfcfd;
+  transition: border-color 0.25s var(--ease), background 0.25s var(--ease);
+}
+
+.lab-step-n {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  border-radius: 999px;
+  background: var(--bg-deep);
+  color: var(--muted);
+}
+
+.lab-step strong {
+  display: block;
+  font-size: 0.88rem;
+}
+
+.lab-step p {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.lab-step-badge {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.4rem;
+  align-self: center;
+}
+
+.lab-pass {
+  border-color: rgba(11, 122, 102, 0.35);
+  background: rgba(11, 122, 102, 0.06);
+}
+
+.lab-pass .lab-step-badge {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.lab-watch {
+  border-color: rgba(196, 163, 90, 0.4);
+  background: rgba(196, 163, 90, 0.08);
+}
+
+.lab-watch .lab-step-badge {
+  color: #8a6d2f;
+  background: var(--gold-soft);
+}
+
+.lab-fail {
+  border-color: rgba(180, 60, 60, 0.28);
+  background: rgba(180, 60, 60, 0.05);
+}
+
+.lab-fail .lab-step-badge {
+  color: #8a3a3a;
+  background: rgba(180, 60, 60, 0.1);
+}
+
+/* Landing calc uses cab-calc grid — ensure panel bg on light sections */
+.calc .cab-calc-layout {
+  margin-top: 0.5rem;
 }
