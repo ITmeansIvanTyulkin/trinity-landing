@@ -3,12 +3,135 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TRINITY — Три стратегии. Одна миссия.</title>
-  <meta name="description" content="TRINITY — research / decision-support платформа для MOEX: коинтеграция pairs, тренд и арбитраж в одной системе. Paper, FA, Capital Allocator." />
+  <title>TRINITY — коинтеграция MOEX, объём ATAS/Tiger и ИИ-сигналы</title>
+  <meta name="description" content="TRINITY — research / decision-support для MOEX: pairs (коинтеграция), объёмный слой уровня ATAS + Tiger.trade и ИИ-анализ в одном контуре. Ручная торговля или paper/sandbox — на выбор. Триал 14 дней." />
+  <meta name="keywords" content="TRINITY, MOEX, коинтеграция, pairs trading, ATAS, Tiger.trade, order flow, decision-support, paper trading, IMOEX" />
+  <meta name="author" content="TRINITY Lab" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow" />
+  <meta name="yandex" content="index, follow" />
+  <meta name="theme-color" content="#0c1a22" />
+  <meta name="color-scheme" content="light" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <!-- Replace YOUR-TRINITY-DOMAIN before publish (see docs/SEO.md) -->
+  <link rel="canonical" href="https://YOUR-TRINITY-DOMAIN/" />
+  <link rel="alternate" hreflang="ru" href="https://YOUR-TRINITY-DOMAIN/" />
+  <link rel="alternate" hreflang="x-default" href="https://YOUR-TRINITY-DOMAIN/" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/favicon.svg" />
+  <link rel="manifest" href="site.webmanifest" />
+
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="TRINITY" />
+  <meta property="og:title" content="TRINITY — ATAS + Tiger.trade + ИИ в одном контуре" />
+  <meta property="og:description" content="Decision-support для MOEX pairs: объём, профиль, режим рынка и сигналы. Руками у брокера или paper/sandbox — ваш выбор." />
+  <meta property="og:url" content="https://YOUR-TRINITY-DOMAIN/" />
+  <meta property="og:image" content="https://YOUR-TRINITY-DOMAIN/assets/product-dashboard.png" />
+  <meta property="og:image:alt" content="Дашборд TRINITY: виджеты paper, брокер, режим рынка, капитал" />
+  <meta property="og:image:width" content="1024" />
+  <meta property="og:image:height" content="840" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="TRINITY — три стратегии. Одна миссия." />
+  <meta name="twitter:description" content="Коинтеграция MOEX + объёмный слой + ИИ-анализ. Research / decision-support, не гарантия прибыли." />
+  <meta name="twitter:image" content="https://YOUR-TRINITY-DOMAIN/assets/product-dashboard.png" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1785927600" />
+  <link rel="stylesheet" href="css/styles.css?v=1785948000" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://YOUR-TRINITY-DOMAIN/#organization",
+        "name": "TRINITY Lab",
+        "url": "https://YOUR-TRINITY-DOMAIN/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://YOUR-TRINITY-DOMAIN/assets/favicon.svg"
+        },
+        "slogan": "Three Strategies. One Mission."
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://YOUR-TRINITY-DOMAIN/#website",
+        "url": "https://YOUR-TRINITY-DOMAIN/",
+        "name": "TRINITY",
+        "description": "Research / decision-support платформа для MOEX: коинтеграция, объём, ИИ-анализ сигналов.",
+        "inLanguage": "ru-RU",
+        "publisher": { "@id": "https://YOUR-TRINITY-DOMAIN/#organization" }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://YOUR-TRINITY-DOMAIN/#app",
+        "name": "TRINITY",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web",
+        "url": "https://YOUR-TRINITY-DOMAIN/",
+        "description": "Операторский контур для pairs trading на MOEX: ATAS-слой + Tiger.trade-класс профиль + ИИ-анализ. Ручная торговля или paper/sandbox.",
+        "offers": {
+          "@type": "AggregateOffer",
+          "priceCurrency": "RUB",
+          "lowPrice": "5000",
+          "highPrice": "15000",
+          "offerCount": "3"
+        },
+        "featureList": [
+          "Коинтеграция / pairs DAILY paper",
+          "Объёмный microstructure gate",
+          "Capital Allocator по режиму рынка",
+          "Ручное исполнение у брокера или sandbox-контур"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://YOUR-TRINITY-DOMAIN/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Это маркетплейс ATAS + Tiger + ИИ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "В одном доступе: объёмный слой (ATAS-класс), профиль / order flow (Tiger.trade-класс) и аналитический интеллект по парам. Дальше на выбор: ручная торговля у брокера или paper/sandbox в операторке. Research / decision-support, не гарантия прибыли."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Нужны ли отдельно ATAS и Tiger.trade?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Для кабинета на ~100–250k ₽ обычно нет: их роль для pairs уже внутри TRINITY. Не хотите робота — берите сигнал и торгуйте сами."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Это автоторговля?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Нет. TRINITY — research / decision-support. Paper и sandbox в операторском приложении; вы решаете, как исполнять сигнал."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Есть ли риск потерять деньги?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Да. Любая торговля на бирже рискованна. TRINITY — инструмент поддержки решений, а не гарантия прибыли."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+  <script src="js/site-origin.js"></script>
 </head>
 <body>
   <header class="site-nav">
@@ -891,7 +1014,7 @@
     </div>
   </footer>
 
-  <script src="js/main.js?v=1785927600"></script>
-  <script src="js/calc.js?v=1785927600"></script>
+  <script src="js/main.js?v=1785948000"></script>
+  <script src="js/calc.js?v=1785948000"></script>
 </body>
 </html>

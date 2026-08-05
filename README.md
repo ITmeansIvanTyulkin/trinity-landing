@@ -36,8 +36,10 @@ css/styles.css
 js/main.js              # hero / nav / reveal
 js/calc.js              # Capital Allocator сценарий
 js/cabinet-*.js         # кабинет + auth
-supabase/profiles.sql   # профиль / рассылка
+robots.txt / sitemap.xml
+supabase/profiles.sql
 docs/SUPABASE_SETUP.md
+docs/SEO.md
 ```
 
 ## Продуктовая честность
@@ -53,3 +55,11 @@ docs/SUPABASE_SETUP.md
 Любой static host: GitHub Pages, Cloudflare Pages, Netlify.
 
 На деплое подставьте Supabase URL/anon в `js/cabinet-config.js` (или сгенерируйте файл в CI).
+
+## SEO
+
+Перед публикацией замените `YOUR-TRINITY-DOMAIN` — см. [docs/SEO.md](docs/SEO.md).
+
+В коде: `robots.txt`, `sitemap.xml`, Open Graph, JSON-LD, `favicon.svg`. Кабинет — `noindex`.
+
+**Важно:** теги помогают роботам, но не покупают «1 место» в поиске.
