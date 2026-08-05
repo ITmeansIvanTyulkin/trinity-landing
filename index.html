@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1785852000" />
+  <link rel="stylesheet" href="css/styles.css?v=1785927600" />
 </head>
 <body>
   <header class="site-nav">
@@ -28,6 +28,7 @@
       </button>
       <ul class="nav-links" data-nav-links>
         <li><a href="#strategies">Стратегии</a></li>
+        <li><a href="#atas">Объёмы</a></li>
         <li><a href="#product">Продукт</a></li>
         <li><a href="#pricing">Тарифы</a></li>
         <li><a href="#calculator">Калькулятор</a></li>
@@ -185,77 +186,176 @@
       </div>
     </section>
 
-    <!-- 3. ATAS -->
+    <!-- 3. Marketplace offer: ATAS + Tiger + AI → manual or auto -->
     <section class="section" id="atas">
-      <div class="wrap split">
-        <div class="split-copy reveal">
-          <p class="eyebrow">Объёмный слой</p>
-          <h2>Как мы видим рынок изнутри</h2>
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Маркетплейс возможностей · одно предложение</p>
+          <h2>ATAS + Tiger.trade + ИИ-анализ — в одном доступе</h2>
           <p class="lead">
-            В TRINITY встроен аналитический слой, вдохновлённый ATAS.
-            Это не просто графики — система читает агрессию и ликвидность перед входом.
-          </p>
-          <ul class="feature-list">
-            <li>
-              <span class="mark" aria-hidden="true"></span>
-              <div>
-                <strong>Delta</strong>
-                <span>Кто агрессивнее: покупатели или продавцы.</span>
-              </div>
-            </li>
-            <li>
-              <span class="mark" aria-hidden="true"></span>
-              <div>
-                <strong>Footprint / Clusters</strong>
-                <span>Объёмы на каждом уровне цены внутри свечи.</span>
-              </div>
-            </li>
-            <li>
-              <span class="mark" aria-hidden="true"></span>
-              <div>
-                <strong>POC / Value Area</strong>
-                <span>Зоны справедливой цены, куда рынок стремится вернуться.</span>
-              </div>
-            </li>
-            <li>
-              <span class="mark" aria-hidden="true"></span>
-              <div>
-                <strong>DOM / Iceberg</strong>
-                <span>Скрытая ликвидность в стакане.</span>
-              </div>
-            </li>
-          </ul>
-          <p style="margin-top:1.5rem">
-            <a class="btn btn-dark" href="#product">Посмотреть пример анализа</a>
+            Не три покупки и не три окна. Один контур TRINITY: объёмный слой уровня ATAS,
+            профиль / order&nbsp;flow в духе Tiger.trade и аналитический интеллект поверх пар —
+            а дальше <strong>вы выбираете</strong>: ручная торговля у брокера или автоматический контур в операторке.
           </p>
         </div>
-        <div class="panel-visual reveal" aria-label="Пример ATAS gate">
-          <div class="atas-rows">
-            <div class="atas-row">
-              <span class="name">DELTA</span>
-              <div class="bar"><i style="--w:72%"></i></div>
-              <span class="gate">PASS</span>
+
+        <div class="offer-banner reveal">
+          <div class="offer-banner-copy">
+            <p class="offer-eyebrow">Коммерческое предложение</p>
+            <h3>Маркетплейс в одной подписке</h3>
+            <p>
+              Order&nbsp;flow + профиль + ИИ-разбор сигнала — и режим исполнения на ваш вкус.
+              Без обязательной веры в робота: контроль всегда можно оставить себе.
+            </p>
+          </div>
+          <div class="offer-banner-cta">
+            <p class="offer-price"><span>от</span> 7&nbsp;500&nbsp;₽<em>/мес</em></p>
+            <p class="offer-price-note">Оператор · 14 дней триала · без карты</p>
+            <a class="btn btn-primary" href="cabinet.html">Открыть доступ</a>
+          </div>
+        </div>
+
+        <div class="market-formula reveal" aria-label="Формула продукта">
+          <div class="market-pill">
+            <span class="market-pill-k">01</span>
+            <strong>ATAS-слой</strong>
+            <em>delta · clusters · gate</em>
+          </div>
+          <span class="market-op" aria-hidden="true">+</span>
+          <div class="market-pill">
+            <span class="market-pill-k">02</span>
+            <strong>Tiger.trade</strong>
+            <em>профиль · order flow</em>
+          </div>
+          <span class="market-op" aria-hidden="true">+</span>
+          <div class="market-pill">
+            <span class="market-pill-k">03</span>
+            <strong>ИИ-анализ</strong>
+            <em>пары · режим · rationale</em>
+          </div>
+          <span class="market-op market-eq" aria-hidden="true">=</span>
+          <div class="market-pill market-pill-sum">
+            <span class="market-pill-k">TRINITY</span>
+            <strong>Один контур</strong>
+            <em>сигнал → ваш выбор исполнения</em>
+          </div>
+        </div>
+
+        <p class="market-choice-lead reveal">Исполнение — на выбор пользователя</p>
+        <div class="path-grid path-grid-choice reveal">
+          <article class="path-card">
+            <p class="path-kicker">Ручная торговля</p>
+            <h3>Сигнал → вы у брокера</h3>
+            <p>
+              Получаете качество входа, объёмный контекст и rationale.
+              Исполняете сами в терминале брокера: свой риск, своя дисциплина, полный контроль.
+            </p>
+            <p class="path-tag">Для тех, кто не доверяет роботу</p>
+          </article>
+          <article class="path-card path-card-accent">
+            <p class="path-kicker">Автоматический контур</p>
+            <h3>Дашборд → paper / sandbox</h3>
+            <p>
+              Режим рынка, journal и T-Invest sandbox в операторском IMOEX.
+              Автоматизация там, где вы её включили — токен и ордера только в операторке.
+            </p>
+            <p class="path-tag">Для тех, кто хочет контур под ключ</p>
+          </article>
+        </div>
+
+        <div class="stack-compare reveal" aria-label="Сравнение стеков">
+          <article class="stack-card stack-card-out">
+            <p class="stack-card-label">Покупать по отдельности</p>
+            <h3>ATAS + Tiger + «ещё ИИ»</h3>
+            <ul>
+              <li>Три счёта · три UX · три счета</li>
+              <li>Сами склеиваете объём и идею входа</li>
+              <li>Режим «руками / авто» — снова ваша сборка</li>
+            </ul>
+            <p class="stack-card-foot">Дорогой маркетплейс из кусков — на капитале 100–250k часто избыточен</p>
+          </article>
+          <div class="stack-vs" aria-hidden="true"><span>vs</span></div>
+          <article class="stack-card stack-card-in">
+            <p class="stack-card-label">Одно предложение TRINITY</p>
+            <h3>Стек уже собран</h3>
+            <ul>
+              <li>Объём + профиль + анализ пар в одном пайплайне</li>
+              <li>ИИ / research-слой усиливает решение, не прячет его</li>
+              <li>Ручная или автоматическая ветка — переключатель за вами</li>
+            </ul>
+            <p class="stack-card-foot">Research / decision-support. Не клон всего ATAS/Tiger — их роль для pairs в одном флаконе</p>
+          </article>
+        </div>
+
+        <div class="split atas-detail">
+          <div class="split-copy reveal">
+            <p class="eyebrow">Что внутри слоя</p>
+            <h3 class="atas-detail-title">Объём · профиль · интеллект — в логике пар</h3>
+            <ul class="feature-list">
+              <li>
+                <span class="mark" aria-hidden="true"></span>
+                <div>
+                  <strong>Delta / footprint</strong>
+                  <span>Агрессия и объём на уровнях — без второго терминала ATAS.</span>
+                </div>
+              </li>
+              <li>
+                <span class="mark" aria-hidden="true"></span>
+                <div>
+                  <strong>Профиль бара (Tiger-класс)</strong>
+                  <span>POC / value area в том же гейте, что техника пары.</span>
+                </div>
+              </li>
+              <li>
+                <span class="mark" aria-hidden="true"></span>
+                <div>
+                  <strong>ИИ-анализ решения</strong>
+                  <span>Режим рынка, EG/Z, FA и rationale — прозрачный разбор, не чёрный ящик.</span>
+                </div>
+              </li>
+              <li>
+                <span class="mark" aria-hidden="true"></span>
+                <div>
+                  <strong>Выбор исполнения</strong>
+                  <span>Вручную у брокера или автоматический paper/sandbox-контур в IMOEX.</span>
+                </div>
+              </li>
+            </ul>
+            <p style="margin-top:1.5rem">
+              <a class="btn btn-dark" href="#product">Как это выглядит</a>
+              <a class="btn btn-line" href="#pricing" style="margin-left:0.5rem">Тарифы</a>
+            </p>
+          </div>
+          <div class="panel-visual reveal" aria-label="Пример volume gate">
+            <p class="gate-panel-title">Volume / microstructure gate</p>
+            <div class="atas-rows">
+              <div class="atas-row">
+                <span class="name">DELTA</span>
+                <div class="bar"><i style="--w:72%"></i></div>
+                <span class="gate">PASS</span>
+              </div>
+              <div class="atas-row">
+                <span class="name">PROFILE</span>
+                <div class="bar"><i style="--w:66%"></i></div>
+                <span class="gate">PASS</span>
+              </div>
+              <div class="atas-row">
+                <span class="name">POC dist</span>
+                <div class="bar"><i style="--w:64%"></i></div>
+                <span class="gate">PASS</span>
+              </div>
+              <div class="atas-row block">
+                <span class="name">ICEBERG</span>
+                <div class="bar"><i style="--w:28%"></i></div>
+                <span class="gate">BLOCK</span>
+              </div>
+              <div class="atas-row">
+                <span class="name">AI / FA</span>
+                <div class="bar"><i style="--w:78%"></i></div>
+                <span class="gate">PASS</span>
+              </div>
             </div>
-            <div class="atas-row">
-              <span class="name">SPREAD</span>
-              <div class="bar"><i style="--w:58%"></i></div>
-              <span class="gate">PASS</span>
-            </div>
-            <div class="atas-row">
-              <span class="name">POC dist</span>
-              <div class="bar"><i style="--w:64%"></i></div>
-              <span class="gate">PASS</span>
-            </div>
-            <div class="atas-row block">
-              <span class="name">ICEBERG</span>
-              <div class="bar"><i style="--w:28%"></i></div>
-              <span class="gate">BLOCK</span>
-            </div>
-            <div class="atas-row">
-              <span class="name">SESSION</span>
-              <div class="bar"><i style="--w:81%"></i></div>
-              <span class="gate">PASS</span>
-            </div>
+            <p class="gate-panel-note">Иллюстрация гейта — не live-поток и не обещание PnL.</p>
           </div>
         </div>
       </div>
@@ -268,8 +368,9 @@
           <p class="eyebrow">Volume intelligence</p>
           <h2>Система учится на объёмах</h2>
           <p class="lead">
-            Дальше механических фильтров — поиск комбинаций объёма, дельты и цены,
-            которые предшествуют удачному mean-reversion спреда.
+            Roadmap после paper/OOS: не только механический gate, а поиск сочетаний
+            объёма, дельты и цены — следующий слой поверх маркетплейса
+            «ATAS + Tiger.trade + ИИ-анализ» для pairs decision-support.
           </p>
           <ul class="feature-list">
             <li>
@@ -311,54 +412,142 @@
         <div class="section-head reveal">
           <p class="eyebrow">Интерфейс</p>
           <h2>Как это выглядит</h2>
-          <p class="lead">Операторский контур: дашборд, сделка, брокерская консоль T-Invest.</p>
+          <p class="lead">
+            Живые экраны операторского контура IMOEX: режим рынка, спред / Z-score и брокерская песочница T-Invest.
+          </p>
         </div>
-        <div class="shot-grid">
-          <article class="shot reveal">
-            <div class="shot-frame" aria-hidden="true">
-              <div class="shot-ui">
-                <div class="bar-row"></div>
-                <div class="bar-row short"></div>
-                <div class="cols">
-                  <div class="block"></div>
-                  <div class="block"></div>
-                </div>
+
+        <div class="product-showcase reveal" data-product-showcase>
+          <div class="product-tabs" role="tablist" aria-label="Экраны продукта">
+            <button type="button" class="product-tab is-active" role="tab" aria-selected="true" data-shot="dashboard">
+              <span class="product-tab-kicker">01</span>
+              Дашборд
+            </button>
+            <button type="button" class="product-tab" role="tab" aria-selected="false" data-shot="charts">
+              <span class="product-tab-kicker">02</span>
+              Спред / Z-score
+            </button>
+            <button type="button" class="product-tab" role="tab" aria-selected="false" data-shot="broker">
+              <span class="product-tab-kicker">03</span>
+              Брокер
+            </button>
+          </div>
+
+          <div class="product-stage">
+            <div class="product-chrome" data-product-chrome>
+              <div class="product-chrome-bar" aria-hidden="true">
+                <span class="dot d-r"></span>
+                <span class="dot d-y"></span>
+                <span class="dot d-g"></span>
+                <span class="product-chrome-url" data-chrome-url>/view · dashboard</span>
+              </div>
+
+              <div class="product-viewport">
+                <figure class="product-panel is-active" data-panel="dashboard" role="tabpanel">
+                  <button type="button" class="product-zoom" data-zoom="assets/product-dashboard.png?v=1785923600" aria-label="Увеличить дашборд">
+                    <img
+                      src="assets/product-dashboard.png?v=1785923600"
+                      alt="Дашборд TRINITY: 8 виджетов — Paper, брокер, Final, режим TREND, капитал, сигналы, стратегии, вселенная"
+                      width="1024"
+                      height="840"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </button>
+                  <button type="button" class="hotspot hs-1" data-tip="regime" style="--x:87%;--y:24%" aria-label="Режим рынка">
+                    <i></i>
+                  </button>
+                  <button type="button" class="hotspot hs-2" data-tip="capital" style="--x:13%;--y:72%" aria-label="Капитал">
+                    <i></i>
+                  </button>
+                  <button type="button" class="hotspot hs-3" data-tip="universe" style="--x:87%;--y:72%" aria-label="Вселенная">
+                    <i></i>
+                  </button>
+                </figure>
+
+                <figure class="product-panel" data-panel="charts" role="tabpanel" hidden>
+                  <button type="button" class="product-zoom" data-zoom="assets/product-charts.png" aria-label="Увеличить графики спреда">
+                    <img
+                      src="assets/product-charts.png"
+                      alt="Спред + KAMA и Z-score с сигналами входа и выхода"
+                      width="1024"
+                      height="780"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </button>
+                  <button type="button" class="hotspot hs-1" data-tip="spread" style="--x:72%;--y:22%" aria-label="Спред и KAMA">
+                    <i></i>
+                  </button>
+                  <button type="button" class="hotspot hs-2" data-tip="zscore" style="--x:78%;--y:68%" aria-label="Z-score сигналы">
+                    <i></i>
+                  </button>
+                  <button type="button" class="hotspot hs-3" data-tip="now" style="--x:88%;--y:58%" aria-label="Текущий сигнал">
+                    <i></i>
+                  </button>
+                </figure>
+
+                <figure class="product-panel" data-panel="broker" role="tabpanel" hidden>
+                  <button type="button" class="product-zoom" data-zoom="assets/product-broker.png" aria-label="Увеличить консоль брокера">
+                    <img
+                      src="assets/product-broker.png"
+                      alt="Консоль брокера T-Invest: статус, sandbox, токен и параметры исполнения"
+                      width="1024"
+                      height="837"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </button>
+                  <button type="button" class="hotspot hs-1" data-tip="sandbox" style="--x:28%;--y:28%" aria-label="Песочница">
+                    <i></i>
+                  </button>
+                  <button type="button" class="hotspot hs-2" data-tip="token" style="--x:72%;--y:42%" aria-label="Токен и счёт">
+                    <i></i>
+                  </button>
+                  <button type="button" class="hotspot hs-3" data-tip="safety" style="--x:70%;--y:72%" aria-label="Kill-switch">
+                    <i></i>
+                  </button>
+                </figure>
+
+                <aside class="product-tip" data-product-tip hidden>
+                  <p class="product-tip-label" data-tip-label></p>
+                  <p class="product-tip-body" data-tip-body></p>
+                </aside>
               </div>
             </div>
-            <h3>Дашборд</h3>
-            <p>Режим рынка, KPI, активные пары и итог цикла.</p>
-          </article>
-          <article class="shot reveal">
-            <div class="shot-frame" aria-hidden="true">
-              <div class="shot-ui">
-                <div class="bar-row short"></div>
-                <div class="block" style="min-height:5.5rem"></div>
-                <div class="bar-row"></div>
+
+            <div class="product-copy">
+              <p class="product-kicker" data-shot-kicker>Операторский контур</p>
+              <h3 data-shot-title>Дашборд</h3>
+              <p data-shot-lead>
+                Восемь виджетов в одном взгляде: paper, брокер, final, режим рынка, капитал, сигналы, стратегии и вселенная.
+                Сейчас TREND (ADX 34) — новые pairs-входы блокируются.
+              </p>
+              <ul class="product-bullets" data-shot-bullets>
+                <li>Режим рынка дисциплинирует входы (TREND → блок)</li>
+                <li>Капитал 200 000 ₽ · DAILY 100% · без плеча &lt;1M</li>
+                <li>Вселенная: 55 тикеров · 178 пар · топ cointegration</li>
+              </ul>
+              <div class="product-actions">
+                <a class="btn btn-primary" href="cabinet.html">Открыть кабинет</a>
+                <a class="btn btn-ghost product-ghost" href="#calculator">Калькулятор капитала</a>
               </div>
             </div>
-            <h3>Окно сделки</h3>
-            <p>Спред, Z-score, стрелки входа и rationale.</p>
-          </article>
-          <article class="shot reveal">
-            <div class="shot-frame" aria-hidden="true">
-              <div class="shot-ui">
-                <div class="bar-row"></div>
-                <div class="cols">
-                  <div class="block"></div>
-                  <div class="block"></div>
-                </div>
-                <div class="bar-row short"></div>
-              </div>
-            </div>
-            <h3>Брокерская консоль</h3>
-            <p>T-Invest: токен, sandbox, reconcile, flatten-all.</p>
-          </article>
+          </div>
         </div>
+
         <div class="video-cta reveal">
-          <p>Скоро: 30-секундная демка — кнопка «Анализ + paper» и появление сигналов.</p>
-          <a class="btn btn-ghost" href="#pricing">Оставить заявку на демо</a>
+          <p>Research / decision-support. Скрины с живого дашборда — не обещание PnL.</p>
+          <a class="btn btn-ghost product-ghost" href="#pricing">Смотреть тарифы</a>
         </div>
       </div>
+
+      <dialog class="product-lightbox" data-product-lightbox aria-label="Увеличенный скрин">
+        <form method="dialog" class="product-lightbox-bar">
+          <button type="submit" class="btn btn-ghost product-ghost" value="close">Закрыть</button>
+        </form>
+        <img src="" alt="" data-lightbox-img />
+      </dialog>
     </section>
 
     <!-- 6. Pricing -->
@@ -613,6 +802,29 @@
         </div>
         <div class="faq-list">
           <details class="faq-item reveal">
+            <summary>Это маркетплейс ATAS + Tiger + ИИ?</summary>
+            <p>
+              По сути да — в одном доступе: объёмный слой (ATAS-класс), профиль / order&nbsp;flow (Tiger.trade-класс)
+              и аналитический интеллект по парам. Дальше на ваш выбор: ручная торговля у брокера
+              или автоматический paper/sandbox-контур в операторке. Это decision-support, не обещание прибыли
+              и не клон всего ATAS/Tiger для скальпа.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>Нужны ли отдельно ATAS и Tiger.trade?</summary>
+            <p>
+              Для кабинета на ~100–250k&nbsp;₽ обычно нет: их роль для pairs уже внутри TRINITY.
+              Не хотите робота — берите сигнал и торгуйте сами. Хотите контур — включайте операторский путь.
+            </p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>Это автоторговля?</summary>
+            <p>
+              Нет. TRINITY — research / decision-support. Paper и sandbox живут в операторском приложении;
+              вы решаете, исполнять сигнал вручную или через контур брокера там.
+            </p>
+          </details>
+          <details class="faq-item reveal">
             <summary>Нужно ли уметь программировать?</summary>
             <p>Нет. TRINITY работает через веб-интерфейс оператора. Всё настраивается в UI.</p>
           </details>
@@ -679,7 +891,7 @@
     </div>
   </footer>
 
-  <script src="js/main.js?v=1785852000"></script>
-  <script src="js/calc.js?v=1785852000"></script>
+  <script src="js/main.js?v=1785927600"></script>
+  <script src="js/calc.js?v=1785927600"></script>
 </body>
 </html>

@@ -105,6 +105,14 @@
   function mapAuthError(error) {
     if (!error) return "Ошибка аутентификации";
     const m = (error.message || String(error)).toLowerCase();
+    if (
+      m.includes("load failed") ||
+      m.includes("failed to fetch") ||
+      m.includes("networkerror") ||
+      m.includes("network request failed")
+    ) {
+      return "Сеть: не удалось связаться с Supabase. Проверьте supabaseUrl (Project URL) и интернет.";
+    }
     if (m.includes("email not confirmed")) {
       return "Email ещё не подтверждён. Откройте письмо и перейдите по ссылке.";
     }
