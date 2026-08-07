@@ -1,0 +1,9 @@
+# TRINITY landing — crawlers
+User-agent: *
+Allow: /
+Disallow: /cabinet.html
+Disallow: /js/cabinet-config.local.js
+Disallow: /supabase/
+
+# Prefer HTTPS host once domain is live
+Sitemap: https://YOUR-TRINITY-DOMAIN/sitemap.xml

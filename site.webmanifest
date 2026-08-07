@@ -1,0 +1,18 @@
+{
+  "name": "TRINITY",
+  "short_name": "TRINITY",
+  "description": "Research / decision-support для MOEX: pairs, объём, режим рынка.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0c1a22",
+  "theme_color": "#0c1a22",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

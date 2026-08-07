@@ -1,8 +1,7 @@
 (() => {
-  const modes = [
+  const Modes = window.TrinityProductModes;
+  const modes = (Modes && Modes.MODES) || [
     { id: "SIDEWAYS", book: "DAILY", alloc: "100% pairs", focus: "mean-rev" },
-    { id: "TREND", book: "DAILY", alloc: "trend EA", focus: "momentum" },
-    { id: "ARBITRAGE", book: "FUT", alloc: "calendar", focus: "spread" },
   ];
 
   const pill = document.querySelector("[data-mode-pill]");
@@ -13,7 +12,7 @@
   let modeIndex = 0;
 
   function applyMode(index) {
-    const mode = modes[index];
+    const mode = Modes ? Modes.modeAt(index) : modes[index];
     if (!pill || !mode) return;
     pill.dataset.mode = mode.id;
     pill.textContent = mode.id;
@@ -28,12 +27,10 @@
 
   if (!reduceMotion) {
     setInterval(() => {
-      modeIndex = (modeIndex + 1) % modes.length;
+      modeIndex = Modes ? Modes.nextModeIndex(modeIndex) : (modeIndex + 1) % modes.length;
       applyMode(modeIndex);
     }, 3200);
   }
-
-  /* Hero candlesticks — replaced by assets/hero-chart.png pan in CSS */
 
   /* Mobile nav */
   const toggle = document.querySelector("[data-nav-toggle]");
@@ -70,31 +67,111 @@
     reveals.forEach((el) => el.classList.add("visible"));
   }
 
-  /* Capital calculator — mirrors product allocator spirit */
-  const equity = document.getElementById("equity");
-  const equityLabel = document.querySelector("[data-equity-label]");
-  const slotsEl = document.querySelector("[data-slots]");
-  const grossEl = document.querySelector("[data-gross]");
+  /* —— Product showcase (tabs / hotspots / lightbox) —— */
+  const showcase = document.querySelector("[data-product-showcase]");
+  if (showcase && Modes) {
+    const tabs = showcase.querySelectorAll("[data-shot]");
+    const panels = showcase.querySelectorAll("[data-panel]");
+    const tipBox = showcase.querySelector("[data-product-tip]");
+    const tipLabel = showcase.querySelector("[data-tip-label]");
+    const tipBody = showcase.querySelector("[data-tip-body]");
+    const chromeUrl = showcase.querySelector("[data-chrome-url]");
+    const chrome = showcase.querySelector("[data-product-chrome]");
 
-  function formatRub(n) {
-    return new Intl.NumberFormat("ru-RU").format(n) + " ₽";
+    function setCopy(id) {
+      const data = Modes.getShot(id);
+      if (!data) return;
+      const kicker = showcase.querySelector("[data-shot-kicker]");
+      const title = showcase.querySelector("[data-shot-title]");
+      const lead = showcase.querySelector("[data-shot-lead]");
+      const bullets = showcase.querySelector("[data-shot-bullets]");
+      if (chromeUrl) chromeUrl.textContent = data.url;
+      if (kicker) kicker.textContent = data.kicker;
+      if (title) title.textContent = data.title;
+      if (lead) lead.textContent = data.lead;
+      if (bullets) {
+        bullets.innerHTML = data.bullets.map((b) => "<li>" + b + "</li>").join("");
+      }
+    }
+
+    function hideTip() {
+      if (!tipBox) return;
+      tipBox.hidden = true;
+      showcase.querySelectorAll(".hotspot.is-active").forEach((h) => h.classList.remove("is-active"));
+    }
+
+    function showTip(key, hotspot) {
+      const tip = Modes.getTip(key);
+      if (!tip || !tipBox) return;
+      tipLabel.textContent = tip.label;
+      tipBody.textContent = tip.body;
+      tipBox.hidden = false;
+      showcase.querySelectorAll(".hotspot.is-active").forEach((h) => h.classList.remove("is-active"));
+      if (hotspot) hotspot.classList.add("is-active");
+    }
+
+    function activate(id) {
+      tabs.forEach((tab) => {
+        const on = tab.getAttribute("data-shot") === id;
+        tab.classList.toggle("is-active", on);
+        tab.setAttribute("aria-selected", String(on));
+      });
+      panels.forEach((panel) => {
+        const on = panel.getAttribute("data-panel") === id;
+        panel.classList.toggle("is-active", on);
+        panel.hidden = !on;
+      });
+      hideTip();
+      setCopy(id);
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => activate(tab.getAttribute("data-shot")));
+    });
+
+    showcase.querySelectorAll(".hotspot").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const key = btn.getAttribute("data-tip");
+        if (btn.classList.contains("is-active")) hideTip();
+        else showTip(key, btn);
+      });
+    });
+
+    if (chrome && !reduceMotion) {
+      chrome.addEventListener("mousemove", (e) => {
+        const r = chrome.getBoundingClientRect();
+        const t = Modes.chromeTilt(e.clientX, e.clientY, r);
+        chrome.style.transform =
+          "perspective(1200px) rotateY(" +
+          t.rotateY +
+          "deg) rotateX(" +
+          t.rotateX +
+          "deg)";
+      });
+      chrome.addEventListener("mouseleave", () => {
+        chrome.style.transform = "perspective(1200px) rotateX(0deg) rotateY(0deg)";
+      });
+    }
+
+    setCopy("dashboard");
   }
 
-  function updateCalc() {
-    if (!equity) return;
-    const value = Number(equity.value);
-    if (equityLabel) equityLabel.textContent = formatRub(value);
-
-    let slots = Math.max(1, Math.floor(value / 100000));
-    if (value >= 1000000) slots = Math.min(slots, 12);
-    else slots = Math.min(slots, 8);
-
-    if (slotsEl) slotsEl.textContent = String(slots);
-    if (grossEl) grossEl.textContent = formatRub(value);
-  }
-
-  if (equity) {
-    equity.addEventListener("input", updateCalc);
-    updateCalc();
+  /* Lightbox for product + proof screenshots */
+  const lightbox = document.querySelector("[data-product-lightbox]");
+  const lightboxImg = lightbox && lightbox.querySelector("[data-lightbox-img]");
+  if (lightbox && lightboxImg) {
+    document.querySelectorAll("[data-zoom]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const src = btn.getAttribute("data-zoom");
+        const img = btn.querySelector("img");
+        lightboxImg.src = src;
+        lightboxImg.alt = (img && img.alt) || "";
+        if (typeof lightbox.showModal === "function") lightbox.showModal();
+      });
+    });
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) lightbox.close();
+    });
   }
 })();

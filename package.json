@@ -1,0 +1,12 @@
+{
+  "name": "trinity-landing",
+  "private": true,
+  "version": "0.1.0",
+  "description": "TRINITY marketing landing — calc, cabinet lab, auth helpers",
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
