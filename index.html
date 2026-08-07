@@ -42,7 +42,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1785948000" />
+  <link rel="stylesheet" href="css/styles.css?v=1786121000" />
 
   <script type="application/ld+json">
   {
@@ -152,6 +152,7 @@
       <ul class="nav-links" data-nav-links>
         <li><a href="#strategies">Стратегии</a></li>
         <li><a href="#atas">Объёмы</a></li>
+        <li><a href="#proof">Desk</a></li>
         <li><a href="#product">Продукт</a></li>
         <li><a href="#pricing">Тарифы</a></li>
         <li><a href="#calculator">Калькулятор</a></li>
@@ -481,6 +482,81 @@
             <p class="gate-panel-note">Иллюстрация гейта — не live-поток и не обещание PnL.</p>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Desk / paper proof (after ATAS marketplace) -->
+    <section class="section proof" id="proof">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Операторский desk</p>
+          <h2>Так выглядит разбор и journal</h2>
+          <p class="lead">
+            Paper statement, график с профилем и стакан DOM — контур, в котором видно
+            вход, выход, reason и PnL. Это иллюстрация paper / replay, не обещание доходности.
+          </p>
+        </div>
+
+        <div class="proof-stage reveal">
+          <figure class="proof-card proof-card--desk">
+            <div class="product-chrome">
+              <div class="product-chrome-bar" aria-hidden="true">
+                <span class="dot d-r"></span>
+                <span class="dot d-y"></span>
+                <span class="dot d-g"></span>
+                <span class="product-chrome-url">/view · chart · DOM</span>
+              </div>
+              <button type="button" class="product-zoom" data-zoom="assets/proof-desk.png?v=1786120100" aria-label="Увеличить desk: график и стакан">
+                <img
+                  src="assets/proof-desk.png?v=1786120100"
+                  alt="Desk: свечной график с профилем объёма, MACD и стакан DOM"
+                  width="1024"
+                  height="847"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+            </div>
+            <figcaption>
+              <h3>График + стакан</h3>
+              <p>Свечи, зоны, volume profile и DOM рядом с journal — контекст решения в одном экране.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="proof-card">
+            <div class="product-chrome">
+              <div class="product-chrome-bar" aria-hidden="true">
+                <span class="dot d-r"></span>
+                <span class="dot d-y"></span>
+                <span class="dot d-g"></span>
+                <span class="product-chrome-url">/view · paper statement</span>
+              </div>
+              <button type="button" class="product-zoom" data-zoom="assets/proof-statement.png?v=1786120100" aria-label="Увеличить paper statement">
+                <img
+                  src="assets/proof-statement.png?v=1786120100"
+                  alt="Paper statement: журнал сделок с reason, PnL и тегами ROBOT_REPLAY"
+                  width="1024"
+                  height="754"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+            </div>
+            <figcaption>
+              <h3>Paper statement</h3>
+              <p>Журнал входов/выходов: TP, BE_STOP, PnL и теги — прозрачный разбор, не чёрный ящик.</p>
+            </figcaption>
+          </figure>
+        </div>
+
+        <p class="proof-disclaimer reveal">
+          <strong>Paper / robot replay.</strong> Цифры на скринах — иллюстрация журнала и desk,
+          не live-брокерский PnL и не гарантия результата. Research / decision-support.
+        </p>
+        <p class="proof-actions reveal">
+          <a class="btn btn-dark" href="#product">Ещё экраны продукта</a>
+          <a class="btn btn-line" href="#pricing">Тарифы</a>
+        </p>
       </div>
     </section>
 
@@ -1014,7 +1090,9 @@
     </div>
   </footer>
 
-  <script src="js/main.js?v=1785948000"></script>
-  <script src="js/calc.js?v=1785948000"></script>
+  <script src="js/lib/capital-allocator.js?v=1786121000"></script>
+  <script src="js/lib/product-modes.js?v=1786121000"></script>
+  <script src="js/main.js?v=1786121000"></script>
+  <script src="js/calc.js?v=1786121000"></script>
 </body>
 </html>

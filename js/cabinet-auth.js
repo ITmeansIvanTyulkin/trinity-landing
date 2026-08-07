@@ -12,6 +12,10 @@
   }
 
   function isConfigured() {
+    const Err = window.TrinityAuthErrors;
+    if (Err && typeof Err.isAuthConfigured === "function") {
+      return Err.isAuthConfigured(cfg());
+    }
     const c = cfg();
     return Boolean(c.supabaseUrl && c.supabaseAnonKey);
   }
@@ -72,10 +76,19 @@
     });
     const title = document.getElementById("cabinet-gate-title");
     if (!title) return;
-    if (name === "login") title.textContent = "Вход в кабинет";
-    else if (name === "register") title.textContent = "Регистрация";
-    else if (name === "check-email") title.textContent = "Проверьте почту";
-    else if (name === "setup") title.textContent = "Auth не настроен";
+    const Err = window.TrinityAuthErrors;
+    title.textContent =
+      Err && typeof Err.panelTitle === "function"
+        ? Err.panelTitle(name)
+        : name === "login"
+          ? "Вход в кабинет"
+          : name === "register"
+            ? "Регистрация"
+            : name === "check-email"
+              ? "Проверьте почту"
+              : name === "setup"
+                ? "Auth не настроен"
+                : "Кабинет";
   }
 
   function setError(msg) {
@@ -103,28 +116,11 @@
   }
 
   function mapAuthError(error) {
+    const Err = window.TrinityAuthErrors;
+    if (Err && typeof Err.mapAuthError === "function") {
+      return Err.mapAuthError(error);
+    }
     if (!error) return "Ошибка аутентификации";
-    const m = (error.message || String(error)).toLowerCase();
-    if (
-      m.includes("load failed") ||
-      m.includes("failed to fetch") ||
-      m.includes("networkerror") ||
-      m.includes("network request failed")
-    ) {
-      return "Сеть: не удалось связаться с Supabase. Проверьте supabaseUrl (Project URL) и интернет.";
-    }
-    if (m.includes("email not confirmed")) {
-      return "Email ещё не подтверждён. Откройте письмо и перейдите по ссылке.";
-    }
-    if (m.includes("invalid login credentials")) {
-      return "Неверный email или пароль.";
-    }
-    if (m.includes("user already registered")) {
-      return "Этот email уже зарегистрирован — войдите или сбросьте пароль в письме.";
-    }
-    if (m.includes("password")) {
-      return "Пароль слишком короткий (минимум 6 символов).";
-    }
     return error.message || "Ошибка аутентификации";
   }
 

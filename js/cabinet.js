@@ -7,8 +7,8 @@
   const fmt = (n) => new Intl.NumberFormat("ru-RU").format(Math.round(n));
   const rub = (n) => fmt(n) + " ₽";
 
-  const Z_ENTER = 1.8;
-  const Z_WATCH = 1.4;
+  const Lab = window.TrinityDecisionLab;
+  const Unlock = window.TrinityUnlockKey;
 
   /* —— Optional IMOEX stub (read-only) —— */
   async function tryImoexStub() {
@@ -226,9 +226,21 @@
     let current = { ...data.unlockKey };
 
     function paint() {
-      if (masked) masked.textContent = revealed ? current.full : current.masked;
+      if (masked) {
+        masked.textContent = Unlock
+          ? Unlock.displayKey(current, revealed)
+          : revealed
+            ? current.full
+            : current.masked;
+      }
       if (rotated) rotated.textContent = "Обновлён: " + current.lastRotated;
-      if (toggle) toggle.textContent = revealed ? "Скрыть" : "Показать";
+      if (toggle) {
+        toggle.textContent = Unlock
+          ? Unlock.toggleLabel(revealed)
+          : revealed
+            ? "Скрыть"
+            : "Показать";
+      }
     }
 
     if (toggle) {
@@ -240,14 +252,13 @@
 
     if (regen) {
       regen.addEventListener("click", () => {
-        const seg = () =>
-          Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
-        const body = [seg(), seg(), seg(), seg()].join("-");
-        current = {
-          full: "TRINITY-" + body,
-          masked: "TRINITY-" + body.slice(0, 4) + "-••••-••••-" + body.slice(-4),
-          lastRotated: new Date().toISOString().slice(0, 10),
-        };
+        current = Unlock
+          ? Unlock.generateKey()
+          : {
+              full: "TRINITY-DEMO",
+              masked: "TRINITY-DEMO-••••-••••-DEMO",
+              lastRotated: new Date().toISOString().slice(0, 10),
+            };
         revealed = false;
         paint();
         regen.textContent = "Ключ перевыпущен";
@@ -342,82 +353,19 @@
       if (pairNote) pairNote.textContent = pair ? pair.note : "";
       if (atasWrap) atasWrap.hidden = book !== "INTRADAY";
 
-      const steps = [];
+      const result = Lab
+        ? Lab.evaluatePipeline({
+            zAbs: zAbs,
+            regime: regime,
+            cluster: cluster,
+            fa: fa,
+            book: book,
+            atas: atas,
+            sector: pair && pair.sector,
+          })
+        : null;
 
-      /* 1. Tech Z */
-      let techOk = false;
-      let techStatus = "fail";
-      let techDetail = "";
-      if (zAbs >= Z_ENTER) {
-        techOk = true;
-        techStatus = "pass";
-        techDetail = "|Z| ≥ " + Z_ENTER + " — порог входа";
-      } else if (zAbs >= Z_WATCH) {
-        techStatus = "watch";
-        techDetail = "|Z| в зоне WATCH (" + Z_WATCH + "–" + Z_ENTER + ")";
-      } else {
-        techDetail = "|Z| < " + Z_WATCH + " — техника слабая";
-      }
-      steps.push({ id: "tech", title: "Техника (EG / Z)", status: techStatus, detail: techDetail });
-
-      /* 2. Regime */
-      let regimeOk = regime !== "TREND";
-      let regimeStatus = regimeOk ? "pass" : "fail";
-      let regimeDetail =
-        regime === "TREND"
-          ? "TREND · ADX высокий — новые pairs-входы блокируются"
-          : regime === "SIDEWAYS"
-            ? "SIDEWAYS · боковик — pairs в фокусе"
-            : "NEUTRAL · смешанный режим, pairs допустимы осторожнее";
-      steps.push({
-        id: "regime",
-        title: "Regime gate",
-        status: regimeStatus,
-        detail: regimeDetail,
-      });
-
-      /* 3. Cluster */
-      steps.push({
-        id: "cluster",
-        title: "Cluster gate",
-        status: cluster ? "pass" : "fail",
-        detail: cluster
-          ? (pair.sector || "SECTOR") + " · eligible (net>0, PF≥1.1)"
-          : (pair.sector || "SECTOR") + " · не eligible / OIL_GAS-like ban",
-      });
-
-      /* 4. FA */
-      let faOk = fa === "pass";
-      let faStatus = fa === "pass" ? "pass" : fa === "weak" ? "watch" : "fail";
-      let faDetail =
-        fa === "pass"
-          ? "Фундамент поддерживает / не противоречит"
-          : fa === "weak"
-            ? "FA слабый — обычно WATCH, не paper-open"
-            : "FA против — блок рекомендации";
-      steps.push({ id: "fa", title: "Фундамент (FA)", status: faStatus, detail: faDetail });
-
-      /* 5. Book / ATAS */
-      let atasOk = true;
-      if (book === "INTRADAY") {
-        atasOk = atas;
-        steps.push({
-          id: "atas",
-          title: "ATAS / volume (INTRADAY)",
-          status: atas ? "pass" : "fail",
-          detail: atas
-            ? "Микроструктура ок · book всё равно research-only"
-            : "ATAS gate блокирует · типичный WATCH (microstructure)",
-        });
-      } else {
-        steps.push({
-          id: "book",
-          title: "Book",
-          status: "pass",
-          detail: "DAILY · live paper после FA (в продукте)",
-        });
-      }
-
+      const steps = result ? result.steps : [];
       stepsRoot.innerHTML = "";
       steps.forEach((s, i) => {
         const li = document.createElement("li");
@@ -435,55 +383,11 @@
         stepsRoot.appendChild(li);
       });
 
-      /* Verdict */
-      let outcome = "BLOCK";
-      let outcomeClass = "lab-out-block";
-      let reason = "";
-
-      if (!regimeOk) {
-        outcome = "BLOCK";
-        reason = "Regime TREND — pairs mean-reversion не открывает новые входы.";
-      } else if (!cluster) {
-        outcome = "BLOCK";
-        reason = "Cluster gate — сектор не eligible в месячном review.";
-      } else if (fa === "fail") {
-        outcome = "BLOCK";
-        reason = "FA против — рекомендация не проходит в paper.";
-      } else if (book === "INTRADAY" && !atasOk) {
-        outcome = "WATCH";
-        outcomeClass = "lab-out-watch";
-        reason =
-          "Техника может быть ок, но ATAS/volume gate блокирует INTRADAY. Book research-only — без paper-открытий.";
-      } else if (book === "INTRADAY") {
-        outcome = "RESEARCH";
-        outcomeClass = "lab-out-research";
-        reason =
-          "INTRADAY сейчас research-only: метрики считаются, paper-opens выключены до OOS.";
-      } else if (techOk && faOk) {
-        outcome = "PAPER OPEN";
-        outcomeClass = "lab-out-enter";
-        reason =
-          "Техника + regime + cluster + FA — кандидат в paper-journal (не ордер брокеру).";
-      } else if (techStatus === "watch" || fa === "weak" || !techOk) {
-        outcome = "WATCH";
-        outcomeClass = "lab-out-watch";
-        if (!techOk && techStatus === "fail") {
-          reason = "Техника ниже порога — ждём разворот / |Z|.";
-        } else if (fa === "weak") {
-          reason = "FA слабый — держим в WATCH, не форсируем paper-open.";
-        } else {
-          reason = "На границе порогов — наблюдение, не вход.";
-        }
-      } else {
-        outcome = "BLOCK";
-        reason = "Пайплайн не собрал подтверждений.";
+      if (verdict && result) {
+        verdict.className = "lab-verdict " + result.outcomeClass;
+        verdict.textContent = result.outcome;
       }
-
-      if (verdict) {
-        verdict.className = "lab-verdict " + outcomeClass;
-        verdict.textContent = outcome;
-      }
-      if (why) why.textContent = reason;
+      if (why && result) why.textContent = result.reason;
     }
 
     pairSel.addEventListener("change", update);

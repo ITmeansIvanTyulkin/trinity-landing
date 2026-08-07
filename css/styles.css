@@ -52,6 +52,7 @@ body {
 
 img {
   max-width: 100%;
+  height: auto;
   display: block;
 }
 
@@ -1268,6 +1269,81 @@ h2 {
   padding: 0.35rem 0.55rem;
 }
 
+/* —— Paper / desk proof (after ATAS) —— */
+.proof {
+  background: var(--bg-deep);
+  border-top: 1px solid var(--line);
+}
+
+.proof-stage {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 1.35rem;
+}
+
+.proof-card {
+  margin: 0;
+  max-width: 920px;
+}
+
+.proof-card--desk {
+  max-width: 100%;
+}
+
+.proof-card .product-chrome {
+  margin-bottom: 0.85rem;
+  border-radius: 10px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 22px 48px rgba(18, 25, 30, 0.18);
+}
+
+.proof-card .product-zoom img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  vertical-align: top;
+}
+
+.proof-card figcaption {
+  max-width: 40rem;
+}
+
+.proof-card figcaption h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--display);
+  font-size: 1.15rem;
+}
+
+.proof-card figcaption p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.proof-disclaimer {
+  margin: 0 0 1.15rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(196, 163, 90, 0.35);
+  background: rgba(196, 163, 90, 0.08);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #5c4e2e;
+  max-width: 48rem;
+}
+
+.proof-disclaimer strong {
+  color: #3d3420;
+}
+
+.proof-actions {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
 /* —— Product shots (interactive showcase) —— */
 .shots {
   background: var(--navy);
@@ -2098,6 +2174,200 @@ h2 {
 
   .chart-pan img {
     transform: none !important;
+  }
+}
+
+/* —— Tablet (portrait / small landscape) —— */
+@media (max-width: 1100px) and (min-width: 721px) {
+  .wrap {
+    width: min(100% - 2rem, var(--max));
+  }
+
+  .site-nav .nav-links a:not(.nav-cta) {
+    font-size: 0.82rem;
+    padding: 0.45rem 0.5rem;
+  }
+
+  .strategy-grid,
+  .price-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .strategy-grid .strategy-card:last-child,
+  .price-grid .price:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .product-stage {
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+  }
+
+  .product-chrome {
+    transform: none !important;
+  }
+
+  .proof-card {
+    max-width: 100%;
+  }
+
+  .proof-card--desk {
+    max-width: 100%;
+  }
+
+  .calc-box {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .atas-rows {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-content {
+    width: min(100% - 2rem, 36rem);
+  }
+
+  .dash-stage {
+    width: min(48vw, 380px);
+    opacity: 0.5;
+  }
+}
+
+/* —— Phone + small tablet: collapsible nav earlier —— */
+@media (max-width: 900px) {
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 1.25rem;
+    left: 1.25rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: var(--navy);
+    border: 1px solid rgba(247, 244, 238, 0.12);
+    padding: 0.5rem;
+    z-index: 40;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a,
+  .nav-links .nav-cta {
+    padding: 0.85rem 0.9rem;
+  }
+
+  .nav-toggle {
+    display: grid;
+    place-items: center;
+  }
+
+  .product-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    gap: 0.35rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .product-tabs [data-shot] {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .proof-stage {
+    gap: 1.15rem;
+  }
+
+  .proof-card,
+  .proof-card--desk {
+    max-width: 100%;
+  }
+
+  .proof-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .proof-actions .btn {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .product-chrome {
+    transform: none !important;
+  }
+
+  .hotspot {
+    width: 1.7rem;
+    height: 1.7rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .wrap {
+    width: min(100% - 1.5rem, var(--max));
+  }
+
+  .section {
+    padding-top: 3.25rem;
+    padding-bottom: 3.25rem;
+  }
+
+  .section-head .lead {
+    font-size: 0.98rem;
+  }
+
+  .strategy-grid,
+  .price-grid,
+  .calc-box,
+  .path-grid,
+  .stack-compare {
+    grid-template-columns: 1fr;
+  }
+
+  .atas-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .faq details {
+    padding: 0.85rem 0;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .product-shot-copy h3 {
+    font-size: 1.35rem;
+  }
+
+  .product-lightbox {
+    padding: 0.75rem;
+  }
+
+  .cabinet-gate {
+    padding: 1rem;
+    align-items: start;
+    padding-top: 2rem;
+  }
+
+  .cabinet-gate-card {
+    padding: 1.5rem 1.15rem 1.25rem;
+  }
+
+  .lab-step {
+    grid-template-columns: auto 1fr;
+    gap: 0.55rem;
+  }
+
+  .lab-step-badge {
+    grid-column: 2;
+    justify-self: start;
   }
 }
 

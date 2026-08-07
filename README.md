@@ -6,7 +6,8 @@
 
 ## Стек
 
-Статический сайт: HTML + CSS + JS. Без сборки и без Node.
+Статический сайт: HTML + CSS + JS. Без бандлера.
+Чистая логика вынесена в `js/lib/*` (UMD) — её покрывают unit-тесты на Node.
 
 Auth кабинета: **Supabase** (email + пароль + confirm). См. [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md).
 
@@ -27,15 +28,25 @@ cp js/cabinet-config.example.js js/cabinet-config.local.js
 # впишите supabaseUrl + supabaseAnonKey
 ```
 
+## Тесты
+
+```bash
+npm test
+```
+
+Покрывают методы в `js/lib/`: Capital Allocator, Decision Lab, auth errors, product modes, unlock key.
+
 ## Структура
 
 ```
-index.html              # лендинг + калькулятор
+index.html              # лендинг + калькулятор + desk proof
 cabinet.html            # кабинет (Supabase gate)
-css/styles.css
-js/main.js              # hero / nav / reveal
-js/calc.js              # Capital Allocator сценарий
+css/styles.css          # desktop / tablet / mobile
+js/lib/                 # чистая логика (тестируется)
+js/main.js              # hero / nav / reveal / showcase
+js/calc.js              # Capital Allocator UI
 js/cabinet-*.js         # кабинет + auth
+test/                   # node:test
 robots.txt / sitemap.xml
 supabase/profiles.sql
 docs/SUPABASE_SETUP.md

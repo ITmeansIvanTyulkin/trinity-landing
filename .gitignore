@@ -18,6 +18,9 @@ Thumbs.db
 # Cabinet Supabase keys (copy from cabinet-config.example.js)
 js/cabinet-config.local.js
 
+# Local scratch / verification shots (not for publish)
+assets/hero-verify-after.png
+
 # Node (if added later)
 node_modules/
 dist/
