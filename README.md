@@ -47,6 +47,7 @@ js/main.js              # hero / nav / reveal / showcase
 js/calc.js              # Capital Allocator UI
 js/cabinet-*.js         # кабинет + auth
 test/                   # node:test
+wiki/                   # публикации + how-to
 robots.txt / sitemap.xml
 supabase/profiles.sql
 docs/SUPABASE_SETUP.md

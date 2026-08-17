@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Стакан заявок, футпринт и профиль объёма — как читают поток на Мосбирже</title>
+  <meta name="description" content="Объёмный анализ: DOM, лента сделок, футпринт, POC, дельта и order flow. Зачем слой стакана нужен парному трейдингу и как его читают в одном контуре." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://YOUR-TRINITY-DOMAIN/wiki/volume-dom.html" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <meta property="og:title" content="Стакан, футпринт, профиль объёма" />
+  <meta property="og:description" content="Order flow без мистики: очередь заявок, след сделок внутри свечи, где рынок наторговал объём." />
+  <meta property="og:type" content="article" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css?v=1786726000" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Стакан заявок, футпринт и профиль объёма",
+    "inLanguage": "ru-RU",
+    "url": "https://YOUR-TRINITY-DOMAIN/wiki/volume-dom.html"
+  }
+  </script>
+</head>
+<body class="wiki-page">
+  <header class="site-nav cabinet-nav">
+    <div class="wrap">
+      <a class="nav-brand" href="../index.html" aria-label="TRINITY — на лендинг">
+        <span class="trinity-logo" aria-hidden="true"><span class="ring ring-c"></span><span class="ring ring-a"></span><span class="ring ring-b"></span></span>
+        TRINITY
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Меню" aria-expanded="false" data-nav-toggle>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <ul class="nav-links" data-nav-links>
+        <li><a href="../index.html">Продукт</a></li>
+        <li><a href="./">Wiki</a></li>
+        <li><a href="../index.html#pricing">Тарифы</a></li>
+        <li><a class="nav-cta" href="../cabinet.html">Триал 14 дней</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="wiki-hero">
+    <div class="wrap">
+      <p class="wiki-crumb"><a href="../index.html">Продукт</a> / <a href="./">Wiki</a> / Объём</p>
+      <p class="eyebrow">Volume · DOM</p>
+      <h1>Стакан и футпринт: кто стоит в очереди и кто уже прошёл</h1>
+      <p class="lead">Цена на графике — итог. Стакан, лента и кластеры показывают, <em>как</em> этот итог собрали: очередью лимиток и ударами по рынку.</p>
+    </div>
+  </section>
+
+  <main class="section" style="padding-top:2.25rem">
+    <div class="wrap wiki-layout">
+      <article class="wiki-article">
+        <h2>Три слоя одной сцены</h2>
+        <p>
+          Представьте кассу. <strong>Стакан (DOM, level 2)</strong> — люди в очереди с ценниками: купить по 241, продать по 242.
+          Это ещё не сделки, это намерения. Крупный «столб» на bid не обязан быть настоящим спросом: заявку можно снять за миллисекунды.
+        </p>
+        <p>
+          <strong>Лента (time &amp; sales, tape)</strong> — кто уже купил и продал. Агрессор, ударивший по ask, рисует покупку;
+          удар по bid — продажу. Отсюда дельта: сколько агрессии прошло вверх минус вниз.
+        </p>
+        <p>
+          <strong>Футпринт / кластер</strong> раскладывает объём <em>внутри</em> свечи по ценам. Свеча «зелёная» на графике может быть пустой внутри,
+          а соседняя «скучная» — набита боем на одном уровне. Профиль объёма за сессию склеивает это в горизонтальную гистограмму:
+          POC — цена, где торговали больше всего, value area — зона, где прошёл основной объём.
+        </p>
+
+        <h2>Словарь, которым все ищут одно и то же</h2>
+        <ul>
+          <li><strong>Order flow</strong> — поток агрессии и очереди, а не отдельный индикатор с магической линией.</li>
+          <li><strong>Imbalance</strong> — перекос bid/ask в кластере: одна сторона съела другую на уровне.</li>
+          <li><strong>Iceberg</strong> — видимый кусок в стакане, за которым догружается объём. В ленте он «капает» в одном месте.</li>
+          <li><strong>Market profile / TPO</strong> — другое представление того же вопроса «где рынок согласился с ценой», через время на уровне, не только через лоты.</li>
+          <li><strong>Smart tape</strong> — лента с фильтрами: крупные принты, скорость, повторы.</li>
+        </ul>
+        <p>
+          ATAS и Tiger.trade стали именами нарицательными именно потому, что собрали эти слои в удобные окна.
+          В pairs-контуре нужен не весь скальперский арсенал на 400 кластерах, а ответ на узкий вопрос:
+          подтверждает ли поток вход по Z-score или против него стоит стена.
+        </p>
+
+        <h2>Зачем объём паре акций</h2>
+        <p>
+          Daily-пара живёт на коинтеграции и режиме. Объём здесь — второй голос. Пример: Z уехал, техника хочет short спреда,
+          а в стакане слабой ноги тонкий ask и лёд — короткий выход может стоить дороже идеи. Другой пример: на POC сессии
+          обе ноги стоят плотно, дельта затихла — плохое место открывать «потому что Z = 2».
+        </p>
+        <p>
+          Для внутридневной книги тот же слой жёстче: volume-gate может просто закрыть вход, если поток против сделки.
+          Это не замена спреду, а фильтр исполнения.
+        </p>
+        <div class="wiki-example">
+          <p><strong>Как читать без медитации.</strong> Сначала уровень (вчерашний POC, круглая, край value). Потом — кто ударил (лента). Потом — остался ли объём в стакане после удара. Если ударили и очередь восстановилась — это не то же самое, что ударили и стакан «схлопнулся».</p>
+        </div>
+
+        <h2>Практический порядок на экране</h2>
+        <ol>
+          <li>Режим рынка и пара — как в статье про <a href="pairs-moex.html">коинтеграцию</a>.</li>
+          <li>Профиль: где сессия наторговала, не торгуете ли вы «в воздухе».</li>
+          <li>Футпринт последних баров: есть ли дисбаланс в сторону вашей ноги.</li>
+          <li>Стакан на входе: хватит ли очереди, нет ли явного айсберга против.</li>
+        </ol>
+        <p>
+          В TRINITY этот слой собран в одном доступе с аналитикой пар: не три терминала, а один операторский контур.
+          Поставить отдельно ATAS или Tiger имеет смысл, если вам нужен их полный скальп-стол — это другой рабочий стол.
+        </p>
+        <div class="wiki-soft-cta">
+          <p>Как открыть контур и дойти до экранов — по шагам.</p>
+          <a class="btn btn-line" href="how-trinity.html">Как пользоваться TRINITY</a>
+        </div>
+      </article>
+      <aside class="wiki-aside">
+        <h3>Ещё в wiki</h3>
+        <ul>
+          <li><a href="how-trinity.html">Как пользоваться TRINITY</a></li>
+          <li><a href="pairs-moex.html">Парный трейдинг</a></li>
+          <li><a href="calendar-spread.html">Календарный спред</a></li>
+          <li><a href="start-moex.html">Старт на Мосбирже</a></li>
+        </ul>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-legal">
+      <span>TRINITY Wiki</span>
+      <span><a href="./">← Wiki</a></span>
+    </div>
+  </footer>
+  <script src="../js/main.js?v=1786726000"></script>
+</body>
+</html>

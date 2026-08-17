@@ -157,21 +157,159 @@
     setCopy("dashboard");
   }
 
-  /* Lightbox for product + proof screenshots */
+  /* Lightbox: native pixels, wheel/± zoom, pan, 1:1 */
   const lightbox = document.querySelector("[data-product-lightbox]");
   const lightboxImg = lightbox && lightbox.querySelector("[data-lightbox-img]");
-  if (lightbox && lightboxImg) {
+  const lightboxStage = lightbox && lightbox.querySelector("[data-lightbox-stage]");
+  const lightboxCaption = lightbox && lightbox.querySelector("[data-lightbox-caption]");
+  if (lightbox && lightboxImg && lightboxStage) {
+    const MIN_SCALE = 0.35;
+    const MAX_SCALE = 5;
+    let scale = 1;
+    let tx = 0;
+    let ty = 0;
+    let drag = null;
+
+    function applyTransform() {
+      lightboxImg.style.transform = "translate(" + tx + "px, " + ty + "px) scale(" + scale + ")";
+    }
+
+    function nativeView() {
+      scale = 1;
+      tx = 0;
+      ty = 0;
+      applyTransform();
+    }
+
+    function fitToStage() {
+      const nw = lightboxImg.naturalWidth;
+      const nh = lightboxImg.naturalHeight;
+      const rect = lightboxStage.getBoundingClientRect();
+      if (!nw || !nh || rect.width < 8 || rect.height < 8) {
+        nativeView();
+        return;
+      }
+      scale = Math.min(1, (rect.width - 24) / nw, (rect.height - 24) / nh);
+      scale = Math.max(MIN_SCALE, scale);
+      tx = 0;
+      ty = 0;
+      applyTransform();
+    }
+
+    function bumpZoom(dir, cx, cy) {
+      const next = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale + dir * 0.25));
+      if (next === scale) return;
+      const rect = lightboxStage.getBoundingClientRect();
+      const px = (cx != null ? cx : rect.left + rect.width / 2) - rect.left - rect.width / 2;
+      const py = (cy != null ? cy : rect.top + rect.height / 2) - rect.top - rect.height / 2;
+      const k = next / scale;
+      tx = px - k * (px - tx);
+      ty = py - k * (py - ty);
+      scale = next;
+      applyTransform();
+    }
+
+    function openShot() {
+      nativeView();
+      if (typeof lightbox.showModal === "function") lightbox.showModal();
+      if (lightboxImg.complete && lightboxImg.naturalWidth) {
+        requestAnimationFrame(fitToStage);
+      }
+    }
+
+    lightboxImg.addEventListener("load", () => {
+      if (lightbox.open) fitToStage();
+    });
+
     document.querySelectorAll("[data-zoom]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const src = btn.getAttribute("data-zoom");
         const img = btn.querySelector("img");
-        lightboxImg.src = src;
+        const caption = btn.getAttribute("data-zoom-caption");
+        if (lightboxImg.getAttribute("src") !== src) {
+          lightboxImg.src = src;
+        }
         lightboxImg.alt = (img && img.alt) || "";
-        if (typeof lightbox.showModal === "function") lightbox.showModal();
+        if (lightboxCaption) {
+          if (caption) {
+            lightboxCaption.hidden = false;
+            lightboxCaption.textContent = caption;
+          } else {
+            lightboxCaption.hidden = true;
+            lightboxCaption.textContent = "";
+          }
+        }
+        openShot();
       });
     });
+
+    lightbox.querySelectorAll("[data-lightbox-zoom]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        bumpZoom(Number(btn.getAttribute("data-lightbox-zoom")) || 1);
+      });
+    });
+    const resetBtn = lightbox.querySelector("[data-lightbox-reset]");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        nativeView();
+      });
+    }
+    const closeBtn = lightbox.querySelector("[data-lightbox-close]");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (typeof lightbox.close === "function") lightbox.close();
+      });
+    }
+
+    lightboxStage.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      bumpZoom(e.deltaY < 0 ? 1 : -1, e.clientX, e.clientY);
+    }, { passive: false });
+
+    lightboxStage.addEventListener("dblclick", (e) => {
+      e.preventDefault();
+      if (scale < 0.98) nativeView();
+      else fitToStage();
+    });
+
+    lightboxStage.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      drag = { x: e.clientX, y: e.clientY, tx: tx, ty: ty };
+      lightboxStage.classList.add("is-dragging");
+      lightboxStage.setPointerCapture(e.pointerId);
+    });
+    lightboxStage.addEventListener("pointermove", (e) => {
+      if (!drag) return;
+      tx = drag.tx + (e.clientX - drag.x);
+      ty = drag.ty + (e.clientY - drag.y);
+      applyTransform();
+    });
+    function endDrag() {
+      drag = null;
+      lightboxStage.classList.remove("is-dragging");
+    }
+    lightboxStage.addEventListener("pointerup", endDrag);
+    lightboxStage.addEventListener("pointercancel", endDrag);
+
+    lightbox.addEventListener("keydown", (e) => {
+      if (e.key === "+" || e.key === "=") {
+        e.preventDefault();
+        bumpZoom(1);
+      } else if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        bumpZoom(-1);
+      } else if (e.key === "0") {
+        e.preventDefault();
+        nativeView();
+      }
+    });
+
     lightbox.addEventListener("click", (e) => {
       if (e.target === lightbox) lightbox.close();
     });
+    lightbox.addEventListener("close", nativeView);
   }
 })();

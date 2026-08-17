@@ -24,6 +24,14 @@ https://itmeansivantyulkin.github.io/trinity-landing
 3. Проверить Open Graph: [opengraph.xyz](https://www.opengraph.xyz/) или отладчик VK/Telegram
 4. Убедиться, что `https://…/robots.txt` и `https://…/sitemap.xml` открываются
 
+## Wiki
+
+Отдельные URL в [`wiki/`](../wiki/): публикации и how-to, в шапке лендинга — одна строка «Wiki». Sitemap включает хаб и статьи с priority ниже, чем у главной. How-to: [`wiki/how-trinity.html`](../wiki/how-trinity.html).
+
+## Указатель запросов `/topics/`
+
+Не в меню продукта. Роботы находят через `sitemap.xml` и JSON-LD `hasPart`. Страница `index, follow`, текст видимый — `display:none` поисковики почти не считают. Это слабее, чем wiki-статьи: облако ключей без смысла могут пометить как doorway. Поэтому каждый блок ссылается на статью wiki или продукт.
+
 ## Что уже в коде
 
 - `title` / `description` / `robots` / `theme-color`
@@ -31,9 +39,11 @@ https://itmeansivantyulkin.github.io/trinity-landing
 - JSON-LD: `Organization`, `WebSite`, `SoftwareApplication`, `FAQPage`
 - `robots.txt` (кабинет `noindex` через Disallow + meta на `cabinet.html`)
 - `sitemap.xml`, `favicon.svg`, `site.webmanifest`
+- Семантика: [`docs/KEYWORDS.md`](KEYWORDS.md) + опечатки/раскладка [`docs/KEYWORDS-TYPOS.md`](KEYWORDS-TYPOS.md)
 
 ## Честные ограничения
 
-- Не спамить keywords и не покупать накрутку — риск фильтра
+- `meta keywords` читает в основном Яндекс; Google почти игнорирует — для людей тексты в FAQ и [`wiki/`](../wiki/)
+- Не прятать простыню ключей через `display:none` — риск фильтра и почти нулевой вес
 - Кабинет за логином не нужно пушить в топ — он закрыт от индекса
-- Сильные коммерческие запросы («ATAS», «Tiger.trade», «коинтеграция MOEX») требуют времени и внешних упоминаний
+- Сильные коммерческие запросы («ATAS скачать», «Tiger.trade») требуют времени; мы отвечаем честно: это не установка ATAS

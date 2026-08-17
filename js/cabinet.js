@@ -271,6 +271,203 @@
     paint();
   }
 
+  /* —— Self-help chat (no live first-line) —— */
+  function setupHelp() {
+    const Help = window.TrinityCabinetHelp;
+    const log = document.querySelector("[data-help-log]");
+    const form = document.querySelector("[data-help-form]");
+    const input = document.querySelector("[data-help-input]");
+    const escalate = document.querySelector("[data-help-escalate]");
+    const mailForm = document.querySelector("[data-help-mail-form]");
+    const mailEmail = document.querySelector("[data-help-mail-email]");
+    const mailBody = document.querySelector("[data-help-mail-body]");
+    const mailCancel = document.querySelector("[data-help-mail-cancel]");
+    if (!Help || !log || !form || !input) return;
+
+    const supportTo =
+      (config && config.supportEmail) || Help.DEFAULT_SUPPORT_EMAIL;
+    let lastQuery = "";
+    let pathTitles = [];
+
+    function userEmail() {
+      return (
+        (window.localStorage &&
+          localStorage.getItem(
+            (window.TrinityCabinetAuth && window.TrinityCabinetAuth.userKey) ||
+              "trinity.supabase.user_email"
+          )) ||
+        ""
+      );
+    }
+
+    function scrollLog() {
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text) node.textContent = text;
+      return node;
+    }
+
+    function botText(text) {
+      const wrap = el("div", "help-msg help-bot");
+      wrap.appendChild(el("p", "", text));
+      log.appendChild(wrap);
+      scrollLog();
+    }
+
+    function userText(text) {
+      const wrap = el("div", "help-msg help-user");
+      wrap.appendChild(el("p", "", text));
+      log.appendChild(wrap);
+      scrollLog();
+    }
+
+    function renderOptions(cards, prompt) {
+      if (prompt) botText(prompt);
+      if (!cards.length) {
+        botText("По этому тексту вариантов нет. Перефразируйте или напишите человеку — ответ придёт письмом.");
+        showEscalate(true);
+        return;
+      }
+      const box = el("div", "help-options");
+      cards.forEach(function (card) {
+        const btn = el("button", "help-opt", card.title);
+        btn.type = "button";
+        btn.dataset.helpPick = card.id;
+        box.appendChild(btn);
+      });
+      log.appendChild(box);
+      scrollLog();
+    }
+
+    function renderSolution(node) {
+      const wrap = el("div", "help-msg help-bot");
+      wrap.appendChild(el("p", "", node.title));
+      const ol = el("ol", "help-steps");
+      (node.steps || []).forEach(function (step) {
+        ol.appendChild(el("li", "", step));
+      });
+      wrap.appendChild(ol);
+      if (node.href && node.hrefLabel) {
+        const p = el("p");
+        const a = el("a", "", node.hrefLabel);
+        a.href = node.href;
+        p.appendChild(a);
+        wrap.appendChild(p);
+      }
+      const actions = el("div", "help-actions");
+      const ok = el("button", "btn btn-line", "Помогло");
+      ok.type = "button";
+      ok.dataset.helpAct = "ok";
+      const more = el("button", "btn btn-line", "Другая проблема");
+      more.type = "button";
+      more.dataset.helpAct = "more";
+      const mail = el("button", "btn btn-dark", "Написать человеку");
+      mail.type = "button";
+      mail.dataset.helpAct = "mail";
+      actions.appendChild(ok);
+      actions.appendChild(more);
+      actions.appendChild(mail);
+      wrap.appendChild(actions);
+      log.appendChild(wrap);
+      scrollLog();
+    }
+
+    function openNode(id) {
+      const node = Help.findById(id);
+      if (!node) return;
+      pathTitles.push(node.title);
+      userText(node.title);
+      if (node.children && node.children.length) {
+        renderOptions(Help.childrenOf(id), node.prompt || "Уточните:");
+        return;
+      }
+      renderSolution(node);
+    }
+
+    function search(text) {
+      lastQuery = text;
+      const cards = Help.matchQuery(text);
+      if (text) {
+        renderOptions(cards, cards.length ? "Похоже на одно из этого:" : null);
+      } else {
+        renderOptions(cards, "Частые темы — или напишите своими словами:");
+      }
+    }
+
+    function showEscalate(open) {
+      if (!escalate) return;
+      escalate.hidden = !open;
+      if (open && mailEmail && !mailEmail.value) mailEmail.value = userEmail();
+      if (open) escalate.scrollIntoView({ block: "nearest" });
+    }
+
+    function greet() {
+      log.innerHTML = "";
+      pathTitles = [];
+      botText(
+        "Опишите проблему, как в чате. Подберём варианты. Живого оператора здесь нет — в тупике ответит человек письмом."
+      );
+      search("");
+    }
+
+    log.addEventListener("click", function (ev) {
+      const pick = ev.target.closest("[data-help-pick]");
+      if (pick && pick.dataset.helpPick) {
+        openNode(pick.dataset.helpPick);
+        return;
+      }
+      const act = ev.target.closest("[data-help-act]");
+      if (!act) return;
+      if (act.dataset.helpAct === "ok") {
+        botText("Хорошо. Если всплывёт другое — напишите снова или выберите тему.");
+      } else if (act.dataset.helpAct === "more") {
+        pathTitles = [];
+        search("");
+      } else if (act.dataset.helpAct === "mail") {
+        showEscalate(true);
+      }
+    });
+
+    form.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      const text = String(input.value || "").trim();
+      if (!text) {
+        search("");
+        return;
+      }
+      userText(text);
+      input.value = "";
+      search(text);
+    });
+
+    if (mailCancel) {
+      mailCancel.addEventListener("click", function () {
+        showEscalate(false);
+      });
+    }
+
+    if (mailForm) {
+      mailForm.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        const href = Help.composeMailto({
+          to: supportTo,
+          email: mailEmail ? mailEmail.value : "",
+          topicTitle: pathTitles[pathTitles.length - 1] || "",
+          query: lastQuery,
+          path: pathTitles.join(" → "),
+          body: mailBody ? mailBody.value : "",
+        });
+        window.location.href = href;
+      });
+    }
+
+    greet();
+  }
+
   /* —— Payments —— */
   function renderPayments() {
     const tbody = document.querySelector("[data-payments-body]");
@@ -436,6 +633,7 @@
     drawEquity();
     drawAllocation();
     setupUnlock();
+    setupHelp();
     renderPayments();
     renderRoadmap();
     setupLab();

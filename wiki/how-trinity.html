@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Как пользоваться TRINITY: регистрация, инстанс, первый сеанс</title>
+  <meta name="description" content="Пошагово: регистрация в кабинете TRINITY, подтверждение почты, получение инстанса операторского приложения, вход в /view и что делать в первый рабочий день." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://YOUR-TRINITY-DOMAIN/wiki/how-trinity.html" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <meta property="og:title" content="Как пользоваться TRINITY по шагам" />
+  <meta property="og:description" content="Регистрация, инстанс приложения, вход и первый сеанс в операторке." />
+  <meta property="og:type" content="article" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css?v=1786726000" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "Как пользоваться TRINITY",
+    "description": "Регистрация в кабинете, получение инстанса операторского приложения и первый сеанс.",
+    "inLanguage": "ru-RU",
+    "url": "https://YOUR-TRINITY-DOMAIN/wiki/how-trinity.html",
+    "step": [
+      { "@type": "HowToStep", "name": "Регистрация", "text": "Откройте кабинет, создайте аккаунт по email и паролю." },
+      { "@type": "HowToStep", "name": "Подтверждение почты", "text": "Перейдите по ссылке из письма и войдите." },
+      { "@type": "HowToStep", "name": "Инстанс приложения", "text": "Получите URL облачного инстанса или поднимите локальный оператор IMOEX." },
+      { "@type": "HowToStep", "name": "Первый сеанс", "text": "Откройте /view: режим рынка, вселенная пар, спред, Анализ + paper." }
+    ]
+  }
+  </script>
+</head>
+<body class="wiki-page">
+  <header class="site-nav cabinet-nav">
+    <div class="wrap">
+      <a class="nav-brand" href="../index.html" aria-label="TRINITY — на лендинг">
+        <span class="trinity-logo" aria-hidden="true"><span class="ring ring-c"></span><span class="ring ring-a"></span><span class="ring ring-b"></span></span>
+        TRINITY
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Меню" aria-expanded="false" data-nav-toggle>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <ul class="nav-links" data-nav-links>
+        <li><a href="../index.html">Продукт</a></li>
+        <li><a href="./">Wiki</a></li>
+        <li><a href="../index.html#pricing">Тарифы</a></li>
+        <li><a class="nav-cta" href="../cabinet.html">Триал 14 дней</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="wiki-hero">
+    <div class="wrap">
+      <p class="wiki-crumb"><a href="../index.html">Продукт</a> / <a href="./">Wiki</a> / Старт</p>
+      <p class="eyebrow">Публикация · How-to</p>
+      <h1>Как пользоваться TRINITY</h1>
+      <p class="lead">От письма с паролем до первого сеанса в операторке. Два экрана: кабинет на сайте и приложение (инстанс) с дашбордом <code>/view</code>.</p>
+    </div>
+  </section>
+
+  <main class="section" style="padding-top:2.25rem">
+    <div class="wrap wiki-layout">
+      <article class="wiki-article">
+        <h2>Две двери, один аккаунт</h2>
+        <p>
+          TRINITY разделён нарочно. На сайте вы регистрируетесь, видите подписку, метрики и лабораторию пайплайна.
+          Сама работа с рынком — в операторском приложении IMOEX: дашборд, график спреда, журнал paper и брокерская песочница.
+          Один email открывает оба контура, когда инстанс приложения уже выдан.
+        </p>
+        <p>
+          Установочного файла «как у брокера» нет: это веб-контур. Вам либо дают URL готового инстанса, либо вы поднимаете приложение у себя и заходите на <code>/view</code>.
+        </p>
+
+        <ol class="wiki-steps">
+          <li>
+            <h3>Откройте кабинет и создайте аккаунт</h3>
+            <p>
+              Нажмите «Триал 14 дней» или перейдите в
+              <a href="../cabinet.html">кабинет</a>. Если аккаунта ещё нет — «Зарегистрироваться».
+              Укажите email, пароль (от 6 символов) и по желанию имя. Письма с новостями можно оставить включёнными.
+            </p>
+            <p>Кнопка «Создать аккаунт» отправит письмо подтверждения. Без перехода по ссылке из письма вход не откроется.</p>
+          </li>
+          <li>
+            <h3>Подтвердите почту и войдите</h3>
+            <p>
+              Откройте письмо TRINITY / Supabase, нажмите ссылку, вернитесь на экран входа.
+              Тот же email и пароль — кнопка «Войти». Если письма нет, проверьте спам или «Отправить письмо ещё раз».
+            </p>
+            <p>
+              После входа вы в кабинете: тариф и дни триала, режим рынка, демо-метрики, лаборатория «Почему ENTER / WATCH / BLOCK», раздел аккаунта с unlock-ключом.
+            </p>
+          </li>
+          <li>
+            <h3>Получите приложение: инстанс или локальный запуск</h3>
+            <p>
+              <strong>Облачный инстанс.</strong> После регистрации вам выдают адрес операторки (обычно это HTTPS-хост вашей подписки).
+              Сохраните его: это и есть «скачанное приложение», только оно уже запущено. Откройте в браузере, войдите тем же email.
+            </p>
+            <p>
+              <strong>Свой инстанс.</strong> Если ставите оператор сами (разработка, выделенный сервер): поднимаете IMOEX и открываете
+              <code>http://localhost:8080/view</code> или ваш хост. Токен брокера и ордера живут только там, не в кабинете на лендинге.
+            </p>
+            <p>
+              Unlock-ключ из кабинета (раздел «Аккаунт») понадобится, если инстанс просит активацию. Показать / перевыпустить — там же.
+            </p>
+          </li>
+          <li>
+            <h3>Первый сеанс в <code>/view</code></h3>
+            <p>Откройте дашборд и пройдите по кругу — это и есть рабочий ритуал, а не «нажать купить».</p>
+            <ul>
+              <li><strong>Режим рынка.</strong> SIDEWAYS / TREND / ARBITRAGE. В тренде новые входы pairs обычно не открывают — сначала смотрите режим, потом пары.</li>
+              <li><strong>Вселенная.</strong> Тикеры IMOEX и топ пар по коинтеграции. Выберите 1–2 имени, которые понимаете (сектор, ликвидность).</li>
+              <li><strong>Спред / Z-score.</strong> Экран графиков: спред, KAMA, пороги ±2, подпись «сейчас». Это техника пары, не кнопка ордера.</li>
+              <li><strong>Анализ + paper.</strong> Запустите разбор: техника → regime → cluster → фундамент. Итог читайте в журнале Paper.</li>
+              <li><strong>Брокерская песочница.</strong> Если подключаете T-Invest sandbox — токен и счёт только в настройках операторки. На сайте кабинета поля брокера нет.</li>
+            </ul>
+          </li>
+          <li>
+            <h3>Что делать каждый день</h3>
+            <p>
+              Короткий цикл: режим → 2–3 пары из вселенной → Z и спред → если пайплайн зелёный, paper-слот → вечером журнал.
+              Лаборатория в кабинете полезна, когда хотите руками подвигать Z, режим и FA и увидеть, почему вердикт BLOCK, а не OPEN.
+            </p>
+            <p>
+              Капитал на дашборде и калькулятор на <a href="../index.html#calculator">главной</a> — про аллокацию (pairs / trend / arb), не про пополнение брокерского счёта с сайта.
+            </p>
+          </li>
+        </ol>
+
+        <h2>Где что лежит</h2>
+        <ul>
+          <li><strong>Кабинет</strong> — аккаунт, триал, лаборатория, ключ.</li>
+          <li><strong>Оператор <code>/view</code></strong> — дашборд, графики пары, paper, брокерская песочница.</li>
+          <li><strong>Лендинг</strong> — продукт, тарифы, калькулятор капитала.</li>
+        </ul>
+        <div class="wiki-example">
+          <p><strong>Типичная путаница.</strong> Кабинет после регистрации «пустой» по ордерам — так и задумано. Рынок смотрят в инстансе приложения. Если <code>/view</code> не открывается, инстанс ещё не выдан или локальный IMOEX не запущен, а не «сломалась регистрация».</p>
+        </div>
+
+        <div class="wiki-soft-cta">
+          <p>Готовы пройти шаги 1–2 прямо сейчас.</p>
+          <a class="btn btn-line" href="../cabinet.html">Открыть кабинет</a>
+        </div>
+      </article>
+      <aside class="wiki-aside">
+        <h3>Ещё в wiki</h3>
+        <ul>
+          <li><a href="pairs-moex.html">Парный трейдинг</a></li>
+          <li><a href="volume-dom.html">Объём и стакан</a></li>
+          <li><a href="calendar-spread.html">Календарный спред</a></li>
+          <li><a href="start-moex.html">Старт на Мосбирже</a></li>
+        </ul>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-legal">
+      <span>TRINITY Wiki</span>
+      <span><a href="./">← Wiki</a></span>
+    </div>
+  </footer>
+  <script src="../js/main.js?v=1786726000"></script>
+</body>
+</html>

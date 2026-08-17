@@ -8,6 +8,7 @@
  */
 window.CABINET_CONFIG = Object.assign({}, window.CABINET_CONFIG || {}, {
   imoexBase: null,
+  supportEmail: "hello@trinity.local",
   supabaseUrl: "https://YOUR_PROJECT.supabase.co",
   supabaseAnonKey: "YOUR_ANON_PUBLIC_KEY",
 });

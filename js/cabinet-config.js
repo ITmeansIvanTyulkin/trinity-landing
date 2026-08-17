@@ -8,6 +8,7 @@
 window.CABINET_CONFIG = {
   /* Optional read-only stub: "http://localhost:8080" */
   imoexBase: null,
+  supportEmail: "hello@trinity.local",
   /* Supabase project URL + anon (public) key — fill via .local.js or deploy */
   supabaseUrl: "",
   supabaseAnonKey: "",

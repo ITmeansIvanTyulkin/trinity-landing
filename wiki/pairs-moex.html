@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Парный трейдинг и коинтеграция на Мосбирже — как читают спред двух акций</title>
+  <meta name="description" content="Парный трейдинг на MOEX: коинтеграция против корреляции, спред, hedge ratio, Z-score и mean reversion. Как оператор смотрит пару в боковике." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://YOUR-TRINITY-DOMAIN/wiki/pairs-moex.html" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <meta property="og:title" content="Парный трейдинг и коинтеграция на MOEX" />
+  <meta property="og:description" content="Спред двух акций, Z-score и возврат к среднему — как это устроено на Мосбирже." />
+  <meta property="og:type" content="article" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css?v=1786726000" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Парный трейдинг и коинтеграция на Мосбирже",
+    "description": "Как строят спред двух акций IMOEX, чем коинтеграция отличается от корреляции и как читают Z-score.",
+    "inLanguage": "ru-RU",
+    "url": "https://YOUR-TRINITY-DOMAIN/wiki/pairs-moex.html"
+  }
+  </script>
+</head>
+<body class="wiki-page">
+  <header class="site-nav cabinet-nav">
+    <div class="wrap">
+      <a class="nav-brand" href="../index.html" aria-label="TRINITY — на лендинг">
+        <span class="trinity-logo" aria-hidden="true"><span class="ring ring-c"></span><span class="ring ring-a"></span><span class="ring ring-b"></span></span>
+        TRINITY
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Меню" aria-expanded="false" data-nav-toggle>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <ul class="nav-links" data-nav-links>
+        <li><a href="../index.html">Продукт</a></li>
+        <li><a href="./">Wiki</a></li>
+        <li><a href="../index.html#pricing">Тарифы</a></li>
+        <li><a class="nav-cta" href="../cabinet.html">Триал 14 дней</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="wiki-hero">
+    <div class="wrap">
+      <p class="wiki-crumb"><a href="../index.html">Продукт</a> / <a href="./">Wiki</a> / Pairs</p>
+      <p class="eyebrow">Pairs · MOEX</p>
+      <h1>Парный трейдинг: две акции вместо одной ставки</h1>
+      <p class="lead">Идея простая, как дуэт в оркестре: бумаги из одного мира обычно не разбегаются навсегда. Когда спред «поёт фальшиво», смотрят, вернётся ли он к привычной партии.</p>
+    </div>
+  </section>
+
+  <main class="section" style="padding-top:2.25rem">
+    <div class="wrap wiki-layout">
+      <article class="wiki-article">
+        <h2>Зачем торговать пару, а не «просто Сбер»</h2>
+        <p>
+          Одиночная акция тащит на себе весь рынок: ставку ЦБ, нефть, новость по эмитенту, настроение по IMOEX.
+          Парный трейдинг пытается вычесть этот общий ветер. Вы одновременно в одной ноге длинные, в другой короткие —
+          в долях, которые статистика считает справедливыми. Остаётся ставка не на «рынок вырастет», а на то, что <em>разница</em> между двумя именами сжалась или разошлась слишком сильно.
+        </p>
+        <p>
+          На Мосбирже так часто смотрят односекторные пары: банки, нефтянка, металлы, ритейл. Ликвидность важнее красоты графика:
+          тонкое имя в короткой ноге превращает аккуратную идею в проскальзывание.
+        </p>
+        <div class="wiki-example">
+          <p><strong>Картинка на пальцах.</strong> Две нефтяные бумаги месяцами ходят почти параллельно. Одна отчиталась раньше, спред разъехался на два стандартных отклонения. Если история связи жива, спред имеет привычку сужаться — это и есть mean reversion. Если связь умерла (другой бизнес, санкционный шок, смена индекса), «возврат» может не прийти.</p>
+        </div>
+
+        <h2>Корреляция и коинтеграция — разные вопросы</h2>
+        <p>
+          Корреляция отвечает: «в этом окне они двигались в одну сторону». Две бумаги могут быть коррелированы, потому что весь индекс летел вниз.
+          Завтра окно сменится — и «дружба» рассыплется.
+        </p>
+        <p>
+          Коинтеграция жёстче. Она спрашивает: существует ли устойчивая линейная комбинация цен — спред — которая ведёт себя как стационарный ряд.
+          У стационарного ряда есть среднее, вокруг которого он дышит. Тогда отклонение измеримо, и Z-score имеет смысл.
+          Классика — Engle–Granger: регрессия одной цены на другую, затем ADF по остаткам. Это проверка гипотезы, а не печать купонов.
+        </p>
+        <h3>Hedge ratio</h3>
+        <p>
+          «Купить 1 лот A и продать 1 лот B» почти никогда не нейтрально: цены и лотности разные.
+          Коэффициент из регрессии (или rolling OLS / Kalman) говорит, сколько B нужно против A, чтобы спред был похож на шум вокруг нуля.
+          Его пересчитывают: рынок не стоит на месте, и вчерашний hedge сегодня уже перекашивает бету.
+        </p>
+
+        <h2>Спред, Z-score, пороги</h2>
+        <p>
+          Спред — это цена A минус β·цена B (иногда отношение, иногда лог-цены). Дальше его сглаживают — в контуре TRINITY на графике рядом KAMA —
+          и меряют, на сколько сигм он ушёл от своего недавнего среднего. Это Z-score.
+        </p>
+        <ul>
+          <li>Малый |Z| — пара «дома», делать нечего.</li>
+          <li>Зона наблюдения (около 1.4) — WATCH: идея появилась, вход рано.</li>
+          <li>Зона входа (около 1.8 и выше, пороги на графике часто рисуют ±2) — смотрят разворот и остальные гейты.</li>
+          <li>Возврат Z к нулю — типичный выход, а не «ещё чуть-чуть дожмём».</li>
+        </ul>
+        <p>
+          Mean reversion любит боковик. Когда ADX высокий и режим TREND, та же пара может разъезжаться дальше:
+          тренд съедает статистику, которая считалась в спокойном окне. Поэтому в операторке сначала читают режим рынка, потом Z.
+        </p>
+
+        <h2>Что ломает красивую пару</h2>
+        <p>
+          Отчётность одной ноги, смена дивидендной политики, включение/исключение из индекса, корпоративное событие, скачок ГО на срочке,
+          если хедж идёт через фьючерс. Комиссии и спред стакана на обеих ногах — отдельный налог: бумажный Z = 2.2 на экране
+          после двух рыночных заявок может стать 1.6.
+        </p>
+        <p>
+          Поэтому «статистический арбитраж» — имя метода (стат. связь + возврат), а не ярлык «арбитраж как безрисковый базис».
+          Оператор смотрит журнал: сколько дней пара в слоте, не уехала ли β, не сменился ли режим.
+        </p>
+
+        <h2>Как это выглядит в рабочем контуре</h2>
+        <p>
+          Вселенная: десятки ликвидных тикеров IMOEX, сотни кандидатов, сверху — пары с лучшей коинтеграцией на текущем окне.
+          Дальше пайплайн DAILY: техника (Z, спред) → regime → кластер/объём → фундамент → вердикт OPEN / WATCH / BLOCK.
+          В кабинете тот же порядок можно прокрутить руками в лаборатории; живой сеанс — в инстансе <code>/view</code>.
+        </p>
+        <p>
+          Пошаговый вход в продукт — в статье
+          <a href="how-trinity.html">как пользоваться TRINITY</a>.
+        </p>
+        <div class="wiki-soft-cta">
+          <p>Дальше по теме: объём как второй слой той же пары.</p>
+          <a class="btn btn-line" href="volume-dom.html">Стакан и футпринт</a>
+        </div>
+      </article>
+      <aside class="wiki-aside">
+        <h3>Ещё в wiki</h3>
+        <ul>
+          <li><a href="how-trinity.html">Как пользоваться TRINITY</a></li>
+          <li><a href="volume-dom.html">Объём и стакан</a></li>
+          <li><a href="calendar-spread.html">Календарный спред</a></li>
+          <li><a href="start-moex.html">Старт на Мосбирже</a></li>
+        </ul>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-legal">
+      <span>TRINITY Wiki</span>
+      <span><a href="./">← Wiki</a></span>
+    </div>
+  </footer>
+  <script src="../js/main.js?v=1786726000"></script>
+</body>
+</html>

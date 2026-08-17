@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1786121000" />
+  <link rel="stylesheet" href="css/styles.css?v=1786727000" />
 </head>
 <body class="cabinet-page cabinet-locked">
   <!-- Supabase email/password + confirm (shared IdP with future IMOEX Phase 2) -->
@@ -124,6 +124,7 @@
         <li><a href="#overview">Обзор</a></li>
         <li><a href="#charts">Метрики</a></li>
         <li><a href="#lab">Лаборатория</a></li>
+        <li><a href="#help">Помощь</a></li>
         <li><a href="#account">Аккаунт</a></li>
         <li><span class="cab-user-email mono" data-cab-user-email></span></li>
         <li><button type="button" class="nav-text-btn" data-cab-logout>Выйти</button></li>
@@ -373,6 +374,44 @@
       </div>
     </section>
 
+    <!-- Self-help (cabinet only, no live first-line) -->
+    <section class="section cab-section cab-help" id="help">
+      <div class="wrap help-shell">
+        <div class="section-head reveal">
+          <p class="eyebrow">Помощь</p>
+          <h2>Разберём по шагам</h2>
+          <p class="lead">
+            Живого чата нет. Напишите, что происходит — покажем варианты.
+            Выберите один: решение или следующий уточняющий список.
+            Если шаги не закрыли вопрос, человеку уйдёт письмо, ответ придёт на почту.
+          </p>
+        </div>
+
+        <div class="help-chat reveal" data-help-log aria-live="polite"></div>
+
+        <form class="help-composer reveal" data-help-form>
+          <label class="sr-only" for="help-input">Опишите проблему</label>
+          <input id="help-input" data-help-input type="text" maxlength="280" autocomplete="off" placeholder="Например: не приходит письмо или не открывается /view" />
+          <button type="submit" class="btn btn-primary">Найти</button>
+        </form>
+
+        <div class="help-escalate reveal" data-help-escalate hidden>
+          <h3>Письмо человеку</h3>
+          <p class="cab-panel-sub">Не чат: опишите, что уже пробовали. Откроется почтовая программа.</p>
+          <form data-help-mail-form>
+            <label for="help-mail-email">Ваш email</label>
+            <input id="help-mail-email" data-help-mail-email type="email" required autocomplete="email" />
+            <label for="help-mail-body">Что случилось</label>
+            <textarea id="help-mail-body" data-help-mail-body required placeholder="Коротко: что ожидали и что видите на экране"></textarea>
+            <div class="help-actions">
+              <button type="submit" class="btn btn-primary">Открыть письмо</button>
+              <button type="button" class="btn btn-line" data-help-mail-cancel>Скрыть</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <!-- Account -->
     <section class="section cab-section cab-account" id="account">
       <div class="wrap">
@@ -396,6 +435,7 @@
           <article class="cab-panel reveal">
             <h3>Документы и поддержка</h3>
             <ul class="cab-link-list">
+              <li><a href="#help">Помощь: подобрать шаги</a></li>
               <li><a href="index.html#faq">FAQ на лендинге</a></li>
               <li><a href="index.html#calculator">Калькулятор капитала</a></li>
               <li><a href="index.html#roadmap">Дорожная карта</a></li>
@@ -449,6 +489,7 @@
           <h4>Навигация</h4>
           <ul>
             <li><a href="index.html">Лендинг</a></li>
+            <li><a href="#help">Помощь</a></li>
             <li><a href="#lab">Лаборатория</a></li>
             <li><a href="index.html#calculator">Калькулятор</a></li>
             <li><a href="index.html#pricing">Тарифы</a></li>
@@ -474,9 +515,10 @@
   <script src="js/lib/auth-errors.js?v=1786121000"></script>
   <script src="js/lib/decision-lab.js?v=1786121000"></script>
   <script src="js/lib/unlock-key.js?v=1786121000"></script>
+  <script src="js/lib/cabinet-help.js?v=1786727000"></script>
   <script src="js/cabinet-config.js?v=1786121000"></script>
   <script src="js/cabinet-data.js?v=1786121000"></script>
   <script src="js/cabinet-auth.js?v=1786121000"></script>
-  <script src="js/cabinet.js?v=1786121000"></script>
+  <script src="js/cabinet.js?v=1786727000"></script>
 </body>
 </html>
