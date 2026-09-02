@@ -8,4 +8,4 @@
  *
  * Keep WITHOUT trailing slash.
  */
-window.TRINITY_SITE_ORIGIN = "https://YOUR-TRINITY-DOMAIN";
+window.TRINITY_SITE_ORIGIN = "https://trinity.trading";

@@ -23,7 +23,7 @@
     NEUTRAL:
       "Смешанный режим → капитал делится между books более равномерно.",
     TREND:
-      "ADX высокий → новые pairs-входы блокируются; в сценарии доминируют Trend EA / Arb.",
+      "ADX высокий → новые pairs-входы блокируются; в сценарии доминируют Trend desk / Arb.",
   };
 
   function formatRub(n) {
@@ -107,15 +107,15 @@
     }
     if (n === 2) {
       return (
-        "Pairs + Trend EA — веса по режиму " +
+        "Pairs + Trend desk — веса по режиму " +
         regime +
-        "; early-access / roadmap, не live-гарантия."
+        "; fair-paper SANDBOX_FAIR, live FORTS gated."
       );
     }
     return (
       "Full Trinity · режим " +
       regime +
-      " — иллюстративный Full Core сценарий; arb и trend на roadmap / EA."
+      " — иллюстративный Full Core сценарий; arb и trend — fair-paper desk."
     );
   }
 

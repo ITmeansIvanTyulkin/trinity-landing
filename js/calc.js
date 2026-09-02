@@ -41,7 +41,7 @@
       "Pairs " +
         s.split.pairs +
         "%" +
-        (s.split.trend ? " · Trend EA " + s.split.trend + "%" : "") +
+        (s.split.trend ? " · Trend desk " + s.split.trend + "%" : "") +
         (s.split.arb ? " · Arb " + s.split.arb + "%" : "") +
         ' <span class="scenario-tag">' +
         s.regime +

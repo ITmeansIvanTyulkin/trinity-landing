@@ -12,21 +12,21 @@
 
   const MODES = [
     { id: "SIDEWAYS", book: "DAILY", alloc: "100% pairs", focus: "mean-rev" },
-    { id: "TREND", book: "DAILY", alloc: "trend EA", focus: "momentum" },
+    { id: "TREND", book: "M5", alloc: "trend desk", focus: "BRV6" },
     { id: "ARBITRAGE", book: "FUT", alloc: "calendar", focus: "spread" },
   ];
 
   const SHOTS = {
     dashboard: {
       url: "/view · dashboard",
-      kicker: "Операторский контур",
+      kicker: "Multi-strategy",
       title: "Дашборд",
       lead:
-        "Восемь виджетов в одном взгляде: paper, брокер, final, режим рынка, капитал, сигналы, стратегии и вселенная. Сейчас TREND (ADX 34) — новые pairs-входы блокируются.",
+        "Четыре столпа на одном экране: коинтеграция (ресёрch), тренд диапазон BRV6, позиционная и календарный арбитраж. Лента «Сейчас», paper PnL и «Анализ + paper».",
       bullets: [
-        "Режим рынка дисциплинирует входы (TREND → блок)",
-        "Капитал 200 000 ₽ · DAILY 100% · без плеча &lt;1M",
-        "Вселенная: 55 тикеров · 178 пар · топ cointegration",
+        "Коинтеграция: sit-out / ресёрch — cash РФ или quality-пары",
+        "Тренд · диапазон: BRV6 · последняя TP2 +224 ₽ · ждём confirm",
+        "Calendar arb: FORTS spread · T-Invest · paper, live gated",
       ],
     },
     charts: {
@@ -56,6 +56,18 @@
   };
 
   const TIPS = {
+    cointegration: {
+      label: "Коинтеграция",
+      body: "Sit-out / ресёрch: ни один сектор не доказан — cash РФ или quality-пары.",
+    },
+    trendRange: {
+      label: "Тренд · диапазон",
+      body: "BRV6 · интрадей. Последняя TP2 +224 ₽ — зона размечена, ждём confirm на графике.",
+    },
+    calendarArb: {
+      label: "Календарный арбитраж",
+      body: "FORTS spread · котировки T-Invest · paper-сделки, live-ордера отключены.",
+    },
     regime: {
       label: "Режим рынка",
       body: "TREND + ADX 34 → блок новых pairs-входов. Mean-reversion ждёт SIDEWAYS.",

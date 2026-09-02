@@ -56,8 +56,10 @@ docs/SEO.md
 
 ## Продуктовая честность
 
-- **Pairs / DAILY** — live paper
-- **Trend / Arbitrage** — early access / roadmap (Full Core)
+- **Pairs / DAILY** — live paper (MOEX ISS)
+- **Trend BR M5** — fair-paper desk SANDBOX_FAIR (T-Invest tape, DOM)
+- **Calendar arb** — fair-paper desk (BR/SI/RI/GD/NG)
+- **Live FORTS** у брокера — gated, `broker.enabled: false` по умолчанию
 - **Volume ML** — roadmap
 - Кабинет не торгует и не хранит токен брокера
 - Research / decision-support, не гарантия прибыли
@@ -70,7 +72,7 @@ docs/SEO.md
 
 ## SEO
 
-Перед публикацией замените `YOUR-TRINITY-DOMAIN` — см. [docs/SEO.md](docs/SEO.md).
+Продакшен-домен: **https://trinity.trading** — см. [`docs/SEO.md`](docs/SEO.md).
 
 В коде: `robots.txt`, `sitemap.xml`, Open Graph, JSON-LD, `favicon.svg`. Кабинет — `noindex`.
 

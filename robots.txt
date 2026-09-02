@@ -6,4 +6,4 @@ Disallow: /js/cabinet-config.local.js
 Disallow: /supabase/
 
 # Prefer HTTPS host once domain is live
-Sitemap: https://YOUR-TRINITY-DOMAIN/sitemap.xml
+Sitemap: https://trinity.trading/sitemap.xml

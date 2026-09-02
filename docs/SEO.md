@@ -2,20 +2,16 @@
 
 Технические теги **не гарантируют 1 место** в Яндексе/Google. Они дают роботам корректный сниппет, индексацию и соцпревью. Ранжирование = контент + ссылки + поведение + конкуренция по запросу.
 
-## Перед деплоем (обязательно)
+## Перед деплоем
 
-Замените плейсхолдер `https://YOUR-TRINITY-DOMAIN` (без `/` в конце) в файлах:
+Продакшен-origin: **`https://trinity.trading`** (без `/` в конце). Проверьте совпадение в:
 
 1. [`js/site-origin.js`](../js/site-origin.js)
 2. [`robots.txt`](../robots.txt) — строка `Sitemap:`
 3. [`sitemap.xml`](../sitemap.xml) — все `<loc>`
 4. [`index.html`](../index.html) — `canonical`, `og:url`, JSON-LD `@id` / `url`
 
-Пример для GitHub Pages:
-
-```text
-https://itmeansivantyulkin.github.io/trinity-landing
-```
+Для staging на GitHub Pages можно временно подставить другой origin — не забудьте вернуть `trinity.trading` перед продом.
 
 ## После деплоя
 

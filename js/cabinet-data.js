@@ -48,8 +48,8 @@ window.CABINET_DATA = {
     arbitrage: 0,
     labels: {
       pairs: "Pairs (live paper)",
-      trend: "Trend (EA / roadmap)",
-      arbitrage: "Arbitrage (roadmap)",
+      trend: "Trend (BR M5 desk)",
+      arbitrage: "Arbitrage (calendar desk)",
     },
   },
 
@@ -68,8 +68,8 @@ window.CABINET_DATA = {
   roadmap: [
     { label: "Pairs DAILY", detail: "live paper", status: "live" },
     { label: "INTRADAY", detail: "research only", status: "research" },
-    { label: "Trend", detail: "EA · Full Core", status: "soon" },
-    { label: "Arbitrage", detail: "roadmap · Full Core", status: "soon" },
+    { label: "Trend BR M5", detail: "SANDBOX_FAIR desk", status: "live" },
+    { label: "Calendar arb", detail: "fair-paper desk", status: "live" },
   ],
 
   labPairs: [

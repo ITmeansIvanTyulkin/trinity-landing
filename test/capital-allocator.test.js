@@ -66,7 +66,7 @@ describe("TrinityCapitalAllocator", () => {
   it("strategyWarn covers n=1/2/3", () => {
     assert.match(Calc.strategyWarn(1, "TREND"), /standby/);
     assert.match(Calc.strategyWarn(1, "SIDEWAYS"), /Оператор/);
-    assert.match(Calc.strategyWarn(2, "NEUTRAL"), /Trend EA/);
+    assert.match(Calc.strategyWarn(2, "NEUTRAL"), /Trend desk/);
     assert.match(Calc.strategyWarn(3, "SIDEWAYS"), /Full Trinity/);
   });
 
