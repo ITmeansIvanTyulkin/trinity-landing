@@ -11,7 +11,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
-  const DEFAULT_SUPPORT_EMAIL = "hello@trinity.local";
+  const DEFAULT_SUPPORT_EMAIL = "info@trinity.trading";
 
   const TOPICS = [
     {

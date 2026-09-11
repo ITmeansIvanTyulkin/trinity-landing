@@ -1,7 +1,10 @@
 (() => {
   const data = window.CABINET_DATA;
-  const config = window.CABINET_CONFIG || {};
   if (!data) return;
+
+  function cfg() {
+    return window.CABINET_CONFIG || {};
+  }
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const fmt = (n) => new Intl.NumberFormat("ru-RU").format(Math.round(n));
@@ -10,32 +13,157 @@
   const Lab = window.TrinityDecisionLab;
   const Unlock = window.TrinityUnlockKey;
 
+  function setText(sel, text) {
+    const el = document.querySelector(sel);
+    if (el) el.textContent = text;
+  }
+
+  function applyRegime(r) {
+    if (!r) return;
+    data.regime = Object.assign({}, data.regime, r);
+    setText("[data-regime-note]", data.regime.note || "");
+    setText("[data-regime-book]", data.regime.book || "DAILY");
+    const pill = document.querySelector("[data-regime-pill]");
+    if (pill) {
+      pill.dataset.mode = data.regime.current || "UNKNOWN";
+      pill.textContent = data.regime.current || "UNKNOWN";
+    }
+  }
+
+  function slotsFromJournal(journal) {
+    const entries = (journal && journal.entries) || [];
+    return entries
+      .filter((e) => String(e.status || "").toUpperCase() === "OPEN")
+      .map((e) => ({
+        pair: (e.tickerY || "?") + " / " + (e.tickerX || "?"),
+        book: e.book || "DAILY",
+        z:
+          e.markZ != null
+            ? Number(e.markZ).toFixed(2)
+            : e.entryZ != null
+              ? Number(e.entryZ).toFixed(2)
+              : "—",
+        status: "OPEN",
+        size:
+          e.remainingFraction != null
+            ? String(Math.round(Number(e.remainingFraction) * 100)) + "%"
+            : "—",
+      }));
+  }
+
+  /** Cumulative paper equity from CLOSED journal legs (desk truth, not mock). */
+  function equityPointsFromJournal(journal) {
+    const entries = ((journal && journal.entries) || [])
+      .filter((e) => String(e.status || "").toUpperCase() === "CLOSED")
+      .map((e) => ({
+        t: e.closedAt || e.openedAt || "",
+        pnl: e.pnlRub != null ? Number(e.pnlRub) : 0,
+      }))
+      .filter((e) => e.t)
+      .sort((a, b) => String(a.t).localeCompare(String(b.t)));
+    if (!entries.length) return [];
+    let acc = 0;
+    return entries.map((e) => {
+      acc += e.pnl;
+      return acc;
+    });
+  }
+
   /* —— Optional IMOEX stub (read-only) —— */
   async function tryImoexStub() {
-    const base = config.imoexBase;
+    const base = (cfg().imoexBase || "").replace(/\/$/, "");
     const note = document.querySelector("[data-data-source]");
     if (!base) {
       if (note) {
         note.textContent =
-          "Mock-данные (standalone). Публичного /api/regime в IMOEX пока нет. Торговля — только в /view.";
+          "Офлайн-кабинет: без выдуманного PnL. Paper и режим рынка — в операторке IMOEX /view.";
       }
       return;
     }
+
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 2500);
     try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 1200);
-      const res = await fetch(base + "/api/paper/journal", { signal: ctrl.signal });
+      const [journalRes, regimeRes] = await Promise.all([
+        fetch(base + "/api/paper/journal", { signal: ctrl.signal }),
+        fetch(base + "/api/analysis/regime", { signal: ctrl.signal }),
+      ]);
       clearTimeout(t);
-      if (res.ok && note) {
-        note.textContent =
-          "Источник: IMOEX " +
-          base +
-          " (read-only stub journal). Режим — mock. Торговля — только в /view.";
+
+      let okParts = [];
+      if (journalRes.ok) {
+        const journal = await journalRes.json();
+        data.paperSummary = {
+          realizedPnlRub: journal.realizedPnlRub,
+          unrealizedPnlRub: journal.unrealizedPnlRub,
+          openCount: journal.openCount || 0,
+          closedCount: journal.closedCount || 0,
+          updatedAt: journal.updatedAt || null,
+        };
+        data.openSlots = slotsFromJournal(journal);
+        const pts = equityPointsFromJournal(journal);
+        const realized =
+          journal.realizedPnlRub != null ? rub(journal.realizedPnlRub) : "—";
+        const unrealized =
+          journal.unrealizedPnlRub != null ? rub(journal.unrealizedPnlRub) : "—";
+        data.equityCurve = {
+          points: pts,
+          label: pts.length
+            ? "Paper equity (closed)"
+            : "Paper journal · открытых нет",
+          note:
+            "Realized " +
+            realized +
+            " · unrealized " +
+            unrealized +
+            " · open " +
+            (journal.openCount || 0) +
+            " · closed " +
+            (journal.closedCount || 0) +
+            " · с деска /api/paper/journal",
+        };
+        renderOps();
+        drawEquity();
+        okParts.push("journal");
+      }
+
+      if (regimeRes.ok) {
+        const regime = await regimeRes.json();
+        const label = regime.label || "UNKNOWN";
+        const adx =
+          typeof regime.adx === "number" && !Number.isNaN(regime.adx)
+            ? regime.adx.toFixed(1)
+            : "—";
+        applyRegime({
+          current: label,
+          book: "DAILY",
+          adx: regime.adx,
+          source: "imoex",
+          note:
+            (regime.detail || label) +
+            (regime.blockEntries ? " · новые pairs-входы блокируются" : "") +
+            " · ADX " +
+            adx,
+        });
+        okParts.push("regime");
+      }
+
+      if (note) {
+        note.textContent = okParts.length
+          ? "Источник: IMOEX " +
+            base +
+            " (read-only " +
+            okParts.join(" + ") +
+            "). Торговля — только в /view."
+          : "IMOEX " + base + " ответил без данных. Смотрите paper в /view.";
       }
     } catch {
+      clearTimeout(t);
       if (note) {
         note.textContent =
-          "Mock-данные (IMOEX недоступен). Опционально: CABINET_CONFIG.imoexBase → localhost:8080.";
+          "IMOEX недоступен из браузера (" +
+          base +
+          "). Проверьте, что Instance запущен и CORS разрешает лендинг. Paper — в /view.";
       }
     }
   }
@@ -44,23 +172,12 @@
   function renderOverview() {
     const s = data.subscription;
     const r = data.regime || {};
-    const set = (sel, text) => {
-      const el = document.querySelector(sel);
-      if (el) el.textContent = text;
-    };
-    set("[data-tier]", s.tier);
-    set("[data-tier-price]", fmt(s.priceRub) + " ₽/мес");
-    set("[data-delivery]", s.delivery);
-    set("[data-next-billing]", s.nextBilling);
-    set("[data-trial-note]", s.reverseTrialNote);
-    set("[data-regime-note]", r.note || "");
-    set("[data-regime-book]", r.book || "DAILY");
-
-    const pill = document.querySelector("[data-regime-pill]");
-    if (pill) {
-      pill.dataset.mode = r.current || "SIDEWAYS";
-      pill.textContent = r.current || "SIDEWAYS";
-    }
+    setText("[data-tier]", s.tier);
+    setText("[data-tier-price]", fmt(s.priceRub) + " ₽/мес");
+    setText("[data-delivery]", s.delivery);
+    setText("[data-next-billing]", s.nextBilling);
+    setText("[data-trial-note]", s.reverseTrialNote);
+    applyRegime(r);
 
     const badge = document.querySelector("[data-trial-badge]");
     if (badge) {
@@ -73,9 +190,13 @@
     }
 
     const bar = document.querySelector("[data-trial-bar]");
+    const track = bar && bar.parentElement;
     if (bar && s.trialActive) {
+      if (track) track.hidden = false;
       const pct = Math.max(0, Math.min(100, (s.trialDaysLeft / s.trialTotalDays) * 100));
       bar.style.width = pct + "%";
+    } else if (track) {
+      track.hidden = true;
     }
   }
 
@@ -84,8 +205,17 @@
     const tbody = document.querySelector("[data-slots-body]");
     if (!tbody) return;
     tbody.innerHTML = "";
-    data.openSlots.forEach((row) => {
+    const rows = data.openSlots || [];
+    if (!rows.length) {
       const tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td colspan="5" class="cab-empty-cell">Нет открытых paper-позиций в кабинете. Журнал — в IMOEX /view.</td>';
+      tbody.appendChild(tr);
+      return;
+    }
+    rows.forEach((row) => {
+      const tr = document.createElement("tr");
+      const status = row.status || "WATCH";
       tr.innerHTML =
         "<td>" +
         row.pair +
@@ -94,9 +224,9 @@
         "</td><td class=\"mono\">" +
         row.z +
         "</td><td><span class=\"chip chip-" +
-        row.status.toLowerCase() +
+        status.toLowerCase() +
         "\">" +
-        row.status +
+        status +
         "</span></td><td class=\"mono\">" +
         row.size +
         "</td>";
@@ -115,8 +245,33 @@
     canvas.width = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
 
-    const pts = data.equityCurve.points;
+    const curve = data.equityCurve || {};
+    const pts = curve.points || [];
+    const label = document.querySelector("[data-equity-end]");
+    const sub = document.querySelector("[data-equity-sub]");
+    if (sub) sub.textContent = curve.note || "";
+
+    if (!pts.length) {
+      ctx.fillStyle = "#6a7680";
+      ctx.font = "13px 'IBM Plex Sans', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(
+        curve.label || "Нет paper equity в кабинете",
+        w / 2,
+        h / 2 - 6
+      );
+      ctx.font = "12px 'IBM Plex Sans', sans-serif";
+      ctx.fillText("Смотрите statement в IMOEX /view", w / 2, h / 2 + 14);
+      if (label) {
+        const ps = data.paperSummary || {};
+        label.textContent =
+          ps.realizedPnlRub != null ? "Paper " + rub(ps.realizedPnlRub) : "—";
+      }
+      return;
+    }
+
     const min = Math.min(...pts) * 0.995;
     const max = Math.max(...pts) * 1.005;
     const pad = { t: 16, r: 12, b: 28, l: 52 };
@@ -177,7 +332,6 @@
     ctx.fillStyle = "#c4a35a";
     ctx.fill();
 
-    const label = document.querySelector("[data-equity-end]");
     if (label) label.textContent = rub(last);
   }
 
@@ -208,6 +362,12 @@
         "\"></i></div>";
       root.appendChild(el);
     });
+    if (a.note) {
+      const p = document.createElement("p");
+      p.className = "cab-panel-sub";
+      p.textContent = a.note;
+      root.appendChild(p);
+    }
 
     if (!reduceMotion) {
       requestAnimationFrame(() => root.classList.add("ready"));
@@ -222,8 +382,26 @@
     const toggle = document.querySelector("[data-key-toggle]");
     const regen = document.querySelector("[data-key-regen]");
     const rotated = document.querySelector("[data-key-rotated]");
+    const keyNote = document.querySelector("[data-key-note]");
+    const current = data.unlockKey || {};
+
+    if (keyNote) keyNote.textContent = current.note || "";
+
+    if (current.status === "pending" || !current.full) {
+      if (masked) masked.textContent = "Ключ ещё не выдан";
+      if (rotated) rotated.textContent = "Instance delivery · биллинг не подключён";
+      if (toggle) {
+        toggle.disabled = true;
+        toggle.textContent = "Недоступно";
+      }
+      if (regen) {
+        regen.disabled = true;
+        regen.textContent = "После Instance";
+      }
+      return;
+    }
+
     let revealed = false;
-    let current = { ...data.unlockKey };
 
     function paint() {
       if (masked) {
@@ -252,16 +430,8 @@
 
     if (regen) {
       regen.addEventListener("click", () => {
-        current = Unlock
-          ? Unlock.generateKey()
-          : {
-              full: "TRINITY-DEMO",
-              masked: "TRINITY-DEMO-••••-••••-DEMO",
-              lastRotated: new Date().toISOString().slice(0, 10),
-            };
-        revealed = false;
-        paint();
-        regen.textContent = "Ключ перевыпущен";
+        /* Real reissue needs billing backend — keep disabled messaging if pending handled above. */
+        regen.textContent = "Только через поддержку";
         setTimeout(() => {
           regen.textContent = "Перевыпустить";
         }, 1800);
@@ -285,7 +455,7 @@
     if (!Help || !log || !form || !input) return;
 
     const supportTo =
-      (config && config.supportEmail) || Help.DEFAULT_SUPPORT_EMAIL;
+      (cfg().supportEmail) || Help.DEFAULT_SUPPORT_EMAIL;
     let lastQuery = "";
     let pathTitles = [];
 
@@ -473,7 +643,15 @@
     const tbody = document.querySelector("[data-payments-body]");
     if (!tbody) return;
     tbody.innerHTML = "";
-    data.payments.forEach((p) => {
+    const rows = data.payments || [];
+    if (!rows.length) {
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td colspan="5" class="cab-empty-cell">Платежей пока нет — биллинг не подключён.</td>';
+      tbody.appendChild(tr);
+      return;
+    }
+    rows.forEach((p) => {
       const tr = document.createElement("tr");
       tr.innerHTML =
         "<td>" +
@@ -627,7 +805,25 @@
     }
   }
 
+  function refreshUserEmail() {
+    const email =
+      (window.localStorage &&
+        localStorage.getItem(
+          (window.TrinityCabinetAuth && window.TrinityCabinetAuth.userKey) ||
+            "trinity.supabase.user_email"
+        )) ||
+      "";
+    const label = document.querySelector("[data-cab-user-email]");
+    if (label && email) label.textContent = email;
+  }
+
+  let uiBooted = false;
   function bootCabinetUi() {
+    if (uiBooted) {
+      refreshUserEmail();
+      return;
+    }
+    uiBooted = true;
     renderOverview();
     renderOps();
     drawEquity();
@@ -640,23 +836,14 @@
     setupNav();
     setupReveal();
     tryImoexStub();
-
-    const email =
-      (window.localStorage &&
-        localStorage.getItem(
-          (window.TrinityCabinetAuth && window.TrinityCabinetAuth.userKey) ||
-            "trinity.supabase.user_email"
-        )) ||
-      "";
-    const label = document.querySelector("[data-cab-user-email]");
-    if (label && email) label.textContent = email;
+    refreshUserEmail();
   }
 
+  /* Metrics / lab must not wait on Supabase session (can hang offline). */
+  bootCabinetUi();
   const auth = window.TrinityCabinetAuth;
   if (auth && typeof auth.setupAuth === "function") {
-    auth.setupAuth().then(bootCabinetUi).catch(() => bootCabinetUi());
-  } else {
-    bootCabinetUi();
+    auth.setupAuth().then(refreshUserEmail).catch(() => {});
   }
 
   window.addEventListener("resize", () => {

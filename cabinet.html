@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TRINITY — Личный кабинет</title>
-  <meta name="description" content="Личный кабинет TRINITY: подписка, paper-метрики, пайплайн-лаборатория. Research / decision-support — без торговли и токенов брокера." />
+  <meta name="description" content="Личный кабинет TRINITY: подписка, paper-метрики, инвестиции (research), пайплайн-лаборатория. Без торговли и токенов брокера." />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="googlebot" content="noindex, nofollow" />
   <meta name="theme-color" content="#0c1a22" />
@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1786727000" />
+  <link rel="stylesheet" href="css/styles.css?v=1789116401" />
 </head>
 <body class="cabinet-page cabinet-locked">
   <!-- Supabase email/password + confirm (shared IdP with future IMOEX Phase 2) -->
@@ -66,16 +66,55 @@
       </div>
 
       <div data-auth-panel="register" hidden>
-        <form id="cabinet-register-form" class="cabinet-gate-form" autocomplete="on">
-          <label for="cabinet-reg-name">Имя (необязательно)</label>
-          <input id="cabinet-reg-name" name="name" type="text" autocomplete="nickname" placeholder="Как к вам обращаться" />
+        <form id="cabinet-register-form" class="cabinet-gate-form cabinet-gate-form-tall" autocomplete="on">
+          <label for="cabinet-reg-name">Имя</label>
+          <input id="cabinet-reg-name" name="name" type="text" autocomplete="name" required maxlength="80" placeholder="Как к вам обращаться" />
+
           <label for="cabinet-reg-email">Email</label>
           <input id="cabinet-reg-email" name="email" type="email" autocomplete="username" required placeholder="you@example.com" />
+
           <label for="cabinet-reg-pass">Пароль</label>
           <input id="cabinet-reg-pass" name="password" type="password" autocomplete="new-password" required minlength="6" />
+
+          <label for="cabinet-reg-phone">Телефон</label>
+          <input id="cabinet-reg-phone" name="phone" type="tel" autocomplete="tel" required maxlength="32" placeholder="+7 …" />
+
+          <div class="cabinet-gate-row">
+            <div>
+              <label for="cabinet-reg-gender">Пол</label>
+              <select id="cabinet-reg-gender" name="gender" required>
+                <option value="" disabled selected>Выберите</option>
+                <option value="female">Женский</option>
+                <option value="male">Мужской</option>
+                <option value="other">Другое / не указывать</option>
+              </select>
+            </div>
+            <div>
+              <label for="cabinet-reg-age">Возраст</label>
+              <input id="cabinet-reg-age" name="age" type="number" inputmode="numeric" min="18" max="100" required placeholder="18+" />
+            </div>
+          </div>
+
+          <label for="cabinet-reg-experience">Опыт торговли</label>
+          <select id="cabinet-reg-experience" name="experience" required>
+            <option value="" disabled selected>Выберите</option>
+            <option value="none">Нет опыта</option>
+            <option value="beginner">До 1 года</option>
+            <option value="intermediate">1–3 года</option>
+            <option value="advanced">3–7 лет</option>
+            <option value="pro">Более 7 лет / профессионал</option>
+          </select>
+
           <label class="cabinet-check">
-            <input id="cabinet-reg-marketing" type="checkbox" checked />
-            <span>Согласен на продуктовые письма и новости TRINITY</span>
+            <input id="cabinet-reg-pdn" type="checkbox" required />
+            <span>
+              Согласен на обработку персональных данных
+              (<a href="privacy.html" target="_blank" rel="noopener noreferrer">по политике</a>
+            </span>
+          </label>
+          <label class="cabinet-check">
+            <input id="cabinet-reg-marketing" type="checkbox" />
+            <span>Согласен на продуктовые письма и новости TRINITY (необязательно)</span>
           </label>
           <button type="submit" class="btn btn-primary">Создать аккаунт</button>
         </form>
@@ -123,6 +162,7 @@
       <ul class="nav-links" data-nav-links>
         <li><a href="#overview">Обзор</a></li>
         <li><a href="#charts">Метрики</a></li>
+        <li><a href="invest.html">Инвестиции</a></li>
         <li><a href="#lab">Лаборатория</a></li>
         <li><a href="#help">Помощь</a></li>
         <li><a href="#account">Аккаунт</a></li>
@@ -139,13 +179,13 @@
         <p class="eyebrow">Личный кабинет</p>
         <h1>Операторский контур</h1>
         <p class="lead cab-hero-lead">
-          Подписка, paper-метрики и пайплайн-лаборатория.
+          Подписка, paper-метрики, лаунчер защищённого портфеля и пайплайн-лаборатория.
           Здесь нет ордеров и токенов брокера — торговля остаётся в IMOEX
           <a href="http://localhost:8080/view" rel="noopener">/view</a>.
           Калькулятор капитала — на <a href="index.html#calculator">лендинге</a>.
         </p>
         <p class="cab-source" data-data-source>
-          Mock-данные (standalone). Опционально: <code>CABINET_CONFIG.imoexBase</code> → read-only IMOEX API.
+          Офлайн-кабинет: без выдуманного PnL. Paper и режим — в IMOEX /view.
         </p>
       </div>
     </section>
@@ -176,7 +216,7 @@
           <article class="cab-card">
             <span class="cab-label">Режим рынка</span>
             <div class="cab-regime-row">
-              <span class="mode-pill" data-regime-pill data-mode="SIDEWAYS">SIDEWAYS</span>
+              <span class="mode-pill" data-regime-pill data-mode="UNKNOWN">UNKNOWN</span>
               <span class="cab-book" data-regime-book>DAILY</span>
             </div>
             <p class="cab-meta" data-regime-note></p>
@@ -199,28 +239,32 @@
     <section class="section cab-section cab-charts" id="charts">
       <div class="wrap">
         <div class="section-head reveal">
-          <p class="eyebrow">Paper-like metrics</p>
-          <h2>Метрики (демо)</h2>
-          <p class="lead">Иллюстративные графики из mock-данных. Не живой PnL и не обещание доходности.</p>
+          <p class="eyebrow">Paper metrics</p>
+          <h2>Метрики</h2>
+          <p class="lead">
+            Данные с деска IMOEX — только при read-only <code>imoexBase</code>.
+            На публичном сайте Instance обычно не открыт → блоки пустые (не mock).
+            Живой journal и statement — в операторке <code>/view</code>.
+          </p>
         </div>
 
         <div class="cab-charts-grid">
           <article class="cab-panel reveal">
             <div class="cab-panel-head">
               <div>
-                <h3>Equity curve</h3>
-                <p class="cab-panel-sub">Paper-like mock · не исторический результат</p>
+                <h3>Equity / paper</h3>
+                <p class="cab-panel-sub" data-equity-sub>Кривая не рисуется из выдуманных точек</p>
               </div>
               <strong class="cab-equity-end mono" data-equity-end>—</strong>
             </div>
-            <canvas id="equity-chart" width="640" height="260" aria-label="Кривая капитала (иллюстрация)"></canvas>
+            <canvas id="equity-chart" width="640" height="260" aria-label="Кривая капитала (paper, если есть данные)"></canvas>
           </article>
 
           <article class="cab-panel reveal">
             <div class="cab-panel-head">
               <div>
                 <h3>Аллокация</h3>
-                <p class="cab-panel-sub">Capital Allocator · сейчас 100% pairs</p>
+                <p class="cab-panel-sub">Тариф Оператор: 100% DAILY pairs · не прогноз доходности</p>
               </div>
             </div>
             <div class="alloc-bars" data-alloc-bars></div>
@@ -231,7 +275,7 @@
           <div class="cab-panel-head">
             <div>
               <h3>Открытые слоты</h3>
-              <p class="cab-panel-sub">Демо-журнал · позже можно подтянуть /api/paper/journal</p>
+              <p class="cab-panel-sub">Открытые paper-позиции из журнала IMOEX, если подключен read-only источник · иначе пусто</p>
             </div>
           </div>
           <div class="cab-table-wrap">
@@ -248,6 +292,42 @@
               <tbody data-slots-body></tbody>
             </table>
           </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Investments: launcher into invest.html (not the product UI) -->
+    <section class="section cab-section cab-invest" id="invest">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Средний и длинный горизонт</p>
+          <h2>Инвестиции</h2>
+          <p class="lead">
+            Research / decision-support в отдельном защищённом контуре.
+            Не ордера и не токены брокера — торговля остаётся в IMOEX
+            <a href="http://localhost:8080/view" rel="noopener">/view</a>.
+          </p>
+        </div>
+
+        <article class="cab-panel cab-invest-launch reveal">
+          <div class="cab-panel-head">
+            <div>
+              <h3>Защищённый портфель</h3>
+              <p class="cab-panel-sub">
+                Анкета риска, активы и пассивы, автоанализ тикера MOEX и длинный отчёт.
+                Сессия та же, что у кабинета.
+              </p>
+            </div>
+            <span class="cab-status-pill">Research</span>
+          </div>
+          <p>
+            Paper-позиции деска подмешиваются в диаграмму только read-only
+            (при заданном <code>imoexBase</code>). Три desk-стратегии здесь не дублируются.
+          </p>
+          <p class="calc-disclaimer cab-calc-disclaimer">
+            Не индивидуальная инвестрекомендация и не гарантия прибыли.
+          </p>
+          <a class="btn btn-primary" href="invest.html">Открыть защищённый портфель</a>
         </article>
       </div>
     </section>
@@ -423,12 +503,12 @@
         <div class="cab-account-grid">
           <article class="cab-panel reveal">
             <h3>Unlock-ключ</h3>
-            <p class="cab-panel-sub">Маскированный ключ активации (mock). Перевыпуск — демо UI.</p>
-            <p class="cab-key mono" data-key-masked>TRINITY-••••</p>
+            <p class="cab-panel-sub" data-key-note>Выдаётся после Instance delivery</p>
+            <p class="cab-key mono" data-key-masked>Ключ ещё не выдан</p>
             <p class="cab-meta muted" data-key-rotated></p>
             <div class="cab-actions">
-              <button type="button" class="btn btn-line" data-key-toggle>Показать</button>
-              <button type="button" class="btn btn-dark" data-key-regen>Перевыпустить</button>
+              <button type="button" class="btn btn-line" data-key-toggle disabled>Недоступно</button>
+              <button type="button" class="btn btn-dark" data-key-regen disabled>После Instance</button>
             </div>
           </article>
 
@@ -441,7 +521,7 @@
               <li><a href="index.html#roadmap">Дорожная карта</a></li>
               <li><a href="index.html#product">Обзор продукта</a></li>
               <li><a href="https://t.me/" rel="noopener noreferrer">Telegram · задать вопрос</a></li>
-              <li><a href="mailto:hello@trinity.local?subject=TRINITY%20cabinet">Написать в поддержку</a></li>
+              <li><a href="mailto:info@trinity.trading?subject=TRINITY%20cabinet">Написать в поддержку</a></li>
             </ul>
             <p class="cab-boundary" style="margin-top:1rem">
               Торговый UI: <a href="http://localhost:8080/view">localhost:8080/view</a>
@@ -451,7 +531,7 @@
 
         <article class="cab-panel reveal" style="margin-top:1.15rem">
           <h3>История платежей</h3>
-          <p class="cab-panel-sub">Mock-таблица. Реальный биллинг появится позже.</p>
+          <p class="cab-panel-sub">Реальный биллинг ещё не подключён — таблица пустая.</p>
           <div class="cab-table-wrap">
             <table class="cab-table">
               <thead>
@@ -489,6 +569,7 @@
           <h4>Навигация</h4>
           <ul>
             <li><a href="index.html">Лендинг</a></li>
+            <li><a href="invest.html">Инвестиции</a></li>
             <li><a href="#help">Помощь</a></li>
             <li><a href="#lab">Лаборатория</a></li>
             <li><a href="index.html#calculator">Калькулятор</a></li>
@@ -499,26 +580,28 @@
           <h4>Связь</h4>
           <ul>
             <li><a href="https://t.me/" rel="noopener noreferrer">Telegram</a></li>
-            <li><a href="mailto:hello@trinity.local">hello@trinity.local</a></li>
+            <li><a href="mailto:info@trinity.trading">info@trinity.trading</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-legal">
         <span>TRINITY © 2026. Все права защищены. Регистрация ПО в Роспатенте. Без письменного согласия — копирование, форки и использование запрещены. <a href="https://github.com/ITmeansIvanTyulkin/trinity-landing/blob/dev/LICENSE">LICENSE</a></span>
-        <span>Метрики в кабинете — демо / mock, пока не подключён биллинг.</span>
+        <span>Метрики без выдуманного PnL. Paper — в IMOEX /view, биллинг — позже.</span>
       </div>
     </div>
   </footer>
   </div><!-- /.cabinet-shell -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-  <script src="js/lib/auth-errors.js?v=1786121000"></script>
-  <script src="js/lib/decision-lab.js?v=1786121000"></script>
-  <script src="js/lib/unlock-key.js?v=1786121000"></script>
-  <script src="js/lib/cabinet-help.js?v=1786727000"></script>
-  <script src="js/cabinet-config.js?v=1786121000"></script>
-  <script src="js/cabinet-data.js?v=1786121000"></script>
-  <script src="js/cabinet-auth.js?v=1786121000"></script>
-  <script src="js/cabinet.js?v=1786727000"></script>
+  <script src="js/lib/auth-errors.js?v=1789115892"></script>
+  <script src="js/lib/decision-lab.js?v=1789115892"></script>
+  <script src="js/lib/unlock-key.js?v=1789115892"></script>
+  <script src="js/lib/cabinet-help.js?v=1789115892"></script>
+  <script src="js/cabinet-config.js?v=1789115892"></script>
+  <!-- Optional gitignored override; 404 is fine when absent -->
+  <script src="js/cabinet-config.local.js"></script>
+  <script src="js/cabinet-data.js?v=1789115892"></script>
+  <script src="js/cabinet-auth.js?v=1789115892"></script>
+  <script src="js/cabinet.js?v=1789115892"></script>
 </body>
 </html>

@@ -2,6 +2,7 @@
 User-agent: *
 Allow: /
 Disallow: /cabinet.html
+Disallow: /invest.html
 Disallow: /js/cabinet-config.local.js
 Disallow: /supabase/
 

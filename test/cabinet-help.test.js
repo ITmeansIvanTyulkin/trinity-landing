@@ -37,14 +37,14 @@ describe("TrinityCabinetHelp", () => {
 
   it("composeMailto encodes path and query", () => {
     const href = Help.composeMailto({
-      to: "hello@trinity.local",
+      to: "info@trinity.trading",
       email: "a@b.c",
       topicTitle: "Вход",
       query: "нет письма",
       path: "login → login-mail",
       body: "всё ещё нет",
     });
-    assert.match(href, /^mailto:hello@trinity\.local\?/);
+    assert.match(href, /^mailto:info@trinity\.trading\?/);
     assert.match(href, /subject=/);
     assert.match(href, /body=/);
     assert.ok(href.includes(encodeURIComponent("нет письма")));

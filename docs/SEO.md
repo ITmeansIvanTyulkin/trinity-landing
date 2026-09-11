@@ -13,12 +13,28 @@
 
 Для staging на GitHub Pages можно временно подставить другой origin — не забудьте вернуть `trinity.trading` перед продом.
 
-## После деплоя
+## После деплоя (обязательно вручную)
 
-1. [Google Search Console](https://search.google.com/search-console) — добавить ресурс, отправить `sitemap.xml`
-2. [Яндекс.Вебмастер](https://webmaster.yandex.ru/) — то же
-3. Проверить Open Graph: [opengraph.xyz](https://www.opengraph.xyz/) или отладчик VK/Telegram
-4. Убедиться, что `https://…/robots.txt` и `https://…/sitemap.xml` открываются
+Техника на сайте уже готова. Индексация стартует только после верификации владельца:
+
+### Google Search Console
+1. Откройте [Search Console](https://search.google.com/search-console) → **Добавить ресурс** → префикс URL `https://trinity.trading`
+2. Подтвердите владение (HTML-файл в корень сайта, meta-тег в `index.html`, или DNS TXT у Webnames)
+3. **Sitemaps** → отправьте `https://trinity.trading/sitemap.xml`
+4. **Проверка URL** для главной — «Запросить индексирование»
+
+### Яндекс.Вебмастер
+1. [Вебмастер](https://webmaster.yandex.ru/) → добавить `https://trinity.trading`
+2. Подтвердите (meta / HTML-файл / DNS)
+3. **Индексирование → Файлы Sitemap** → `https://trinity.trading/sitemap.xml`
+4. При необходимости — «Переобход страниц» для главной и wiki
+
+### Быстрая проверка публичных URL
+- https://trinity.trading/robots.txt
+- https://trinity.trading/sitemap.xml
+- Open Graph: [opengraph.xyz](https://www.opengraph.xyz/) или отладчик VK/Telegram
+
+Кабинет (`/cabinet.html`) и защищённый портфель (`/invest.html`) — `noindex`; в sitemap их нет.
 
 ## Wiki
 

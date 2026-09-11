@@ -19,6 +19,7 @@ python3 -m http.server 5173
 
 - Лендинг: [http://127.0.0.1:5173/](http://127.0.0.1:5173/)
 - Кабинет: [http://127.0.0.1:5173/cabinet.html](http://127.0.0.1:5173/cabinet.html)
+- Защищённый портфель: [http://127.0.0.1:5173/invest.html](http://127.0.0.1:5173/invest.html) (нужна сессия кабинета)
 - Калькулятор капитала: `#calculator` на главной
 
 Auth:
@@ -34,13 +35,14 @@ cp js/cabinet-config.example.js js/cabinet-config.local.js
 npm test
 ```
 
-Покрывают методы в `js/lib/`: Capital Allocator, Decision Lab, auth errors, product modes, unlock key.
+Покрывают методы в `js/lib/`: Capital Allocator, Decision Lab, auth errors, product modes, unlock key, invest pipeline.
 
 ## Структура
 
 ```
 index.html              # лендинг + калькулятор + desk proof
 cabinet.html            # кабинет (Supabase gate)
+invest.html             # защищённый инвестиционный контур
 css/styles.css          # desktop / tablet / mobile
 js/lib/                 # чистая логика (тестируется)
 js/main.js              # hero / nav / reveal / showcase

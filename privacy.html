@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TRINITY — Политика конфиденциальности</title>
+  <meta name="description" content="Как TRINITY обрабатывает персональные данные кабинета: какие поля, зачем, согласие и рассылки." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://trinity.trading/privacy.html" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=1786700300" />
+</head>
+<body>
+  <header class="site-nav">
+    <div class="wrap">
+      <a class="nav-brand" href="index.html">TRINITY</a>
+      <ul class="nav-links">
+        <li><a href="cabinet.html">Кабинет</a></li>
+        <li><a class="nav-cta" href="index.html">На лендинг</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="wrap" style="max-width:44rem">
+      <p class="eyebrow">Правовая информация</p>
+      <h1>Политика конфиденциальности</h1>
+      <p class="lead">
+        Краткая политика для кабинета TRINITY на сайте
+        <a href="https://trinity.trading">trinity.trading</a>.
+        Оператор обрабатывает данные только с согласия пользователя.
+      </p>
+
+      <h2>Какие данные</h2>
+      <ul>
+        <li>Email и пароль (пароль хранит Supabase Auth, мы его не видим).</li>
+        <li>Имя, телефон, пол, возраст, опыт торговли — если вы указали их при регистрации.</li>
+        <li>Флаг согласия на обработку ПДн и (отдельно) на продуктовые рассылки.</li>
+      </ul>
+
+      <h2>Зачем</h2>
+      <ul>
+        <li>Создать аккаунт и войти в кабинет.</li>
+        <li>Понять портрет оператора (опыт, контакты) для поддержки и доставки продукта.</li>
+        <li>Письма о продукте — только если вы отдельно согласились на рассылку.</li>
+      </ul>
+
+      <h2>Согласие</h2>
+      <p>
+        Регистрация без галочки «согласен на обработку персональных данных» невозможна.
+        Рассылки можно не включать. Отозвать согласие или попросить удаление данных —
+        напишите на <a href="mailto:info@trinity.trading">info@trinity.trading</a>.
+      </p>
+
+      <h2>Где хранится</h2>
+      <p>
+        Учётные записи — в проекте Supabase (Auth + таблица <code>profiles</code>).
+        Торговые токены брокера на лендинге не принимаются и не хранятся.
+      </p>
+
+      <p style="margin-top:2rem">
+        <a class="btn btn-primary" href="cabinet.html">К кабинету</a>
+        <a class="btn btn-line" href="index.html">На лендинг</a>
+      </p>
+    </div>
+  </main>
+</body>
+</html>

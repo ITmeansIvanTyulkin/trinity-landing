@@ -6,9 +6,9 @@
  * NO order placement, NO broker token. Trading stays in IMOEX /view.
  */
 window.CABINET_CONFIG = {
-  /* Optional read-only stub: "http://localhost:8080" */
+  /* Read-only IMOEX: journal + regime (CORS on Instance for landing origins) */
   imoexBase: null,
-  supportEmail: "hello@trinity.local",
+  supportEmail: "info@trinity.trading",
   /* Supabase project URL + anon (public) key — fill via .local.js or deploy */
   supabaseUrl: "",
   supabaseAnonKey: "",

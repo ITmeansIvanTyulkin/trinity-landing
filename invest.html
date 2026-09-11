@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TRINITY — Защищённый портфель</title>
+  <meta name="description" content="Защищённый инвестиционный контур TRINITY: анкета риска, портфель, автоанализ MOEX и research-отчёт. Не инвестрекомендация." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="googlebot" content="noindex, nofollow" />
+  <meta name="theme-color" content="#0c1a22" />
+  <link rel="canonical" href="https://trinity.trading/invest.html" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=1789122501" />
+</head>
+<body class="cabinet-page invest-page cabinet-locked">
+  <p class="invest-auth-wait" data-invest-wait>Проверяем сессию…</p>
+
+  <div class="cabinet-shell invest-shell">
+  <header class="site-nav cabinet-nav">
+    <div class="wrap">
+      <a class="nav-brand" href="index.html" aria-label="TRINITY — на лендинг">
+        <span class="trinity-logo" aria-hidden="true">
+          <span class="ring ring-c"></span>
+          <span class="ring ring-a"></span>
+          <span class="ring ring-b"></span>
+        </span>
+        TRINITY
+      </a>
+      <span class="invest-lock-badge" title="Сессия Supabase, RLS только свои строки">
+        <span class="invest-lock-dot" aria-hidden="true"></span>
+        Защищённый портфель
+      </span>
+      <button class="nav-toggle" type="button" aria-label="Меню" aria-expanded="false" data-nav-toggle>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <ul class="nav-links" data-nav-links>
+        <li><a href="#overview" data-invest-nav="overview">Обзор</a></li>
+        <li><a href="#portfolio" data-invest-nav="portfolio">Портфель</a></li>
+        <li><a href="#watchlist" data-invest-nav="watchlist">Watch list</a></li>
+        <li><a href="#analyze" data-invest-nav="analyze">Автоанализ</a></li>
+        <li><a href="#report" data-invest-nav="report">Отчёт</a></li>
+        <li><a href="#profile" data-invest-nav="profile">Анкета</a></li>
+        <li><span class="cab-user-email mono" data-cab-user-email></span></li>
+        <li><button type="button" class="nav-text-btn" data-cab-logout>Выйти</button></li>
+        <li><a class="nav-cta" href="cabinet.html">← Операторский кабинет</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="cab-hero invest-hero">
+      <div class="wrap">
+        <p class="eyebrow">Кабинет в кабинете</p>
+        <h1>Защищённый инвестиционный контур</h1>
+        <p class="lead cab-hero-lead">
+          Тикер → рынок ISS → гейты → вердикт и длинный research-отчёт.
+          Вы читаете и решаете. Ордеров и токенов брокера здесь нет.
+        </p>
+        <p class="invest-secure-line">
+          <span class="invest-lock-badge invest-lock-badge-light">Защищённое соединение</span>
+          Сессия та же, что в кабинете. Строки в Supabase — только ваши (RLS).
+        </p>
+        <p class="cab-source">Research / decision-support. Не индивидуальная инвестрекомендация и не гарантия прибыли.</p>
+      </div>
+    </section>
+
+    <!-- Overview -->
+    <section class="section cab-section" data-invest-view="overview" id="overview">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Сегодня</p>
+          <h2>Обзор</h2>
+          <p class="lead invest-ov-lead" data-ov-lead>Собираем картину капитала…</p>
+        </div>
+
+        <div class="invest-ov-hero">
+          <article class="invest-ov-net">
+            <span class="cab-label">Капитал после долгов</span>
+            <p class="invest-ov-net-value mono" data-ov-net>—</p>
+            <p class="cab-meta">В собственности <strong data-ov-assets>—</strong> · долги <strong data-ov-liab>—</strong></p>
+            <div class="invest-ov-split" aria-hidden="true">
+              <i data-ov-split-a></i>
+              <b data-ov-split-l></b>
+            </div>
+            <p class="cab-meta muted" data-ov-split-note></p>
+          </article>
+          <article class="invest-ov-gold" data-ov-gold-card>
+            <span class="cab-label">К золоту за 30 дней</span>
+            <p class="invest-ov-gold-verb" data-ov-gold-verb>—</p>
+            <p class="invest-ov-gold-pct mono" data-ov-gold-pct></p>
+            <p class="cab-meta" data-ov-gold-grams></p>
+            <p class="cab-meta muted" data-ov-gold-note></p>
+          </article>
+        </div>
+
+        <div class="invest-ov-stats">
+          <article class="cab-card">
+            <span class="cab-label">Живые деньги</span>
+            <h3 class="mono" data-ov-flow>—</h3>
+            <p class="cab-meta" data-ov-flow-note>Доход минус платежи, в месяц</p>
+          </article>
+          <article class="cab-card">
+            <span class="cab-label">Долг к активам</span>
+            <h3 class="mono" data-ov-leverage>—</h3>
+            <p class="cab-meta" data-ov-leverage-note>Какая доля того, чем владеете, перекрыта долгом</p>
+          </article>
+          <article class="cab-card">
+            <span class="cab-label">Ваша рамка</span>
+            <h3 data-ov-risk>—</h3>
+            <p class="cab-meta">Просадка <strong data-ov-warn>—</strong> — повод перечитать тезис, не стоп брокер</p>
+          </article>
+        </div>
+
+        <div class="invest-ov-grid">
+          <article class="cab-panel">
+            <div class="cab-panel-head">
+              <div>
+                <h3>Из чего состоит</h3>
+                <p class="cab-panel-sub">Доли активов в рублях. Наведите на сектор.</p>
+              </div>
+            </div>
+            <div class="invest-chart" data-structure-chart data-ov-structure></div>
+          </article>
+          <article class="cab-panel">
+            <div class="cab-panel-head">
+              <div>
+                <h3>Крупнее всего</h3>
+                <p class="cab-panel-sub">Три позиции, которые тянут картину</p>
+              </div>
+              <a class="btn btn-line" href="#portfolio">Весь портфель</a>
+            </div>
+            <ol class="invest-ov-top" data-ov-top></ol>
+          </article>
+        </div>
+
+        <article class="cab-panel invest-ov-watch-panel">
+          <div class="cab-panel-head">
+            <div>
+              <h3>Watch list</h3>
+              <p class="cab-panel-sub">Ещё не куплено. Обновляйте, пока вход не станет спокойнее.</p>
+            </div>
+            <div class="invest-ov-watch-tools">
+              <button type="button" class="btn btn-primary" data-ov-watch-refresh>Обновить</button>
+              <a class="btn btn-line" href="#watchlist">Весь список</a>
+            </div>
+          </div>
+          <div class="invest-ov-watch" data-ov-watch></div>
+        </article>
+
+        <article class="cab-panel">
+          <div class="cab-panel-head">
+            <div>
+              <h3>Что сделать</h3>
+              <p class="cab-panel-sub">Не сигналы. Следующий осмысленный шаг.</p>
+            </div>
+          </div>
+          <div class="invest-ov-actions" data-ov-actions></div>
+        </article>
+
+        <p class="calc-disclaimer cab-calc-disclaimer">Не финансовый совет. Бумаги и суммы вы учитываете сами. Не индивидуальная рекомендация и не обещание прибыли.</p>
+      </div>
+    </section>
+
+    <!-- Portfolio -->
+    <section class="section cab-section cab-charts" data-invest-view="portfolio" id="portfolio" hidden>
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Учёт</p>
+          <h2>Портфель</h2>
+          <p class="lead">Вещь в собственности — актив, даже если она тратит деньги. Долг — отдельная строка на остаток кредита, не на цену машины.</p>
+        </div>
+
+        <div class="invest-port-grid">
+          <article class="cab-panel">
+            <div class="cab-panel-head">
+              <div>
+                <h3 data-pos-form-title>Добавить позицию</h3>
+                <p class="cab-panel-sub">«В собственности» входит в капитал. «Долг» — только то, что вы должны, не цена вещи.</p>
+              </div>
+            </div>
+            <form class="invest-pos-form" data-pos-form>
+              <div class="invest-form-row">
+                <label>Тип
+                  <select name="side" required>
+                    <option value="asset">В собственности</option>
+                    <option value="liability">Долг</option>
+                  </select>
+                </label>
+                <label>Класс
+                  <select name="asset_class" data-asset-class required></select>
+                </label>
+              </div>
+              <div class="invest-form-row">
+                <label>Название
+                  <input name="name" type="text" maxlength="120" placeholder="как назовёте позицию" required />
+                </label>
+                <label>Тикер
+                  <input name="ticker" type="text" maxlength="16" placeholder="если есть" />
+                </label>
+              </div>
+              <div class="invest-form-row">
+                <label>Стоимость
+                  <input name="value" type="text" inputmode="decimal" placeholder="число" required />
+                </label>
+                <label>Валюта
+                  <select name="currency" required>
+                    <option value="RUB">₽ рубли</option>
+                    <option value="USD">$ доллары</option>
+                    <option value="EUR">€ евро</option>
+                    <option value="CNY">¥ юани</option>
+                  </select>
+                </label>
+              </div>
+              <div class="invest-form-row">
+                <label data-income-label>
+                  <span class="invest-income-name">Доход в месяц</span>
+                  <input name="income_monthly" type="text" inputmode="decimal" placeholder="если есть" />
+                </label>
+                <p class="cab-meta muted invest-income-hint" data-pos-hint>В собственности — оценка рынка входит в капитал. Долг — только остаток кредита. Личное авто: владеете машиной, кредит если есть — отдельно.</p>
+              </div>
+              <label>Заметка
+                <input name="notes" type="text" maxlength="240" placeholder="необязательно" />
+              </label>
+              <button type="submit" class="btn btn-primary" data-pos-submit>Сохранить</button>
+              <button type="button" class="btn btn-line" data-pos-cancel hidden>Отмена</button>
+              <p class="cab-meta muted" data-pos-form-msg></p>
+            </form>
+          </article>
+
+          <article class="cab-panel">
+            <div class="cab-panel-head">
+              <div>
+                <h3>Структура</h3>
+                <p class="cab-panel-sub" data-chart-note>Доли в рублях по курсу MOEX</p>
+              </div>
+            </div>
+            <div class="invest-chart" data-structure-chart></div>
+          </article>
+        </div>
+
+        <article class="cab-panel invest-import-panel">
+          <div class="cab-panel-head">
+            <div>
+              <h3>Загрузить отчёт</h3>
+              <p class="cab-panel-sub">Excel, CSV, текстовый файл. PDF — только если это текст, не скан. Сначала предпросмотр: в портфель попадёт лишь то, что отметите.</p>
+            </div>
+          </div>
+          <label class="invest-import-drop">
+            <input type="file" accept=".csv,.tsv,.txt,.xlsx,.xls,.pdf,text/plain,application/pdf" data-import-file hidden />
+            <span>Выберите файл или перетащите сюда</span>
+          </label>
+          <p class="cab-meta muted" data-import-status></p>
+          <div data-import-preview hidden>
+            <div class="cab-table-wrap">
+              <table class="cab-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Тип</th>
+                    <th>Класс</th>
+                    <th>Имя</th>
+                    <th>Тикер</th>
+                    <th>Стоимость</th>
+                    <th>Валюта</th>
+                  </tr>
+                </thead>
+                <tbody data-import-body></tbody>
+              </table>
+            </div>
+            <div class="invest-import-actions">
+              <button type="button" class="btn btn-primary" data-import-commit>Добавить отмеченные</button>
+              <button type="button" class="btn btn-line" data-import-cancel>Отмена</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="cab-panel" style="margin-top:1.15rem">
+          <div class="cab-panel-head">
+            <div>
+              <h3>Позиции</h3>
+              <p class="cab-panel-sub">Фильтры минимума · desk нельзя править отсюда</p>
+            </div>
+            <div class="invest-filters">
+              <select data-filter-side>
+                <option value="">Все стороны</option>
+                <option value="asset">В собственности</option>
+                <option value="liability">Долг</option>
+              </select>
+              <select data-filter-class>
+                <option value="">Все классы</option>
+              </select>
+              <select data-filter-source>
+                <option value="">Все источники</option>
+                <option value="manual">manual</option>
+                <option value="desk">desk</option>
+              </select>
+            </div>
+          </div>
+          <div class="cab-table-wrap">
+            <table class="cab-table">
+              <thead>
+                <tr>
+                  <th>Тип</th>
+                  <th>Класс</th>
+                  <th>Имя</th>
+                  <th>Тикер</th>
+                  <th>Стоимость</th>
+                  <th>Доход / курс</th>
+                  <th>Источник</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody data-pos-body></tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Watch list -->
+    <section class="section cab-section" data-invest-view="watchlist" id="watchlist" hidden>
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Ещё не куплено</p>
+          <h2>Watch list</h2>
+          <p class="lead">Бумаги, которые вы держите в поле зрения. Это не портфель: суммы нет, покупки не было. Обновляйте список, пока не настанет более спокойный вход.</p>
+        </div>
+        <article class="cab-panel">
+          <div class="cab-panel-head">
+            <div>
+              <h3>Список наблюдения</h3>
+              <p class="cab-panel-sub" data-watch-sub>Пусто, пока не добавите тикер из отчёта.</p>
+            </div>
+            <button type="button" class="btn btn-primary" data-watch-refresh>Обновить все</button>
+          </div>
+          <p class="cab-meta muted" data-watch-status></p>
+          <div data-watch-empty class="invest-structure-empty">
+            <p>Список пуст. Разберите тикер и нажмите «Добавить в watch list» — бумага не попадёт в портфель.</p>
+          </div>
+          <div class="invest-watch-list" data-watch-list hidden></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Analyze -->
+    <section class="section cab-section" data-invest-view="analyze" id="analyze" hidden>
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Auto-first</p>
+          <h2>Автоанализ</h2>
+          <p class="lead">Введите тикер MOEX. Система снимет ISS, подтянет МСФО (если поля пустые) и соберёт отчёт. Рынок — на момент запроса; отчётность меняется редко.</p>
+        </div>
+
+        <article class="cab-panel">
+          <form class="invest-analyze-form" data-analyze-form>
+            <label class="sr-only" for="invest-ticker-input">Тикер</label>
+            <input id="invest-ticker-input" name="ticker" type="text" maxlength="16" autocomplete="off" placeholder="SBER, GAZP, LKOH…" required />
+            <button type="submit" class="btn btn-primary">Разобрать</button>
+          </form>
+          <p class="cab-meta muted" data-analyze-status></p>
+
+          <details class="invest-fund-box" data-fund-box>
+            <summary>Отчётность (Excel-поля)</summary>
+            <p class="cab-panel-sub">
+              ISS не отдаёт МСФО. «Подтянуть» берёт ссылки на файлы
+              <a href="https://e-disclosure.ru/" target="_blank" rel="noopener noreferrer">e-disclosure.ru</a>
+              и цифры с агрегаторов (Smart-Lab, при пробелах Conomy). PDF официальных отчётов в браузере не разбирается — сверьте годы и единицы.
+            </p>
+            <p>
+              <button type="button" class="btn btn-line" data-fund-pull>Подтянуть отчётность</button>
+            </p>
+            <p class="cab-meta muted" data-fund-pull-note></p>
+            <form data-fund-form class="invest-fund-form">
+              <label>Сектор
+                <select name="sector">
+                  <option value="nonfin">Нефинансовый</option>
+                  <option value="fin">Финансовый (банки)</option>
+                </select>
+              </label>
+              <div data-fund-nonfin class="invest-fund-grid">
+                <label>Выручка, текущий <input name="revenue_curr" type="text" /></label>
+                <label>Выручка, предыдущий <input name="revenue_prev" type="text" /></label>
+                <label>Долг, текущий <input name="debt_curr" type="text" /></label>
+                <label>Долг, предыдущий <input name="debt_prev" type="text" /></label>
+                <label>Акц. капитал, текущий <input name="equity_curr" type="text" /></label>
+                <label>Акц. капитал, предыдущий <input name="equity_prev" type="text" /></label>
+                <label>Опер. прибыль, текущая <input name="op_profit_curr" type="text" /></label>
+                <label>Опер. прибыль, предыдущая <input name="op_profit_prev" type="text" /></label>
+                <label>FCF, текущий <input name="fcf_curr" type="text" /></label>
+                <label>FCF, предыдущий <input name="fcf_prev" type="text" /></label>
+                <label>EBITDA, текущая <input name="ebitda_curr" type="text" /></label>
+                <label>EBITDA, предыдущая <input name="ebitda_prev" type="text" /></label>
+                <label>Краткосрочные обязательства <input name="st_liab_curr" type="text" /></label>
+              </div>
+              <div data-fund-fin class="invest-fund-grid" hidden>
+                <label>Резервы, текущие <input name="reserves_curr" type="text" /></label>
+                <label>Резервы, предыдущие <input name="reserves_prev" type="text" /></label>
+                <label>Кредитный портфель, текущий <input name="loans_curr" type="text" /></label>
+                <label>Кредитный портфель, предыдущий <input name="loans_prev" type="text" /></label>
+                <label>Депозиты, текущие <input name="deposits_curr" type="text" /></label>
+                <label>Депозиты, предыдущие <input name="deposits_prev" type="text" /></label>
+                <label>CAR, текущий (доля, напр. 0.14) <input name="car_curr" type="text" /></label>
+                <label>CAR, предыдущий <input name="car_prev" type="text" /></label>
+                <label>Чистый опер. доход, текущий <input name="noi_curr" type="text" /></label>
+                <label>Чистый опер. доход, предыдущий <input name="noi_prev" type="text" /></label>
+              </div>
+            </form>
+          </details>
+        </article>
+      </div>
+    </section>
+
+    <!-- Report -->
+    <section class="section cab-section cab-charts" data-invest-view="report" id="report" hidden>
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Разбор тикера</p>
+          <h2>Отчёт</h2>
+        </div>
+        <div data-report-empty class="invest-structure-empty">
+          <p>Ещё нет разбора. Запустите автоанализ — здесь появится, стоит ли смотреть бумагу, что с бизнесом и что делать дальше.</p>
+        </div>
+        <div data-report-body hidden>
+          <article class="invest-verdict-banner" data-verdict-banner>
+            <span class="cab-label">Вердикт</span>
+            <h3 data-verdict-title></h3>
+            <p data-verdict-sub></p>
+            <div class="invest-report-actions">
+              <button type="button" class="btn btn-primary" data-act-portfolio>В портфель</button>
+              <button type="button" class="btn btn-line" data-act-watch>Добавить в watch list</button>
+              <button type="button" class="btn btn-dark" data-act-new>Новый тикер</button>
+            </div>
+            <p class="calc-disclaimer">Не индивидуальная инвестрекомендация. Не гарантия прибыли.</p>
+          </article>
+
+          <div class="invest-report-sections" data-report-sections></div>
+
+          <article class="cab-panel invest-tv-panel">
+            <div class="cab-panel-head">
+              <div>
+                <h3>График</h3>
+                <p class="cab-panel-sub" data-chart-sub>Живой график. Если пустой — переключитесь на снимок Мосбиржи.</p>
+              </div>
+              <div class="invest-chart-switch">
+                <button type="button" class="btn btn-line is-active" data-chart-mode="tv">TradingView</button>
+                <button type="button" class="btn btn-line" data-chart-mode="iss">Снимок Мосбиржи</button>
+                <a class="btn btn-line" data-tv-link href="#" target="_blank" rel="noopener noreferrer">Открыть график</a>
+              </div>
+            </div>
+            <div class="invest-tv" id="invest-tv">
+              <iframe
+                id="invest-tv-frame"
+                title="График TradingView"
+                allowtransparency="true"
+                scrolling="no"
+                loading="lazy"
+              ></iframe>
+              <canvas id="invest-iss-chart" width="640" height="420" hidden aria-label="Дневные свечи Мосбиржи"></canvas>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Risk profile -->
+    <section class="section cab-section" data-invest-view="profile" id="profile" hidden>
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Рамка</p>
+          <h2>Анкета риска</h2>
+          <p class="lead">Один раз заполняется и сохраняется. Можно изменить. Это не скоринг брокера и не допуск к торговле.</p>
+        </div>
+
+        <article class="cab-panel" data-risk-result hidden>
+          <span class="cab-label">Текущий результат</span>
+          <h3 data-risk-level-out></h3>
+          <p class="cab-meta">Граница предупреждения: <strong data-risk-warn-out></strong></p>
+          <p class="cab-meta muted" data-risk-completed></p>
+          <button type="button" class="btn btn-line" data-risk-edit>Изменить</button>
+        </article>
+
+        <article class="cab-panel" data-risk-form-wrap>
+          <form data-risk-form class="invest-risk-form">
+            <fieldset>
+              <legend>Горизонт</legend>
+              <div data-risk-opts="horizon"></div>
+            </fieldset>
+            <fieldset>
+              <legend>Когда могут понадобиться деньги</legend>
+              <div data-risk-opts="liquidity"></div>
+            </fieldset>
+            <fieldset>
+              <legend>Резерв на расходы</legend>
+              <div data-risk-opts="reserve"></div>
+            </fieldset>
+            <fieldset>
+              <legend>Поведение при падении портфеля на 15%</legend>
+              <div data-risk-opts="drawdown_behavior"></div>
+            </fieldset>
+            <fieldset>
+              <legend>Влияние убытка на текущие расходы</legend>
+              <div data-risk-opts="expense_impact"></div>
+            </fieldset>
+            <fieldset>
+              <legend>Допустимая волатильность</legend>
+              <div data-risk-opts="volatility"></div>
+            </fieldset>
+            <label class="cabinet-check">
+              <input name="acknowledgement" type="checkbox" required />
+              <span>Понимаю: это research / decision-support, не индивидуальная инвестрекомендация и не гарантия прибыли.</span>
+            </label>
+            <button type="submit" class="btn btn-primary">Сохранить анкету</button>
+            <p class="cab-meta muted" data-risk-msg></p>
+          </form>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">
+            <span class="trinity-logo" aria-hidden="true">
+              <span class="ring ring-c"></span>
+              <span class="ring ring-a"></span>
+              <span class="ring ring-b"></span>
+            </span>
+            TRINITY
+          </div>
+          <p>Research / decision-support. Защищённый контур не размещает ордера и не хранит токены брокера.</p>
+        </div>
+        <div>
+          <h4>Навигация</h4>
+          <ul>
+            <li><a href="cabinet.html">← Операторский кабинет</a></li>
+            <li><a href="index.html">Лендинг</a></li>
+            <li><a href="mailto:info@trinity.trading">info@trinity.trading</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Связь</h4>
+          <ul>
+            <li><a href="mailto:info@trinity.trading">info@trinity.trading</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <span>TRINITY © 2026. Не индивидуальная инвестрекомендация. <a href="privacy.html">Политика ПДн</a></span>
+      </div>
+    </div>
+  </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+  <script src="js/lib/auth-errors.js?v=1789116401"></script>
+  <script src="js/lib/invest-fundamentals.js?v=1789122501"></script>
+  <script src="js/lib/invest-explain.js?v=1789122501"></script>
+  <script src="js/lib/invest-pipeline.js?v=1789122501"></script>
+  <script src="js/lib/invest-fund-fetch.js?v=1789122501"></script>
+  <script src="js/lib/invest-import.js?v=1789122501"></script>
+  <script src="js/cabinet-config.js?v=1789122501"></script>
+  <script src="js/cabinet-config.local.js"></script>
+  <script src="js/cabinet-auth.js?v=1789122501"></script>
+  <script src="js/invest.js?v=1789122601"></script>
+</body>
+</html>

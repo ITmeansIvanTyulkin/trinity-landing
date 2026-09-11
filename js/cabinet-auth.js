@@ -124,14 +124,23 @@
     return error.message || "Ошибка аутентификации";
   }
 
-  async function ensureProfileMarketing(user, marketingOptIn) {
+  async function ensureProfile(user, profile) {
     const sb = getClient();
-    if (!sb || !user) return;
+    if (!sb || !user || !profile) return;
     try {
       await sb
         .from("profiles")
         .update({
-          marketing_opt_in: Boolean(marketingOptIn),
+          display_name: profile.display_name || null,
+          phone: profile.phone || null,
+          gender: profile.gender || null,
+          age_years: profile.age_years,
+          trading_experience: profile.trading_experience || null,
+          marketing_opt_in: Boolean(profile.marketing_opt_in),
+          pdn_consent: Boolean(profile.pdn_consent),
+          pdn_consent_at: profile.pdn_consent
+            ? new Date().toISOString()
+            : null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
@@ -140,7 +149,54 @@
     }
   }
 
+  function readRegisterProfile() {
+    const name = ((document.getElementById("cabinet-reg-name") || {}).value || "").trim();
+    const phone = ((document.getElementById("cabinet-reg-phone") || {}).value || "").trim();
+    const gender = ((document.getElementById("cabinet-reg-gender") || {}).value || "").trim();
+    const ageRaw = ((document.getElementById("cabinet-reg-age") || {}).value || "").trim();
+    const experience = (
+      (document.getElementById("cabinet-reg-experience") || {}).value || ""
+    ).trim();
+    const pdn = Boolean((document.getElementById("cabinet-reg-pdn") || {}).checked);
+    const marketing = Boolean(
+      (document.getElementById("cabinet-reg-marketing") || {}).checked
+    );
+    const age = ageRaw === "" ? null : Number(ageRaw);
+    return {
+      display_name: name,
+      phone,
+      gender,
+      age_years: Number.isFinite(age) ? age : null,
+      trading_experience: experience,
+      pdn_consent: pdn,
+      marketing_opt_in: marketing,
+    };
+  }
+
+  function validateRegisterProfile(profile) {
+    if (!profile.display_name) return "Укажите имя.";
+    if (!profile.phone || profile.phone.replace(/\D/g, "").length < 10) {
+      return "Укажите телефон (не короче 10 цифр).";
+    }
+    if (!profile.gender) return "Укажите пол.";
+    if (
+      profile.age_years == null ||
+      profile.age_years < 18 ||
+      profile.age_years > 100
+    ) {
+      return "Возраст: от 18 до 100.";
+    }
+    if (!profile.trading_experience) return "Укажите опыт торговли.";
+    if (!profile.pdn_consent) {
+      return "Нужно согласие на обработку персональных данных.";
+    }
+    return "";
+  }
+
   async function loadLocalConfigOverride() {
+    /* Prefer sync <script src="cabinet-config.local.js"> in cabinet.html.
+       Keep fetch fallback for older deploys without that tag. */
+    if (cfg().supabaseUrl && cfg().supabaseAnonKey) return;
     try {
       const res = await fetch(
         new URL("js/cabinet-config.local.js", window.location.href).href,
@@ -195,8 +251,16 @@
       });
     });
 
-    /* Session from URL hash (email confirm redirect) or storage */
-    const { data: sessionData } = await sb.auth.getSession();
+    /* Session from URL hash (email confirm redirect) or storage.
+       Bound getSession so a hung Supabase request cannot block the UI forever. */
+    const sessionWait = sb.auth.getSession();
+    const timed = Promise.race([
+      sessionWait,
+      new Promise((resolve) =>
+        setTimeout(() => resolve({ data: { session: null }, error: null }), 4000)
+      ),
+    ]);
+    const { data: sessionData } = await timed;
     let session = sessionData && sessionData.session;
 
     if (session && session.user) {
@@ -255,10 +319,12 @@
         setInfo("");
         const email = (document.getElementById("cabinet-reg-email") || {}).value || "";
         const password = (document.getElementById("cabinet-reg-pass") || {}).value || "";
-        const name = (document.getElementById("cabinet-reg-name") || {}).value || "";
-        const optIn = Boolean(
-          (document.getElementById("cabinet-reg-marketing") || {}).checked
-        );
+        const profile = readRegisterProfile();
+        const profileErr = validateRegisterProfile(profile);
+        if (profileErr) {
+          setError(profileErr);
+          return;
+        }
         if (password.length < 6) {
           setError("Пароль: минимум 6 символов.");
           return;
@@ -272,8 +338,13 @@
           options: {
             emailRedirectTo: redirectTo,
             data: {
-              display_name: name.trim() || undefined,
-              marketing_opt_in: optIn,
+              display_name: profile.display_name,
+              phone: profile.phone,
+              gender: profile.gender,
+              age_years: String(profile.age_years),
+              trading_experience: profile.trading_experience,
+              marketing_opt_in: profile.marketing_opt_in,
+              pdn_consent: profile.pdn_consent,
               source: "cabinet",
             },
           },
@@ -285,7 +356,7 @@
         }
         /* If email confirm required, session may be null */
         if (data.session && data.user) {
-          await ensureProfileMarketing(data.user, optIn);
+          await ensureProfile(data.user, profile);
           persistSession(data.session);
           unlockCabinet(data.user.email);
         } else {
@@ -296,7 +367,9 @@
         }
         registerForm.reset();
         const marketing = document.getElementById("cabinet-reg-marketing");
-        if (marketing) marketing.checked = true;
+        if (marketing) marketing.checked = false;
+        const pdn = document.getElementById("cabinet-reg-pdn");
+        if (pdn) pdn.checked = false;
       });
     }
 
