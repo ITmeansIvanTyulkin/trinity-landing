@@ -360,6 +360,133 @@
     return hit ? hit[1] : raw;
   }
 
+  const LIQUID_CLASSES = {
+    "кэш": true,
+    "валюта": true,
+    "депозиты": true,
+    "акции": true,
+    "облигации": true,
+    "ETF": true,
+    "фонды": true,
+    "золото — бумажное": true,
+  };
+
+  const LOCKED_CLASSES = {
+    "недвижимость": true,
+    "автомобиль": true,
+    "private equity": true,
+    "золото — слитки": true,
+    "золото — монеты": true,
+  };
+
+  function structureInsight(rows) {
+    const assets = (rows || []).filter((r) => r.side === "asset" && (posRub(r) || 0) > 0);
+    const debts = (rows || []).filter((r) => r.side === "liability" && (posRub(r) || 0) > 0);
+    const aSum = assets.reduce((s, r) => s + (posRub(r) || 0), 0);
+    const lSum = debts.reduce((s, r) => s + (posRub(r) || 0), 0);
+    if (!aSum) return [];
+
+    const liquid = assets.reduce(
+      (s, r) => s + (LIQUID_CLASSES[r.asset_class] ? posRub(r) || 0 : 0),
+      0
+    );
+    const locked = assets.reduce(
+      (s, r) => s + (LOCKED_CLASSES[r.asset_class] ? posRub(r) || 0 : 0),
+      0
+    );
+    const top = assets.slice().sort((a, b) => (posRub(b) || 0) - (posRub(a) || 0))[0];
+    const topShare = top ? ((posRub(top) || 0) / aSum) * 100 : 0;
+    const inFlow = (rows || []).reduce((s, p) => s + flowInRub(p), 0);
+    const outFlow = (rows || []).reduce((s, p) => s + flowOutRub(p), 0);
+    const netFlow = inFlow - outFlow;
+    const items = [];
+
+    if (topShare >= 40) {
+      const topName = String((top && top.name) || classLabel(top && top.asset_class) || "Крупнейшая позиция").trim();
+      items.push({
+        kicker: "Концентрация",
+        value: fmtShare(topShare),
+        body: topName + " занимает преимущественную долю активов.",
+      });
+    }
+
+    const cashSum = assets.reduce(
+      (s, r) => s + (r.asset_class === "кэш" ? posRub(r) || 0 : 0),
+      0
+    );
+    const liqPct = (liquid / aSum) * 100;
+    let liqItem;
+    if (locked / aSum >= 0.35) {
+      liqItem = {
+        kicker: "Можно сдвинуть",
+        value: fmtShare(liqPct),
+        body:
+          fmtRub(liquid) +
+          " в кэше, бумагах и валюте. Остальное — жильё и вещи: в круге есть, завтрашней кассой не станут.",
+      };
+    } else if (liqPct >= 80) {
+      liqItem = {
+        kicker: "Почти всё живо",
+        value: fmtShare(liqPct),
+        body: "Круг собран из того, что можно продать или переложить. Удобно, но рубль и бумага живут своей жизнью.",
+      };
+    } else {
+      liqItem = {
+        kicker: "Живое",
+        value: fmtShare(liqPct),
+        body:
+          fmtRub(liquid) +
+          " можно тронуть без продажи жилья. Остальное держит форму капитала, не кассу.",
+      };
+    }
+    if (cashSum >= 10000) {
+      liqItem.body =
+        "Инфляция съедает эти " +
+        fmtRub(cashSum) +
+        ". Капитал лучше инвестировать в акции или в торговлю на бирже — куда именно, решаете вы.";
+    }
+    items.push(liqItem);
+
+    if (lSum > 0) {
+      items.push({
+        kicker: "После долгов",
+        value: fmtRub(aSum - lSum),
+        body:
+          "Долги " +
+          fmtRub(lSum) +
+          " — " +
+          fmtShare((lSum / aSum) * 100) +
+          " активов. Круг считает собственность, не то, что останется, если закрыть кредиты.",
+      });
+    } else if (Math.abs(netFlow) >= 1) {
+      items.push({
+        kicker: "В месяц",
+        value: fmtSignedRub(netFlow),
+        body:
+          netFlow > 0
+            ? "Позиции приносят больше, чем забирают. Это поток учёта, не прогноз."
+            : "Позиции забирают " + fmtRub(Math.abs(netFlow)) + " в месяц. Круг этого не показывает.",
+      });
+    }
+
+    if (items.length < 3) {
+      const fxSum = assets.reduce((s, r) => {
+        const ccy = positionCcy(r);
+        if (ccy === "RUB" || ccy === "RUR") return s;
+        return s + (posRub(r) || 0);
+      }, 0);
+      if (fxSum / aSum >= 0.08) {
+        items.push({
+          kicker: "Не рубли",
+          value: fmtShare((fxSum / aSum) * 100),
+          body: "Доля уже стоит в круге в рублях по курсу Мосбиржи. Сама валюта от этого рублём не стала.",
+        });
+      }
+    }
+
+    return items.slice(0, 3);
+  }
+
   function fmtRub(n) {
     if (n == null || !Number.isFinite(Number(n))) return "—";
     return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.round(n)) + " ₽";
@@ -1111,8 +1238,27 @@
       legend +
       "</div></div>";
 
+    const insight = structureInsight(rows);
+    const reading = insight
+      .map(
+        (item) =>
+          "<li><span>" +
+          escHtml(item.kicker) +
+          "</span><b class=\"mono\">" +
+          escHtml(item.value) +
+          "</b><p>" +
+          escHtml(item.body) +
+          "</p></li>"
+      )
+      .join("");
+
     hosts.forEach((host) => {
-      host.innerHTML = markup;
+      const onOverview = host.hasAttribute("data-ov-structure");
+      host.innerHTML =
+        markup +
+        (onOverview || !reading
+          ? ""
+          : '<ul class="invest-structure-read" data-structure-read>' + reading + "</ul>");
       const root = host.querySelector("[data-donut]");
       requestAnimationFrame(() => {
         if (root) root.classList.add("is-in");
