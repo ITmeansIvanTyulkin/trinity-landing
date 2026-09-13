@@ -15,9 +15,11 @@
     "акции",
     "облигации",
     "ETF",
+    "фонды",
     "крипто",
     "кэш",
     "валюта",
+    "золото",
     "золото — слитки",
     "золото — монеты",
     "золото — бумажное",
@@ -25,13 +27,17 @@
     "forex",
     "опционы",
     "фьючерсы",
-    "фонды",
     "сырьё",
     "депозиты",
     "недвижимость",
+    "недвижимость коммерческая",
     "автомобиль",
     "private equity",
     "структурные продукты",
+    "прочее",
+    "кредит",
+    "ипотека",
+    "прочий долг",
   ];
 
   function normHead(s) {
@@ -71,6 +77,20 @@
     return neg ? -Math.abs(v) : v;
   }
 
+  function monthlyFromYield(value, annualPct) {
+    const v = Number(value);
+    const p = Number(annualPct);
+    if (!Number.isFinite(v) || v <= 0 || !Number.isFinite(p)) return null;
+    return Math.round(((v * p) / 100 / 12) * 100) / 100;
+  }
+
+  function yieldFromMonthly(value, monthly) {
+    const v = Number(value);
+    const m = Number(monthly);
+    if (!Number.isFinite(v) || v <= 0 || !Number.isFinite(m)) return null;
+    return Math.round(((m * 12 * 100) / v) * 100) / 100;
+  }
+
   function detectCurrency(text) {
     const s = String(text || "");
     if (/\$|usd|доллар/i.test(s)) return "USD";
@@ -82,12 +102,14 @@
 
   function guessClass(name, ticker) {
     const s = (String(name || "") + " " + String(ticker || "")).toLowerCase();
-    if (/ипотек/.test(s)) return "недвижимость";
+    if (/ипотек/.test(s)) return "ипотека";
+    if (/(кредит|займ|заем|овердрафт)/.test(s) && !/депозит|вклад/.test(s)) return "кредит";
     if (/авто|машин|bmw|toyota|lada|mercedes|kia|hyundai|volkswagen/.test(s)) return "автомобиль";
-    if (/квартир|апартам|дом\b|участок|недвиж|офис|дача/.test(s)) return "недвижимость";
-    if (/золот|gold|глд|слит/.test(s)) return "золото — бумажное";
+    if (/офис|склад|торгов(ая|ое)|коммерч|помещен/.test(s)) return "недвижимость коммерческая";
+    if (/квартир|апартам|дом\b|участок|недвиж|дача/.test(s)) return "недвижимость";
+    if (/золот|gold|глд|слит/.test(s)) return "золото";
     if (/bitcoin|btc|eth|крипт|usdt/.test(s)) return "крипто";
-    if (/etf|бпиф|fund/.test(s)) return "ETF";
+    if (/etf|бпиф|fund/.test(s)) return "фонды";
     if (/облиг|офз|bond|купон/.test(s)) return "облигации";
     if (/фьюч|futur/.test(s)) return "фьючерсы";
     if (/опцион/.test(s)) return "опционы";
@@ -102,6 +124,7 @@
     const s = String(explicit || name || "").toLowerCase();
     if (/долг|кредит|ипотек|займ|заем|овердрафт|liab/.test(s)) return "liability";
     if (/актив|собств|asset/.test(s) && !/пассив/.test(s)) return "asset";
+    if (cls === "кредит" || cls === "ипотека" || cls === "прочий долг") return "liability";
     if (cls === "автомобиль" && !/кредит|долг/.test(s)) return "asset";
     return "asset";
   }
@@ -118,6 +141,7 @@
     if (/валют|currency|ccy/.test(k)) return "currency";
     if (/класс|class|тип актива|категор/.test(k)) return "asset_class";
     if (/^(side|сторона|тип)$/.test(k) || /долг\/актив|актив\/пассив/.test(k)) return "side";
+    if (/ставк|доходность|годовых|yield/.test(k) && !/месяц/.test(k)) return "yield_annual_pct";
     if (/доход|плат[её]ж|купон|дивиденд|income|rent/.test(k)) return "income_monthly";
     if (/заметк|коммент|note/.test(k)) return "notes";
     return null;
@@ -228,7 +252,17 @@
     const currency = /^(RUB|USD|EUR|CNY|GBP)$/i.test(String(obj.currency || ""))
       ? String(obj.currency).toUpperCase()
       : detectCurrency(blob + " " + name);
-    const income = parseAmount(obj.income_monthly);
+    const incomeRaw = obj.income_monthly;
+    const incomeLooksPct = /%/.test(String(incomeRaw || ""));
+    let income = parseAmount(incomeRaw);
+    let pct = parseAmount(obj.yield_annual_pct);
+    if (incomeLooksPct && pct == null && income != null) {
+      pct = income;
+      income = null;
+    }
+    if ((income == null || income === 0) && pct != null && value != null) {
+      income = monthlyFromYield(Math.abs(value), pct);
+    }
     return {
       side: side,
       asset_class: asset_class,
@@ -236,6 +270,7 @@
       ticker: ticker || null,
       value: Math.abs(value),
       income_monthly: income,
+      yield_annual_pct: pct,
       currency: currency,
       notes: obj.notes ? String(obj.notes).trim() : "",
       include: true,
@@ -360,6 +395,8 @@
     CLASS_KEYS: CLASS_KEYS,
     MAX_ROWS: MAX_ROWS,
     parseAmount: parseAmount,
+    monthlyFromYield: monthlyFromYield,
+    yieldFromMonthly: yieldFromMonthly,
     parseTable: parseTable,
     parseCsvText: parseCsvText,
     parsePlainText: parsePlainText,

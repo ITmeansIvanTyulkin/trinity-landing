@@ -31,7 +31,26 @@ describe("TrinityInvestImport", () => {
     const csv = "Название;Стоимость;Тип\nИпотека;5900000;долг\n";
     const r = Imp.parseCsvText(csv);
     assert.equal(r.rows[0].side, "liability");
-    assert.equal(r.rows[0].asset_class, "недвижимость");
+    assert.equal(r.rows[0].asset_class, "ипотека");
+  });
+
+  it("guesses commercial property and a bank loan", () => {
+    assert.equal(Imp.guessClass("Офис на Тверской", ""), "недвижимость коммерческая");
+    assert.equal(Imp.guessClass("Кредит в банке", ""), "кредит");
+    assert.equal(Imp.guessSide("Кредит в банке", "кредит"), "liability");
+  });
+
+  it("turns an annual deposit rate into monthly income", () => {
+    const csv = "Название;Стоимость;Ставка годовых;Валюта\nДепозит в банке;1000000;20%;RUB\n";
+    const r = Imp.parseCsvText(csv);
+    assert.equal(r.rows[0].asset_class, "депозиты");
+    assert.equal(r.rows[0].yield_annual_pct, 20);
+    assert.equal(r.rows[0].income_monthly, 16666.67);
+  });
+
+  it("converts yield and monthly income both ways", () => {
+    assert.equal(Imp.monthlyFromYield(1000000, 20), 16666.67);
+    assert.equal(Imp.yieldFromMonthly(1000000, 16666.67), 20);
   });
 
   it("reads notepad lines", () => {

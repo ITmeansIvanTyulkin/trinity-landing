@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1789173501" />
+  <link rel="stylesheet" href="css/styles.css?v=1789185201" />
 </head>
 <body class="cabinet-page invest-page cabinet-locked">
   <p class="invest-auth-wait" data-invest-wait>Проверяем сессию…</p>
@@ -172,7 +172,7 @@
         <div class="section-head">
           <p class="eyebrow">Учёт</p>
           <h2>Портфель</h2>
-          <p class="lead">Вещь в собственности — актив, даже если она тратит деньги. Долг — отдельная строка на остаток кредита, не на цену машины.</p>
+          <p class="lead">Вещь в собственности — актив, даже если она тратит деньги. Долг — отдельная строка на остаток кредита, не на цену самой вещи.</p>
         </div>
 
         <div class="invest-port-grid">
@@ -180,7 +180,7 @@
             <div class="cab-panel-head">
               <div>
                 <h3 data-pos-form-title>Добавить позицию</h3>
-                <p class="cab-panel-sub">«В собственности» входит в капитал. «Долг» — только то, что вы должны, не цена вещи.</p>
+                <p class="cab-panel-sub">Сначала тип и класс — от них зависят поля. Где есть доход или ставка, можно указать деньги в месяц или проценты годовых.</p>
               </div>
             </div>
             <form class="invest-pos-form" data-pos-form>
@@ -195,16 +195,16 @@
                   <select name="asset_class" data-asset-class required></select>
                 </label>
               </div>
-              <div class="invest-form-row">
+              <div class="invest-form-row is-solo" data-row="name">
                 <label>Название
-                  <input name="name" type="text" maxlength="120" placeholder="как назовёте позицию" required />
+                  <input name="name" type="text" maxlength="120" data-pos-name placeholder="как назовёте позицию" required />
                 </label>
-                <label>Тикер
+                <label data-field="ticker" hidden>Тикер
                   <input name="ticker" type="text" maxlength="16" placeholder="если есть" />
                 </label>
               </div>
               <div class="invest-form-row">
-                <label>Стоимость
+                <label><span data-value-label>Стоимость</span>
                   <input name="value" type="text" inputmode="decimal" placeholder="число" required />
                 </label>
                 <label>Валюта
@@ -216,13 +216,17 @@
                   </select>
                 </label>
               </div>
-              <div class="invest-form-row">
+              <div class="invest-form-row" data-field="yield" hidden>
                 <label data-income-label>
                   <span class="invest-income-name">Доход в месяц</span>
                   <input name="income_monthly" type="text" inputmode="decimal" placeholder="если есть" />
                 </label>
-                <p class="cab-meta muted invest-income-hint" data-pos-hint>В собственности — оценка рынка входит в капитал. Долг — только остаток кредита. Личное авто: владеете машиной, кредит если есть — отдельно.</p>
+                <label data-field="yield-pct">
+                  <span class="invest-yield-name">Доходность, % годовых</span>
+                  <input name="yield_annual_pct" type="text" inputmode="decimal" placeholder="если есть" />
+                </label>
               </div>
+              <p class="cab-meta muted invest-income-hint" data-pos-hint>Сначала выберите класс — под него подстроятся поля.</p>
               <label>Заметка
                 <input name="notes" type="text" maxlength="240" placeholder="необязательно" />
               </label>
@@ -353,7 +357,7 @@
         <div class="section-head">
           <p class="eyebrow">Auto-first</p>
           <h2>Автоанализ</h2>
-          <p class="lead">Введите тикер MOEX. Система снимет ISS, подтянет МСФО (если поля пустые) и соберёт отчёт. Рынок — на момент запроса; отчётность меняется редко.</p>
+          <p class="lead">Введите тикер Мосбиржи. Система снимет дневки, подтянет отчётность (если поля пустые) и соберёт отчёт. Точка входа — по дневкам под ваш горизонт, не по минуткам.</p>
         </div>
 
         <details class="cab-how invest-how">
@@ -364,7 +368,7 @@
           </summary>
           <div class="cab-how-body">
             <p>
-              Вы вводите тикер. Дальше система идёт по одному маршруту: сначала живой рынок Мосбиржи, затем отчётность по чек-листу — отдельно для обычных компаний и отдельно для банков, затем картина цены и объёма, затем стыковка с вашей анкетой риска. На выходе — длинный отчёт и один из трёх вердиктов: можно рассматривать, пока наблюдать или пока отойти. Это исследование для вашего решения, не индивидуальная рекомендация и не обещание прибыли.
+              Вы вводите тикер. Дальше система идёт по одному маршруту: живой рынок Мосбиржи, отчётность по чек-листу, дневки (профиль объёма и дельта), стыковка с анкетой. На выходе — отчёт и один из трёх вердиктов: покупать, наблюдать или не брать. Это исследование для вашего решения, не индивидуальная рекомендация и не обещание прибыли.
             </p>
 
             <h4>1. Рынок</h4>
@@ -407,7 +411,7 @@
 
             <h4>4. Откуда цифры отчётности</h4>
             <p>
-              Мосбиржа не отдаёт выручку и долг в котировке. Система подтягивает ссылки обязательного раскрытия и цифры с агрегаторов, если поля пустые. Официальный PDF в браузере не разбирается: годы, единицы и консолидацию лучше сверить глазами. Без отчётности вердикт «можно рассматривать» не ставится: смотреть бизнес вслепую нельзя.
+              Мосбиржа не отдаёт выручку и долг в котировке. Система подтягивает ссылки обязательного раскрытия и цифры с агрегаторов, если поля пустые. Официальный PDF в браузере не разбирается: годы, единицы и консолидацию лучше сверить глазами. Без отчётности вердикт «покупать» не ставится: смотреть бизнес вслепую нельзя.
             </p>
 
             <h4>5. Индикаторы цены и объёма</h4>
@@ -420,14 +424,14 @@
               Не отдельный «сигнал купить», а проверка по шагам: цена относительно медленной средней, нет ли перекупленности для нового интереса, близко ли к быстрой средней, не растянут ли ход, не шире ли 20-дневный диапазон вашей рамки просадки из анкеты, какой уровень листинга, стыкуется ли это с чек-листом отчётности. Сопровождение после сделки и пирамида из полной стратегии здесь не автоматизированы.
             </p>
 
-            <h4>7. Объём вместо полного кластера</h4>
+            <h4>7. Профиль объёма по дневкам</h4>
             <p>
-              Слепок объёма относительно своей средней — упрощение. Футпринт, дельта и точка контроля из кластерного разбора в этот проход не входят.
+              Для среднесрока и долгосрока точка входа считается по дневкам: где за месяцы прошёл объём, там точка контроля и зона стоимости. Минутки и футпринт сессии сюда не подмешиваем — это другой горизонт. Дельту читаем по телу дневной свечи: закрылись у хая — скорее откуп, у лоя — скорее слив.
             </p>
 
             <h4>8. Как складывается вердикт</h4>
             <p>
-              Слои имеют разный вес: отчётность — самая тяжёлая доля, затем стратегия, индикаторы, рынок, объём. «Можно рассматривать» — только если отчётность есть и не провалена, рынок не настораживает, стратегия не провалена, и сводный балл достаточно высок. Два и более провала или мёртвый рынок — «пока лучше отойти». Остальное — наблюдение. Вы читаете отчёт и решаете сами.
+              Слои имеют разный вес: отчётность — самая тяжёлая доля, затем стратегия, индикаторы, рынок, профиль. «Покупать» — только если отчётность есть и не провалена, рынок живой, стратегия не провалена, и сводный балл достаточно высок. Два и более провала или мёртвый рынок — «не брать». Остальное — наблюдать. В отчёте будет зона на дневках под ваш горизонт из анкеты. Решение всё равно ваше.
             </p>
 
             <p class="cab-how-foot">
@@ -510,6 +514,7 @@
             <span class="cab-label">Вердикт</span>
             <h3 data-verdict-title></h3>
             <p data-verdict-sub></p>
+            <div class="invest-entry" data-verdict-entry hidden></div>
             <div class="invest-report-actions">
               <button type="button" class="btn btn-primary" data-act-portfolio>В портфель</button>
               <button type="button" class="btn btn-line" data-act-watch>Добавить в watch list</button>
@@ -524,7 +529,7 @@
             <div class="cab-panel-head">
               <div>
                 <h3>График</h3>
-                <p class="cab-panel-sub" data-chart-sub>Живой график. Если пустой — переключитесь на снимок Мосбиржи.</p>
+                <p class="cab-panel-sub" data-chart-sub>График для взгляда. Разбор точки входа — по дневкам.</p>
               </div>
               <div class="invest-chart-switch">
                 <button type="button" class="btn btn-line is-active" data-chart-mode="tv">TradingView</button>
@@ -641,13 +646,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
   <script src="js/lib/auth-errors.js?v=1789116401"></script>
   <script src="js/lib/invest-fundamentals.js?v=1789122501"></script>
-  <script src="js/lib/invest-explain.js?v=1789122501"></script>
-  <script src="js/lib/invest-pipeline.js?v=1789122501"></script>
+  <script src="js/lib/invest-explain.js?v=1789185201"></script>
+  <script src="js/lib/invest-pipeline.js?v=1789185201"></script>
   <script src="js/lib/invest-fund-fetch.js?v=1789122501"></script>
-  <script src="js/lib/invest-import.js?v=1789122501"></script>
+  <script src="js/lib/invest-import.js?v=1789181201"></script>
   <script src="js/cabinet-config.js?v=1789122501"></script>
   <script src="js/cabinet-config.local.js"></script>
   <script src="js/cabinet-auth.js?v=1789122501"></script>
-  <script src="js/invest.js?v=1789173101"></script>
+  <script src="js/invest.js?v=1789185201"></script>
 </body>
 </html>

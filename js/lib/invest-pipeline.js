@@ -1,6 +1,6 @@
 /**
  * Invest auto-pipeline: MOEX ISS market + indicators + strategy skeleton +
- * volume-cluster proxy + composite verdict.
+ * volume profile (POC / value area) + close-location delta + composite verdict.
  *
  * Thresholds live in THRESHOLDS (edit in one place).
  *
@@ -12,7 +12,6 @@
  * - sector relative-value vs peers
  *
  * TODO (indicators PDF): MACD, ADX, Bollinger, stochastic, VWAP — slot later.
- * TODO (cluster PDF): footprint / delta / POC — phase 2; MVP is volume proxy only.
  */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) {
@@ -51,7 +50,10 @@
     entryBandPct: 0.03,
     chasePct: 0.08,
     rangeLookback: 20,
-    candleDays: 400,
+    candleDays: 520,
+    profileMinBars: 40,
+    profileDefaultBars: 220,
+    deltaTailBars: 20,
     weights: {
       market: 0.15,
       fund: 0.3,
@@ -341,6 +343,141 @@
     };
   }
 
+  function profileLookbackDays(profile) {
+    const h = profile && (profile.horizon || (profile.answers && profile.answers.horizon));
+    if (h === "lt1") return 150;
+    if (h === "y3_5") return 280;
+    if (h === "y5") return 320;
+    return THRESHOLDS.profileDefaultBars;
+  }
+
+  function barDelta(c) {
+    const high = Number(c.high);
+    const low = Number(c.low);
+    const close = Number(c.close);
+    const open = Number(c.open);
+    const vol = Number(c.volume);
+    if (!Number.isFinite(vol) || vol <= 0) return 0;
+    const range = high - low;
+    if (!Number.isFinite(range) || range <= 0) {
+      if (Number.isFinite(close) && Number.isFinite(open)) return close >= open ? vol : -vol;
+      return 0;
+    }
+    return (((close - low) - (high - close)) / range) * vol;
+  }
+
+  function volumeProfile(candles, lookback) {
+    const n = lookback || THRESHOLDS.profileDefaultBars;
+    const rows = (candles || [])
+      .filter((c) => {
+        return (
+          Number.isFinite(Number(c.high)) &&
+          Number.isFinite(Number(c.low)) &&
+          Number.isFinite(Number(c.close)) &&
+          Number.isFinite(Number(c.volume)) &&
+          Number(c.volume) > 0 &&
+          Number(c.high) >= Number(c.low)
+        );
+      })
+      .slice(-n);
+    if (rows.length < THRESHOLDS.profileMinBars) return null;
+    let minL = Infinity;
+    let maxH = -Infinity;
+    rows.forEach((c) => {
+      if (c.low < minL) minL = Number(c.low);
+      if (c.high > maxH) maxH = Number(c.high);
+    });
+    if (!(maxH > minL)) return null;
+    const bins = Math.min(48, Math.max(24, Math.round(rows.length / 2)));
+    const step = (maxH - minL) / bins;
+    const hist = new Array(bins).fill(0);
+    rows.forEach((c) => {
+      let from = Math.floor((Number(c.low) - minL) / step);
+      let to = Math.floor((Number(c.high) - minL) / step);
+      if (from < 0) from = 0;
+      if (to >= bins) to = bins - 1;
+      if (to < from) to = from;
+      const share = Number(c.volume) / (to - from + 1);
+      for (let i = from; i <= to; i++) hist[i] += share;
+    });
+    let pocIdx = 0;
+    for (let i = 1; i < bins; i++) {
+      if (hist[i] > hist[pocIdx]) pocIdx = i;
+    }
+    const total = hist.reduce((a, b) => a + b, 0);
+    if (!(total > 0)) return null;
+    let lo = pocIdx;
+    let hi = pocIdx;
+    let acc = hist[pocIdx];
+    const target = total * 0.7;
+    while (acc < target && (lo > 0 || hi < bins - 1)) {
+      const left = lo > 0 ? hist[lo - 1] : -1;
+      const right = hi < bins - 1 ? hist[hi + 1] : -1;
+      if (right > left) {
+        hi += 1;
+        acc += hist[hi];
+      } else if (lo > 0) {
+        lo -= 1;
+        acc += hist[lo];
+      } else {
+        hi += 1;
+        acc += hist[hi];
+      }
+    }
+    const binMid = (i) => minL + (i + 0.5) * step;
+    const hvns = [];
+    for (let i = 1; i < bins - 1; i++) {
+      if (hist[i] >= hist[pocIdx] * 0.55 && hist[i] >= hist[i - 1] && hist[i] >= hist[i + 1]) {
+        hvns.push(round(binMid(i), 2));
+      }
+    }
+    return {
+      poc: round(binMid(pocIdx), 2),
+      val: round(minL + lo * step, 2),
+      vah: round(minL + (hi + 1) * step, 2),
+      hvns: hvns.slice(0, 4),
+      bars: rows.length,
+    };
+  }
+
+  function locationVsValue(last, prof) {
+    if (!prof || last == null || !Number.isFinite(Number(last))) return null;
+    const px = Number(last);
+    if (px > prof.vah) return "above";
+    if (px < prof.val) return "below";
+    return "inside";
+  }
+
+  function buildCluster(daily, profile, last) {
+    const look = profileLookbackDays(profile);
+    const dailyProf = volumeProfile(daily, look);
+    const rows = (daily || []).slice(-look);
+    const tailN = Math.min(THRESHOLDS.deltaTailBars, rows.length);
+    let lastDelta = null;
+    let tailDelta = 0;
+    let cum = 0;
+    rows.forEach((c, i) => {
+      const d = barDelta(c);
+      cum += d;
+      if (i === rows.length - 1) lastDelta = d;
+      if (i >= rows.length - tailN) tailDelta += d;
+    });
+    return {
+      poc: dailyProf ? dailyProf.poc : null,
+      val: dailyProf ? dailyProf.val : null,
+      vah: dailyProf ? dailyProf.vah : null,
+      hvns: (dailyProf && dailyProf.hvns) || [],
+      source: dailyProf ? "daily" : null,
+      bars: dailyProf ? dailyProf.bars : 0,
+      location: locationVsValue(last, dailyProf),
+      lastDelta: lastDelta != null ? round(lastDelta, 0) : null,
+      tailDelta: round(tailDelta, 0),
+      tailBars: tailN,
+      cumDelta: round(cum, 0),
+      lookback: look,
+    };
+  }
+
   function worstStatus(list) {
     const rank = { Fail: 0, Weak: 1, NoData: 2, Pass: 3 };
     let worst = "Pass";
@@ -593,31 +730,43 @@
     };
   }
 
-  function gateCluster(ind) {
-    if (ind.volRatio == null) {
+  function gateCluster(ind, cluster) {
+    const vol = ind && ind.volRatio;
+    const loc = cluster && cluster.location;
+    const metrics = {
+      volRatio: vol != null ? round(vol, 3) : null,
+      poc: cluster && cluster.poc,
+      val: cluster && cluster.val,
+      vah: cluster && cluster.vah,
+      location: loc || null,
+      source: "daily",
+      tailDelta: cluster && cluster.tailDelta,
+    };
+    if (vol == null && !(cluster && cluster.poc)) {
       return {
         id: "cluster",
-        title: "Кластер / объём (прокси)",
+        title: "Профиль и дельта",
         status: "NoData",
-        detail:
-          "Нет ряда объёмов. Это прокси по свечам ISS, не полный кластерный анализ (footprint / дельта / POC — фаза 2).",
-        metrics: { proxy: true },
+        detail: "Нет ряда объёмов — профиль не собрать.",
+        metrics: metrics,
       };
     }
     let status = "Weak";
-    if (ind.volRatio >= 0.8 && ind.volRatio <= 2.5) status = "Pass";
-    else if (ind.volRatio < 0.5) status = "Fail";
+    if (vol != null && vol < THRESHOLDS.volumeFailLow) status = "Fail";
+    else if (loc === "inside" && (vol == null || (vol >= 0.8 && vol <= 2.5))) status = "Pass";
+    else if (loc === "above" && ind && ind.rsi != null && ind.rsi > 70) status = "Weak";
+    else if (vol != null && vol >= 0.8 && vol <= 2.5) status = "Pass";
+    else status = "Weak";
     return {
       id: "cluster",
-      title: "Кластер / объём (прокси)",
-      status,
+      title: "Профиль и дельта",
+      status: status,
       detail:
-        "Относительный объём " +
-        round(ind.volRatio, 2) +
-        "× SMA(" +
-        THRESHOLDS.volumeSma +
-        "). Прокси, не полный кластерный анализ; слот фазы 2 — footprint.",
-      metrics: { volRatio: round(ind.volRatio, 3), proxy: true, phase2: "footprint" },
+        (cluster && cluster.poc != null
+          ? "точка контроля " + cluster.poc + " · зона " + cluster.val + "–" + cluster.vah
+          : "профиля нет") +
+        (vol != null ? " · оборот " + round(vol, 2) + "×" : ""),
+      metrics: metrics,
     };
   }
 
@@ -696,12 +845,13 @@
     const profile = input.riskProfile || null;
     const ind = computeIndicators(candles);
     const fundScored = Fund.scoreFundamentals(fundIn, quote.last);
+    const cluster = buildCluster(candles, profile, ind.last);
     const gates = {
       market: gateMarket(quote, candles),
       fund: gateFund(fundScored),
       indicators: gateIndicators(ind),
       strategy: gateStrategy(ind, null, quote, profile),
-      cluster: gateCluster(ind),
+      cluster: gateCluster(ind, cluster),
     };
     gates.strategy = gateStrategy(ind, gates.fund, quote, profile);
     const composed = composeVerdict(gates);
@@ -727,6 +877,7 @@
         },
       },
       fund: fundScored,
+      cluster: cluster,
       gates,
       verdict: composed.verdict,
       weighted: composed.weighted,
@@ -838,6 +989,9 @@
     pickBoardRow,
     mapCandles,
     computeIndicators,
+    volumeProfile,
+    barDelta,
+    buildCluster,
     gateMarket,
     gateFund,
     gateIndicators,

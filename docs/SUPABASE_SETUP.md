@@ -51,7 +51,7 @@ cp js/cabinet-config.example.js js/cabinet-config.local.js
 (идемпотентно). Таблицы:
 
 - `invest_risk_profiles` — анкета риска, UNIQUE(`user_id`)
-- `invest_positions` — ручные активы/пассивы (`value` = капитал, `income_monthly` = доход или платёж в месяц)
+- `invest_positions` — ручные активы/пассивы (`value` = капитал, `income_monthly` = доход или платёж в месяц, `yield_annual_pct` = ставка или доходность годовых, если указана)
 - `invest_analysis_runs` — прогоны автоанализа (гейты, вердикт, explanation JSON)
 
 RLS: `auth.uid() = user_id` на select/insert/update/delete. Анонимный ключ в клиенте

@@ -2580,13 +2580,35 @@ h2 {
   }
 
   .cabinet-gate {
-    padding: 1rem;
-    align-items: start;
-    padding-top: 2rem;
+    place-items: start center;
+    align-content: start;
+    padding-top: max(1.25rem, env(safe-area-inset-top, 0px));
+    padding-bottom: max(3.5rem, env(safe-area-inset-bottom, 0px) + 2.5rem);
   }
 
   .cabinet-gate-card {
-    padding: 1.5rem 1.15rem 1.25rem;
+    padding: 1.5rem 1.15rem 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Nested form scroll traps the submit button under iOS chrome — scroll the gate instead */
+  .cabinet-gate-form-tall {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .cabinet-gate-form .btn {
+    margin-top: 0.85rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .cabinet-gate-switch {
+    margin-bottom: 0.25rem;
+  }
+
+  .cabinet-gate-foot {
+    margin-bottom: 0.5rem;
   }
 
   .lab-step {
@@ -3616,7 +3638,16 @@ h2 {
   z-index: 1000;
   display: grid;
   place-items: center;
-  padding: 1.5rem;
+  align-content: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding:
+    max(1.5rem, env(safe-area-inset-top, 0px))
+    max(1.5rem, env(safe-area-inset-right, 0px))
+    max(2.5rem, env(safe-area-inset-bottom, 0px) + 1.5rem)
+    max(1.5rem, env(safe-area-inset-left, 0px));
   background:
     radial-gradient(ellipse 80% 60% at 20% 10%, rgba(11, 122, 102, 0.18), transparent 55%),
     radial-gradient(ellipse 70% 50% at 90% 80%, rgba(196, 163, 90, 0.14), transparent 50%),
@@ -3712,9 +3743,17 @@ h2 {
 }
 
 .cabinet-gate-form-tall {
+  /* Desktop: keep card compact; mobile override removes this (see ≤720px) */
   max-height: min(70vh, 36rem);
   overflow-y: auto;
   padding-right: 0.25rem;
+  padding-bottom: 0.35rem;
+  scrollbar-gutter: stable;
+}
+
+.cabinet-gate-form-tall .btn[type="submit"],
+.cabinet-gate-form .btn[type="submit"] {
+  scroll-margin-bottom: 5rem;
 }
 
 .cabinet-check a {
@@ -4687,6 +4726,19 @@ body.cabinet-page:not(.cabinet-locked) .cabinet-shell {
   gap: 0.75rem;
 }
 
+.invest-form-row.is-solo {
+  grid-template-columns: 1fr;
+}
+
+.invest-pos-form [hidden] {
+  display: none !important;
+}
+
+.invest-income-hint {
+  margin: 0;
+  line-height: 1.45;
+}
+
 .invest-pos-form .btn-primary,
 .invest-pos-form .btn-line {
   margin-top: 0.15rem;
@@ -5227,9 +5279,26 @@ body.cabinet-page:not(.cabinet-locked) .cabinet-shell {
 }
 
 .invest-chart-switch .btn.is-active {
-  background: #1a2228;
-  color: #f7f4ee;
-  border-color: #1a2228;
+  background: linear-gradient(180deg, #0e8a74 0%, var(--accent) 100%);
+  color: #fff !important;
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(11, 122, 102, 0.28);
+}
+
+.invest-entry {
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line);
+}
+
+.invest-entry p {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.invest-entry p:last-child {
+  margin-bottom: 0;
 }
 
 .invest-tv-panel .invest-tv,

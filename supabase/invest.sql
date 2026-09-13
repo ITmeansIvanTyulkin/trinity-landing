@@ -49,6 +49,7 @@ create table if not exists public.invest_positions (
   ticker text,
   value numeric not null default 0,
   income_monthly numeric,
+  yield_annual_pct numeric,
   currency text not null default 'RUB',
   notes text,
   source text not null default 'manual',
@@ -62,6 +63,7 @@ alter table public.invest_positions add column if not exists name text;
 alter table public.invest_positions add column if not exists ticker text;
 alter table public.invest_positions add column if not exists value numeric not null default 0;
 alter table public.invest_positions add column if not exists income_monthly numeric;
+alter table public.invest_positions add column if not exists yield_annual_pct numeric;
 alter table public.invest_positions add column if not exists currency text not null default 'RUB';
 alter table public.invest_positions add column if not exists notes text;
 alter table public.invest_positions add column if not exists source text not null default 'manual';
@@ -252,7 +254,7 @@ grant select, insert, update, delete on public.invest_watchlist to authenticated
 comment on table public.invest_risk_profiles is
   'TRINITY invest: risk questionnaire + derived risk_level / warn_drawdown_pct. One row per user.';
 comment on table public.invest_positions is
-  'TRINITY invest: manual assets/liabilities. value = capital; income_monthly = rent/coupon/payment. Desk legs merge client-side.';
+  'TRINITY invest: manual assets/liabilities. value = capital; income_monthly = rent/coupon/payment; yield_annual_pct = optional annual rate. Desk legs merge client-side.';
 comment on table public.invest_analysis_runs is
   'TRINITY invest: ticker analysis runs with gates, verdict, scenarios, explanation JSON.';
 comment on table public.invest_watchlist is

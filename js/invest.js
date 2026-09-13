@@ -5,28 +5,51 @@
   const Imp = window.TrinityInvestImport;
   const Auth = window.TrinityCabinetAuth;
 
-  const ASSET_CLASSES = [
-    ["акции", "Акции"],
-    ["облигации", "Облигации"],
-    ["ETF", "ETF"],
-    ["крипто", "Крипто"],
-    ["кэш", "Кэш"],
-    ["валюта", "Валюта"],
-    ["золото — слитки", "Золото — слитки"],
-    ["золото — монеты", "Золото — монеты"],
-    ["золото — бумажное", "Золото — бумажное"],
-    ["драгметаллы", "Драгметаллы"],
-    ["forex", "Forex"],
-    ["опционы", "Опционы"],
-    ["фьючерсы", "Фьючерсы"],
-    ["фонды", "Фонды"],
-    ["сырьё", "Сырьё"],
-    ["депозиты", "Депозиты"],
-    ["недвижимость", "Недвижимость"],
-    ["автомобиль", "Автомобиль"],
-    ["private equity", "Private equity"],
-    ["структурные продукты", "Структурные продукты"],
+  const CLASS_DEFS = [
+    { id: "акции", label: "Акции", side: "asset", ticker: true, yield: "income", valueLabel: "Стоимость", namePh: "компания или бумага" },
+    { id: "облигации", label: "Облигации", side: "asset", ticker: true, yield: "coupon", valueLabel: "Стоимость", namePh: "выпуск или эмитент" },
+    { id: "фонды", label: "Фонды", side: "asset", ticker: true, yield: "income", valueLabel: "Стоимость", namePh: "фонд или БПИФ" },
+    { id: "ETF", label: "ETF", side: "asset", ticker: true, yield: "income", valueLabel: "Стоимость", hidden: true },
+    { id: "депозиты", label: "Депозит", side: "asset", ticker: false, yield: "rate", valueLabel: "Сумма вклада", namePh: "банк и вклад" },
+    { id: "кэш", label: "Наличные", side: "asset", ticker: false, yield: false, valueLabel: "Сумма", namePh: "рубли, доллары, евро" },
+    { id: "валюта", label: "Валюта на руках", side: "asset", ticker: false, yield: false, valueLabel: "Сумма", hidden: true },
+    { id: "недвижимость", label: "Жильё", side: "asset", ticker: false, yield: "rent", valueLabel: "Оценка рынка", namePh: "квартира или дом" },
+    {
+      id: "недвижимость коммерческая",
+      label: "Коммерческая недвижимость",
+      side: "asset",
+      ticker: false,
+      yield: "rent",
+      valueLabel: "Оценка рынка",
+      namePh: "офис, склад, помещение",
+    },
+    { id: "автомобиль", label: "Автомобиль", side: "asset", ticker: false, yield: "cost", valueLabel: "Оценка рынка", namePh: "марка и год" },
+    { id: "золото", label: "Золото", side: "asset", ticker: false, yield: false, valueLabel: "Оценка", namePh: "слиток, монета или счёт" },
+    { id: "золото — слитки", label: "Золото — слитки", side: "asset", ticker: false, yield: false, hidden: true },
+    { id: "золото — монеты", label: "Золото — монеты", side: "asset", ticker: false, yield: false, hidden: true },
+    { id: "золото — бумажное", label: "Золото — бумажное", side: "asset", ticker: false, yield: false, hidden: true },
+    { id: "драгметаллы", label: "Драгметаллы", side: "asset", ticker: false, yield: false, hidden: true },
+    { id: "крипто", label: "Крипто", side: "asset", ticker: true, yield: false, valueLabel: "Стоимость", namePh: "монета или токен" },
+    { id: "прочее", label: "Другое", side: "asset", ticker: false, yield: "income", valueLabel: "Стоимость", namePh: "как назовёте позицию" },
+    { id: "forex", label: "Forex", side: "asset", ticker: true, yield: false, hidden: true },
+    { id: "опционы", label: "Опционы", side: "asset", ticker: true, yield: false, hidden: true },
+    { id: "фьючерсы", label: "Фьючерсы", side: "asset", ticker: true, yield: false, hidden: true },
+    { id: "сырьё", label: "Сырьё", side: "asset", ticker: true, yield: false, hidden: true },
+    { id: "private equity", label: "Private equity", side: "asset", ticker: false, yield: "income", hidden: true },
+    { id: "структурные продукты", label: "Структурные продукты", side: "asset", ticker: false, yield: "income", hidden: true },
+    { id: "кредит", label: "Кредит", side: "liability", ticker: false, yield: "loan", valueLabel: "Остаток долга", namePh: "банк и кредит" },
+    { id: "ипотека", label: "Ипотека", side: "liability", ticker: false, yield: "loan", valueLabel: "Остаток долга", namePh: "банк и ипотека" },
+    { id: "прочий долг", label: "Другой долг", side: "liability", ticker: false, yield: "loan", valueLabel: "Остаток долга", namePh: "что должны" },
   ];
+
+  const YIELD_LABELS = {
+    income: { money: "Доход в месяц", pct: "Доходность, % годовых" },
+    coupon: { money: "Купон в месяц", pct: "Купон, % годовых" },
+    rate: { money: "Доход в месяц", pct: "Ставка, % годовых" },
+    rent: { money: "Аренда в месяц", pct: "Доходность, % годовых" },
+    cost: { money: "Расход в месяц", pct: null },
+    loan: { money: "Платёж в месяц", pct: "Ставка, % годовых" },
+  };
 
   const CHART_COLORS = [
     "#0b7a66",
@@ -58,6 +81,7 @@
     watchBusy: false,
     filters: { side: "", asset_class: "", source: "" },
     importFileName: "",
+    yieldEdit: "pct",
   };
 
   function cfg() {
@@ -353,11 +377,30 @@
       .replace(/"/g, "&quot;");
   }
 
+  function classDef(id) {
+    return CLASS_DEFS.find((d) => d.id === id) || null;
+  }
+
   function classLabel(key) {
     const raw = String(key || "");
     if (raw.indexOf("desk · ") === 0) return "Desk · " + raw.slice(7);
-    const hit = ASSET_CLASSES.find((p) => p[0] === raw);
-    return hit ? hit[1] : raw;
+    const hit = classDef(raw);
+    return hit ? hit.label : raw;
+  }
+
+  function yieldLinked(def) {
+    return def && (def.yield === "income" || def.yield === "coupon" || def.yield === "rate" || def.yield === "rent");
+  }
+
+  function parseFormNum(raw) {
+    if (raw == null || raw === "") return null;
+    return Fund.parseNumber(String(raw).replace(/%/g, ""));
+  }
+
+  function fmtInputNum(n, digits) {
+    if (n == null || !Number.isFinite(Number(n))) return "";
+    const t = Number(n).toFixed(digits);
+    return t.replace(/\.?0+$/, "").replace(".", ",");
   }
 
   const LIQUID_CLASSES = {
@@ -373,8 +416,10 @@
 
   const LOCKED_CLASSES = {
     "недвижимость": true,
+    "недвижимость коммерческая": true,
     "автомобиль": true,
     "private equity": true,
+    "золото": true,
     "золото — слитки": true,
     "золото — монеты": true,
   };
@@ -532,6 +577,45 @@
     if (keep) sel.value = keep;
   }
 
+  function visibleClassDefs(side, currentId) {
+    return CLASS_DEFS.filter((d) => {
+      if (d.id === currentId) return true;
+      if (d.hidden) return false;
+      return d.side === side;
+    });
+  }
+
+  function fillClassSelect(form) {
+    const sel = form && form.asset_class;
+    if (!sel) return;
+    const side = form.side ? form.side.value : "asset";
+    const current = sel.value;
+    const items = visibleClassDefs(side, current).map((d) => [d.id, d.label]);
+    fillSelect(sel, items, true, "Выберите класс");
+    if (current) sel.value = current;
+  }
+
+  function fillFilterClasses() {
+    const extra = {};
+    mergedPositions().forEach((p) => {
+      if (p && p.asset_class) extra[p.asset_class] = true;
+    });
+    const seen = {};
+    const items = [];
+    CLASS_DEFS.forEach((d) => {
+      if (d.hidden && !extra[d.id]) return;
+      if (seen[d.id]) return;
+      seen[d.id] = true;
+      items.push([d.id, d.label]);
+    });
+    Object.keys(extra).forEach((id) => {
+      if (seen[id]) return;
+      seen[id] = true;
+      items.push([id, classLabel(id)]);
+    });
+    fillSelect($("[data-filter-class]"), items, true);
+  }
+
   function readForm(form) {
     const fd = new FormData(form);
     const o = {};
@@ -598,6 +682,7 @@
       return;
     }
     state.positions = data || [];
+    fillFilterClasses();
     renderPortfolio();
     renderOverview();
   }
@@ -1325,9 +1410,15 @@
             const income = monthlyIncome(r);
             const incR = incomeRub(r);
             const fx = fxPnl(r);
+            const yldPct =
+              r.yield_annual_pct != null && Number.isFinite(Number(r.yield_annual_pct))
+                ? Number(r.yield_annual_pct)
+                : r.side === "asset" && rub > 0 && incR && !isCostingOwnedVehicle(r)
+                  ? (incR * 12 * 100) / rub
+                  : null;
             const yld =
-              r.side === "asset" && rub > 0 && incR && !isCostingOwnedVehicle(r)
-                ? " <span class=\"muted\">" + fmtPct((incR * 12 * 100) / rub) + "</span>"
+              yldPct != null && Number.isFinite(yldPct)
+                ? " <span class=\"muted\">" + fmtPct(yldPct) + "</span>"
                 : "";
             const rubHint =
               ccy !== "RUB" && rub != null
@@ -1441,6 +1532,17 @@
       "[data-verdict-sub]",
       (result.name ? result.name + ". " : "") + priceBit + (expl.lead || expl.disclaimer || "")
     );
+    const entryBox = $("[data-verdict-entry]");
+    if (entryBox) {
+      const lines = expl.entry && expl.entry.lines ? expl.entry.lines : [];
+      if (!lines.length) {
+        entryBox.hidden = true;
+        entryBox.innerHTML = "";
+      } else {
+        entryBox.hidden = false;
+        entryBox.innerHTML = lines.map((line) => "<p>" + escHtml(line) + "</p>").join("");
+      }
+    }
     const host = $("[data-report-sections]");
     if (host) {
       host.innerHTML = (expl.sections || [])
@@ -1523,8 +1625,8 @@
     if (sub) {
       sub.textContent =
         mode === "tv"
-          ? "Живой график, 15 минут. Интервал можно сменить на самом графике. Если пусто — снимок Мосбиржи."
-          : "Дневные свечи Мосбиржи на момент разбора. Не живой поток.";
+          ? "Живой график. Интервал на виджете можно сменить на дневки — разбор точки входа считается только по ним. Если пусто — снимок Мосбиржи."
+          : "Дневки Мосбиржи на момент разбора. Не минутный поток.";
     }
     if (frame) frame.hidden = mode !== "tv";
     if (canvas) canvas.hidden = mode !== "iss";
@@ -2226,43 +2328,132 @@
     });
   }
 
-  function syncIncomeLabel(form) {
-    const name = $("[data-income-label] .invest-income-name");
-    if (!name || !form || !form.side) return;
-    const cls = form.asset_class ? form.asset_class.value : "";
-    if (form.side.value === "liability") name.textContent = "Платёж в месяц";
-    else if (cls === "автомобиль") name.textContent = "Расход в месяц";
-    else name.textContent = "Доход в месяц";
+  function posHintFor(side, cls) {
+    if (cls === "депозиты") {
+      return "Сумма — в валюте вклада. Ставка годовых и доход в месяц считаются друг из друга: достаточно заполнить одно.";
+    }
+    if (cls === "недвижимость коммерческая") {
+      return "Оценка рынка входит в капитал. Аренда — живые деньги. Доходность годовых считается от оценки: достаточно одного поля.";
+    }
+    if (cls === "недвижимость") {
+      return "Оценка рынка входит в капитал. Если сдаёте — укажите аренду в месяц или доходность годовых.";
+    }
+    if (cls === "кредит") {
+      return "Сумма — остаток долга, не сколько брали. Платёж в месяц идёт в живые деньги. Ставка годовых — справочно: из неё платёж не считается, в кредите есть тело и проценты.";
+    }
+    if (cls === "ипотека") {
+      return "Сумма — остаток ипотеки. Жильё запишите отдельно как собственность. Платёж в месяц — что уходит в банк. Ставка — справочно.";
+    }
+    if (cls === "прочий долг") {
+      return "Сумма — сколько ещё должны. Платёж в месяц, если он есть. Ставка — по желанию, справочно.";
+    }
+    if (cls === "автомобиль" && side === "asset") {
+      return "Машина в собственности входит в капитал по оценке рынка. Расход в месяц — содержание и страховка. Кредит, если есть, запишите отдельно как долг на остаток. Если это такси — напишите «такси» в заметке, тогда месяц считается доходом.";
+    }
+    if (cls === "автомобиль") {
+      return "Так учитывается только долг: остаток кредита. Саму машину запишите «в собственности», иначе сумма выглядит как будто вы её должны, а не владеете.";
+    }
+    if (cls === "кэш" || cls === "валюта") {
+      return "Наличные и валюта на руках. Если это вклад в банке — выберите «Депозит», там можно указать ставку.";
+    }
+    if (cls === "акции") {
+      return "Тикер нужен, если бумага с Мосбиржи. Дивиденд можно указать в деньгах за месяц или как доходность годовых.";
+    }
+    if (cls === "облигации") {
+      return "Купон — в месяц или как ставка годовых. Поля считаются друг из друга.";
+    }
+    if (cls === "фонды" || cls === "ETF") {
+      return "Тикер, если фонд торгуется. Выплату можно указать в деньгах за месяц или как доходность годовых.";
+    }
+    if (cls === "золото" || String(cls).indexOf("золото") === 0) {
+      return "Оценка входит в капитал. Шкала золота на обзоре — спот Мосбиржи, не совет покупать слитки.";
+    }
+    if (cls === "крипто") {
+      return "Стоимость по вашей оценке. Месячного дохода у монеты обычно нет — его сюда не выдумываем.";
+    }
+    if (side === "liability") {
+      return "Долг — то, что должны: кредит, ипотека, остаток займа. Стоимость здесь — тело долга, не цена заложенной вещи.";
+    }
+    if (!cls) {
+      return "Сначала выберите класс — под него подстроятся поля. Где есть доход, его можно указать в деньгах или в процентах годовых.";
+    }
+    return "В собственности — оценка рынка входит в капитал. Доход в месяц, если вещь его приносит, либо доходность годовых.";
   }
 
-  function syncPosHints(form) {
-    syncIncomeLabel(form);
-    const hint = $("[data-pos-hint]");
-    if (!hint || !form) return;
+  function setRowSolo(row, solo) {
+    if (!row) return;
+    row.classList.toggle("is-solo", Boolean(solo));
+  }
+
+  function syncPosFields(form, opts) {
+    if (!form) return;
+    const wipe = opts && opts.wipeYield;
     const side = form.side ? form.side.value : "asset";
     const cls = form.asset_class ? form.asset_class.value : "";
-    if (cls === "автомобиль" && side === "asset") {
-      hint.textContent =
-        "Машина в собственности входит в капитал по оценке рынка. Расход в месяц — содержание и страховка. Кредит, если есть, запишите отдельно как долг (остаток), не цену авто. Такси — в заметке слово «такси», тогда месяц считается доходом.";
-    } else if (cls === "автомобиль") {
-      hint.textContent =
-        "Так учитывается только долг: остаток кредита. Саму машину запишите «в собственности», иначе 2 млн выглядят как будто вы их должны, а не владеете.";
-    } else if (side === "liability") {
-      hint.textContent =
-        "Долг — то, что должны: кредит, ипотека, остаток займа. Стоимость здесь — тело долга, не цена заложенной вещи.";
-    } else {
-      hint.textContent =
-        "В собственности — оценка рынка входит в капитал и на круг. Доход в месяц, если вещь его приносит.";
+    const def = classDef(cls);
+    const tickerLab = $("[data-field=\"ticker\"]", form);
+    const nameRow = $("[data-row=\"name\"]", form);
+    const yieldRow = $("[data-field=\"yield\"]", form);
+    const pctLab = $("[data-field=\"yield-pct\"]", form);
+    const valueLab = $("[data-value-label]", form);
+    const nameInp = $("[data-pos-name]", form) || form.name;
+    const moneyName = $("[data-income-label] .invest-income-name", form);
+    const pctName = $("[data-field=\"yield-pct\"] .invest-yield-name", form);
+    const hint = $("[data-pos-hint]");
+
+    const showTicker = Boolean(def && def.ticker);
+    if (tickerLab) tickerLab.hidden = !showTicker;
+    setRowSolo(nameRow, !showTicker);
+    if (nameInp && def && def.namePh) nameInp.placeholder = def.namePh;
+    else if (nameInp) nameInp.placeholder = "как назовёте позицию";
+    if (valueLab) valueLab.textContent = (def && def.valueLabel) || "Стоимость";
+
+    const yKind = def && def.yield;
+    const yCopy = yKind ? YIELD_LABELS[yKind] : null;
+    if (yieldRow) yieldRow.hidden = !yCopy;
+    if (pctLab) pctLab.hidden = !(yCopy && yCopy.pct);
+    setRowSolo(yieldRow, Boolean(yCopy && !yCopy.pct));
+    if (moneyName && yCopy) moneyName.textContent = yCopy.money;
+    if (pctName && yCopy && yCopy.pct) pctName.textContent = yCopy.pct;
+    if (hint) hint.textContent = posHintFor(side, cls);
+
+    if (wipe) {
+      if (!yCopy) {
+        if (form.income_monthly) form.income_monthly.value = "";
+        if (form.yield_annual_pct) form.yield_annual_pct.value = "";
+      } else if (!yCopy.pct && form.yield_annual_pct) {
+        form.yield_annual_pct.value = "";
+      }
+      if (!showTicker && form.ticker && !state.editingId) form.ticker.value = "";
+    }
+  }
+
+  function syncYieldPair(form, from) {
+    const def = classDef(form && form.asset_class ? form.asset_class.value : "");
+    if (!form || !yieldLinked(def) || !Imp) return;
+    const value = parseFormNum(form.value && form.value.value);
+    if (from === "pct") {
+      const pct = parseFormNum(form.yield_annual_pct && form.yield_annual_pct.value);
+      const monthly = Imp.monthlyFromYield(value, pct);
+      if (form.income_monthly) form.income_monthly.value = monthly == null ? "" : fmtInputNum(monthly, 2);
+    } else if (from === "money") {
+      const monthly = parseFormNum(form.income_monthly && form.income_monthly.value);
+      const pct = Imp.yieldFromMonthly(value, monthly);
+      if (form.yield_annual_pct) form.yield_annual_pct.value = pct == null ? "" : fmtInputNum(pct, 2);
+    } else if (from === "value") {
+      syncYieldPair(form, state.yieldEdit === "money" ? "money" : "pct");
     }
   }
 
   function resetPosForm(form) {
     if (!form) return;
     state.editingId = null;
+    state.yieldEdit = "pct";
     form.reset();
     if (form.currency) form.currency.value = "RUB";
     if (form.asset_class) form.asset_class.value = "";
-    syncPosHints(form);
+    fillClassSelect(form);
+    syncPosFields(form, { wipeYield: true });
     setText("[data-pos-form-title]", "Добавить позицию");
     const submit = $("[data-pos-submit]");
     if (submit) submit.textContent = "Сохранить";
@@ -2274,6 +2465,9 @@
     if (!form || !row) return;
     state.editingId = row.id;
     form.side.value = row.side || "asset";
+    fillClassSelect(form);
+    form.asset_class.value = row.asset_class || "";
+    fillClassSelect(form);
     form.asset_class.value = row.asset_class || "";
     form.name.value = row.name || "";
     form.ticker.value = row.ticker || "";
@@ -2281,8 +2475,18 @@
     form.currency.value = positionCcy(row);
     form.income_monthly.value =
       row.income_monthly != null && row.income_monthly !== "" ? String(row.income_monthly) : "";
+    if (form.yield_annual_pct) {
+      if (row.yield_annual_pct != null && row.yield_annual_pct !== "") {
+        form.yield_annual_pct.value = String(row.yield_annual_pct);
+        state.yieldEdit = "pct";
+      } else {
+        const derived = Imp ? Imp.yieldFromMonthly(row.value, row.income_monthly) : null;
+        form.yield_annual_pct.value = derived == null ? "" : fmtInputNum(derived, 2);
+        state.yieldEdit = "money";
+      }
+    }
     form.notes.value = row.notes || "";
-    syncPosHints(form);
+    syncPosFields(form);
     setText("[data-pos-form-title]", "Изменить позицию");
     const submit = $("[data-pos-submit]");
     if (submit) submit.textContent = "Обновить";
@@ -2358,17 +2562,20 @@
   }
 
   function classOptionsHtml(selected) {
-    return ASSET_CLASSES.map(([id, label]) => {
-      return (
-        '<option value="' +
-        escHtml(id) +
-        '"' +
-        (id === selected ? " selected" : "") +
-        ">" +
-        escHtml(label) +
-        "</option>"
-      );
-    }).join("");
+    const items = CLASS_DEFS.filter((d) => !d.hidden || d.id === selected);
+    return items
+      .map((d) => {
+        return (
+          '<option value="' +
+          escHtml(d.id) +
+          '"' +
+          (d.id === selected ? " selected" : "") +
+          ">" +
+          escHtml(d.label) +
+          "</option>"
+        );
+      })
+      .join("");
   }
 
   function renderImportPreview(drafts, extraNote) {
@@ -2387,6 +2594,8 @@
         return (
           '<tr class="invest-import-preview-row" data-import-row data-import-income="' +
           escHtml(d.income_monthly == null ? "" : String(d.income_monthly)) +
+          '" data-import-yield="' +
+          escHtml(d.yield_annual_pct == null ? "" : String(d.yield_annual_pct)) +
           '" data-import-notes="' +
           escHtml(d.notes || "") +
           '">' +
@@ -2450,6 +2659,9 @@
         const incomeRaw = tr.getAttribute("data-import-income");
         const income =
           Imp && Imp.parseAmount && incomeRaw ? Imp.parseAmount(incomeRaw) : incomeRaw ? Number(incomeRaw) : null;
+        const yieldRaw = tr.getAttribute("data-import-yield");
+        const yieldPct =
+          Imp && Imp.parseAmount && yieldRaw ? Imp.parseAmount(yieldRaw) : yieldRaw ? Number(yieldRaw) : null;
         return {
           side: ($("[data-import-side]", tr) || {}).value || "asset",
           asset_class: ($("[data-import-class]", tr) || {}).value || "акции",
@@ -2457,6 +2669,7 @@
           ticker: ticker || null,
           value: value,
           income_monthly: Number.isFinite(income) ? income : null,
+          yield_annual_pct: Number.isFinite(yieldPct) ? yieldPct : null,
           currency: ($("[data-import-ccy]", tr) || {}).value || "RUB",
           notes: tr.getAttribute("data-import-notes") || "",
         };
@@ -2572,6 +2785,7 @@
           ticker: r.ticker,
           value: Math.abs(Number(r.value)),
           income_monthly: r.income_monthly,
+          yield_annual_pct: r.yield_annual_pct == null ? null : r.yield_annual_pct,
           currency: r.currency || "RUB",
           notes: notes ? (notes.indexOf(tag) >= 0 ? notes : notes + " · " + tag) : tag,
           source: "manual",
@@ -2586,7 +2800,16 @@
       return;
     }
     setImportStatus("Записываем " + fresh.length + "…");
-    const { error } = await client.from("invest_positions").insert(fresh);
+    let { error } = await client.from("invest_positions").insert(fresh);
+    if (error && /yield_annual_pct/i.test(error.message || "")) {
+      ({ error } = await client.from("invest_positions").insert(
+        fresh.map((r) => {
+          const copy = Object.assign({}, r);
+          delete copy.yield_annual_pct;
+          return copy;
+        })
+      ));
+    }
     if (error) {
       setImportStatus(
         /schema cache|does not exist/i.test(error.message || "")
@@ -2645,44 +2868,68 @@
         if (!client || !state.user) return;
         const o = readForm(pos);
         if (!o.asset_class) {
-          if (msg) msg.textContent = "Выберите класс — от него зависит структура.";
+          if (msg) msg.textContent = "Выберите класс — от него зависят поля и структура.";
           return;
         }
-        const value = Fund.parseNumber(o.value);
+        const def = classDef(o.asset_class);
+        if (def && def.side) o.side = def.side;
+        const value = parseFormNum(o.value);
         if (value == null) {
           if (msg) msg.textContent = "Укажите стоимость числом.";
           return;
         }
-        const income =
-          o.income_monthly === "" || o.income_monthly == null
-            ? null
-            : Fund.parseNumber(o.income_monthly);
+        let income =
+          o.income_monthly === "" || o.income_monthly == null ? null : parseFormNum(o.income_monthly);
         if (o.income_monthly && income == null) {
-          if (msg) msg.textContent = "Доход/платёж в месяц — числом, либо пусто.";
+          if (msg) msg.textContent = "Доход или платёж в месяц — числом, либо пусто.";
           return;
         }
+        let pct =
+          o.yield_annual_pct === "" || o.yield_annual_pct == null ? null : parseFormNum(o.yield_annual_pct);
+        if (o.yield_annual_pct && pct == null) {
+          if (msg) msg.textContent = "Проценты годовых — числом, либо пусто.";
+          return;
+        }
+        if (!def || !def.yield) {
+          income = null;
+          pct = null;
+        } else if (def.yield === "cost") {
+          pct = null;
+        } else if (yieldLinked(def) && Imp) {
+          if (income == null && pct != null) income = Imp.monthlyFromYield(value, pct);
+          if (pct == null && income != null) pct = Imp.yieldFromMonthly(value, income);
+        }
+        const ticker = def && def.ticker ? (o.ticker || "").toUpperCase() || null : null;
         const row = {
           user_id: state.user.id,
           side: o.side,
           asset_class: o.asset_class,
           name: o.name,
-          ticker: (o.ticker || "").toUpperCase() || null,
+          ticker: ticker,
           value,
           income_monthly: income,
+          yield_annual_pct: pct,
           currency: o.currency || "RUB",
           notes: o.notes || null,
           source: "manual",
           updated_at: new Date().toISOString(),
         };
         const wasEdit = Boolean(state.editingId);
-        const { error } = wasEdit
-          ? await client.from("invest_positions").update(row).eq("id", state.editingId)
-          : await client.from("invest_positions").insert(row);
+        const write = (payload) =>
+          wasEdit
+            ? client.from("invest_positions").update(payload).eq("id", state.editingId)
+            : client.from("invest_positions").insert(payload);
+        let { error } = await write(row);
+        if (error && /yield_annual_pct/i.test(error.message || "")) {
+          const fallback = Object.assign({}, row);
+          delete fallback.yield_annual_pct;
+          ({ error } = await write(fallback));
+        }
         if (error) {
           if (msg) {
             msg.textContent =
-              /income_monthly|schema cache/i.test(error.message || "")
-                ? "Нужна колонка income_monthly — ещё раз выполните supabase/invest.sql в SQL Editor."
+              /income_monthly|schema cache|does not exist/i.test(error.message || "")
+                ? "Таблицы invest_* ещё не созданы или не хватает колонки. Ещё раз выполните supabase/invest.sql в SQL Editor."
                 : error.message;
           }
           return;
@@ -2692,17 +2939,41 @@
         await loadPositions();
       });
       if (pos.side) {
-        pos.side.addEventListener("change", () => syncPosHints(pos));
+        pos.side.addEventListener("change", () => {
+          const def = classDef(pos.asset_class && pos.asset_class.value);
+          if (def && def.side !== pos.side.value) pos.asset_class.value = "";
+          fillClassSelect(pos);
+          syncPosFields(pos, { wipeYield: true });
+        });
       }
       if (pos.asset_class) {
         pos.asset_class.addEventListener("change", () => {
-          if (pos.asset_class.value === "автомобиль" && !state.editingId && pos.side) {
-            pos.side.value = "asset";
+          const def = classDef(pos.asset_class.value);
+          if (def && pos.side && pos.side.value !== def.side) {
+            pos.side.value = def.side;
+            fillClassSelect(pos);
+            pos.asset_class.value = def.id;
           }
-          syncPosHints(pos);
+          syncPosFields(pos, { wipeYield: true });
         });
       }
-      syncPosHints(pos);
+      if (pos.value) {
+        pos.value.addEventListener("input", () => syncYieldPair(pos, "value"));
+      }
+      if (pos.income_monthly) {
+        pos.income_monthly.addEventListener("input", () => {
+          state.yieldEdit = "money";
+          syncYieldPair(pos, "money");
+        });
+      }
+      if (pos.yield_annual_pct) {
+        pos.yield_annual_pct.addEventListener("input", () => {
+          state.yieldEdit = "pct";
+          syncYieldPair(pos, "pct");
+        });
+      }
+      fillClassSelect(pos);
+      syncPosFields(pos);
       const cancel = $("[data-pos-cancel]");
       if (cancel) {
         cancel.addEventListener("click", () => {
@@ -2891,10 +3162,14 @@
         const form = $("[data-pos-form]");
         if (!form || !r) return;
         form.side.value = "asset";
+        fillClassSelect(form);
+        form.asset_class.value = "акции";
+        fillClassSelect(form);
         form.asset_class.value = "акции";
         form.name.value = r.name || r.ticker;
         form.ticker.value = r.ticker || "";
         form.notes.value = "из отчёта " + r.verdict;
+        syncPosFields(form);
         form.value.focus();
       });
 
@@ -2947,8 +3222,9 @@
   }
 
   async function boot() {
-    fillSelect($("[data-asset-class]"), ASSET_CLASSES, true, "Выберите класс");
-    fillSelect($("[data-filter-class]"), ASSET_CLASSES, true);
+    const form = $("[data-pos-form]");
+    fillClassSelect(form);
+    fillFilterClasses();
     fillRiskOptions();
     setupNav();
     setupForms();

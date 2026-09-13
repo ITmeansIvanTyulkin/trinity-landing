@@ -247,6 +247,27 @@ describe("TrinityInvestPipeline", () => {
     assert.equal(legs[0].ticker, "SBER");
   });
 
+  it("builds a daily volume profile and parks POC on the heavy shelf", () => {
+    const rows = [];
+    for (let i = 0; i < 80; i++) {
+      rows.push({ open: 100, close: 100.2, high: 101, low: 99.4, volume: 80 });
+    }
+    for (let i = 0; i < 50; i++) {
+      rows.push({ open: 90, close: 90.1, high: 90.5, low: 89.8, volume: 900 });
+    }
+    const p = Pipe.volumeProfile(rows, 220);
+    assert.ok(p);
+    assert.ok(p.poc >= 89 && p.poc <= 91.5, "poc=" + p.poc);
+    assert.ok(p.val < p.poc && p.poc < p.vah);
+  });
+
+  it("keeps cluster lookback on daily bars for a long horizon", () => {
+    const cl = Pipe.buildCluster(grindCandles(80), { horizon: "y5" }, 110);
+    assert.equal(cl.lookback, 320);
+    assert.equal(cl.source, "daily");
+    assert.ok(cl.bars >= 40);
+  });
+
   it("extractIssJson accepts raw JSON and markdown wrappers", () => {
     const raw = { securities: { columns: ["SECID"], data: [["GAZP"]] } };
     assert.equal(Pipe.extractIssJson(JSON.stringify(raw)).securities.data[0][0], "GAZP");
@@ -316,8 +337,8 @@ describe("TrinityInvestExplain", () => {
       assert.ok(["Pass", "Weak", "Fail", "NoData"].indexOf(s.status) >= 0);
     });
     assert.match(expl.disclaimer, /не индивидуальная/i);
-    assert.match(expl.sections.find((s) => s.id === "cluster").body, /оборот/i);
-    assert.equal(expl.verdictLabel, "Пока — наблюдение");
+    assert.match(expl.sections.find((s) => s.id === "cluster").body, /дневк/i);
+    assert.equal(expl.verdictLabel, "Наблюдать");
     expl.sections.forEach((s) => {
       assert.ok(s.statusLabel, s.id + " needs statusLabel");
       assert.doesNotMatch(s.body, /NoData|Watch|Invest|Excel|MVP|playbook|ISS|гейтов|гейта|ЦКИ/i);
