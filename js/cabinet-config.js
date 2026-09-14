@@ -6,7 +6,8 @@
  * NO order placement, NO broker token. Trading stays in IMOEX /view.
  */
 window.CABINET_CONFIG = {
-  /* Read-only IMOEX: journal + regime (CORS on Instance for landing origins) */
+  /* Read-only snapshot from the desktop desk lands in Supabase (desk_snapshots).
+     imoexBase is a local-dev fallback only — never shown in the UI. */
   imoexBase: null,
   supportEmail: "info@trinity.trading",
   /* Supabase project URL + anon (public) key — fill via .local.js or deploy */

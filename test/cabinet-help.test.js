@@ -24,10 +24,14 @@ describe("TrinityCabinetHelp", () => {
     assert.equal(Help.matchQuery("куда ввести токен брокера")[0].id, "broker");
   });
 
+  it("matches live-data question to metrics", () => {
+    assert.equal(Help.matchQuery("живые данные из приложения")[0].id, "metrics");
+  });
+
   it("findById walks nested nodes", () => {
     const node = Help.findById("trial-pay");
     assert.ok(node);
-    assert.match(node.steps[0], /демонстрацион/i);
+    assert.match(node.steps[0], /не подключена/i);
   });
 
   it("childrenOf returns next options", () => {

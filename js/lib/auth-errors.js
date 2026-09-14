@@ -11,7 +11,7 @@
   "use strict";
 
   function mapAuthError(error) {
-    if (!error) return "Ошибка аутентификации";
+    if (!error) return "Не получилось войти";
     const m = (error.message || String(error)).toLowerCase();
     if (
       m.includes("load failed") ||
@@ -19,7 +19,7 @@
       m.includes("networkerror") ||
       m.includes("network request failed")
     ) {
-      return "Сеть: не удалось связаться с Supabase. Проверьте supabaseUrl (Project URL) и интернет.";
+      return "Не получилось связаться с сервисом входа. Проверьте интернет и попробуйте снова.";
     }
     if (m.includes("email not confirmed")) {
       return "Email ещё не подтверждён. Откройте письмо и перейдите по ссылке.";
@@ -33,7 +33,7 @@
     if (m.includes("password")) {
       return "Пароль слишком короткий (минимум 6 символов).";
     }
-    return error.message || "Ошибка аутентификации";
+    return error.message || "Не получилось войти";
   }
 
   function isAuthConfigured(config) {
@@ -45,7 +45,7 @@
     if (name === "login") return "Вход в кабинет";
     if (name === "register") return "Регистрация";
     if (name === "check-email") return "Проверьте почту";
-    if (name === "setup") return "Auth не настроен";
+    if (name === "setup") return "Вход ещё не подключён";
     return "Кабинет";
   }
 

@@ -14,7 +14,7 @@ Auth кабинета: **Supabase** (email + пароль + confirm). См. [doc
 ## Локальный просмотр
 
 ```bash
-python3 -m http.server 5173
+python3 scripts/dev-server.py
 ```
 
 - Лендинг: [http://127.0.0.1:5173/](http://127.0.0.1:5173/)
@@ -35,7 +35,7 @@ cp js/cabinet-config.example.js js/cabinet-config.local.js
 npm test
 ```
 
-Покрывают методы в `js/lib/`: Capital Allocator, Decision Lab, auth errors, product modes, unlock key, invest pipeline.
+Покрывают методы в `js/lib/`: Capital Allocator, Decision Lab, auth errors, product modes, unlock key, invest pipeline, desk snapshot.
 
 ## Структура
 
@@ -52,6 +52,7 @@ test/                   # node:test
 wiki/                   # публикации + how-to
 robots.txt / sitemap.xml
 supabase/profiles.sql
+supabase/desk_snapshots.sql
 docs/SUPABASE_SETUP.md
 docs/SEO.md
 ```

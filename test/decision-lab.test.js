@@ -28,19 +28,19 @@ describe("TrinityDecisionLab.evaluatePipeline", () => {
   it("BLOCK on TREND regime", () => {
     const r = Lab.evaluatePipeline({ ...base, regime: "TREND" });
     assert.equal(r.outcome, "BLOCK");
-    assert.match(r.reason, /TREND/);
+    assert.match(r.reason, /тренд/i);
   });
 
   it("BLOCK when cluster ineligible", () => {
     const r = Lab.evaluatePipeline({ ...base, cluster: false });
     assert.equal(r.outcome, "BLOCK");
-    assert.match(r.reason, /Cluster/);
+    assert.match(r.reason, /сектор/i);
   });
 
   it("BLOCK when FA fails", () => {
     const r = Lab.evaluatePipeline({ ...base, fa: "fail" });
     assert.equal(r.outcome, "BLOCK");
-    assert.match(r.reason, /FA/);
+    assert.match(r.reason, /фундамент/i);
   });
 
   it("WATCH on weak FA or low Z", () => {
@@ -76,5 +76,85 @@ describe("TrinityDecisionLab.evaluatePipeline", () => {
       r.steps.slice(0, 4).map((s) => s.id),
       ["tech", "regime", "cluster", "fa"]
     );
+  });
+});
+
+describe("TrinityDecisionLab.buildLabState", () => {
+  it("expands catalog beyond the three demo pairs", () => {
+    assert.ok(Lab.catalogPairs().length >= 20);
+    assert.ok(Lab.catalogPairs().some((p) => p.id === "gazp-lkoh"));
+    assert.ok(Lab.catalogPairs().some((p) => p.id === "magn-nlmk"));
+  });
+
+  it("maps desk sit-out to cluster=false and live regime", () => {
+    const s = Lab.buildLabState({
+      regime: { label: "NEUTRAL", blockEntries: false },
+      report: {
+        tickersAnalyzed: 32,
+        pairsTested: 113,
+        cointegratedPairs: 0,
+        topPairs: [],
+        recommendations: [],
+      },
+      cluster: {
+        sitOut: true,
+        champion: null,
+        sectors: [
+          { sector: "OIL_GAS", eligible: false },
+          { sector: "BANKS", eligible: false },
+          { sector: "METALS_MINING", eligible: false },
+          { sector: "RETAIL", eligible: false },
+        ],
+      },
+      recommendations: [],
+    });
+    assert.equal(s.regime, "NEUTRAL");
+    assert.equal(s.sitOut, true);
+    assert.ok(s.pairs.length >= 20);
+    const banks = s.pairs.find((p) => p.id === "sber-vtbr");
+    assert.equal(banks.cluster, false);
+    assert.equal(banks.live, false);
+    const g = Lab.gatesFromPair(banks, { regime: s.regime });
+    assert.equal(g.regime, "NEUTRAL");
+    assert.equal(g.cluster, false);
+    assert.equal(g.fa, "weak");
+    const verdict = Lab.evaluatePipeline(g);
+    assert.equal(verdict.outcome, "BLOCK");
+    assert.match(s.line, /фаворита нет/i);
+  });
+
+  it("promotes recommendation Z into live pair gates", () => {
+    const s = Lab.buildLabState({
+      regime: { label: "SIDEWAYS" },
+      recommendations: [
+        {
+          tickerY: "MAGN",
+          tickerX: "NLMK",
+          currentZScore: -2.1,
+          signal: "LONG_SPREAD",
+          summary: "Спред ниже среднего",
+        },
+      ],
+      cluster: {
+        sitOut: false,
+        champion: "METALS_MINING",
+        sectors: [{ sector: "METALS_MINING", eligible: true }],
+      },
+      finals: [{ tickerY: "MAGN", tickerX: "NLMK", decision: "ENTER" }],
+    });
+    const p = s.pairs.find((x) => x.id === "magn-nlmk");
+    assert.equal(p.live, true);
+    assert.equal(p.zAbs, 2.1);
+    assert.equal(p.cluster, true);
+    assert.equal(p.fa, "pass");
+    const g = Lab.gatesFromPair(p);
+    assert.equal(Lab.evaluatePipeline(g).outcome, "PAPER OPEN");
+    assert.equal(Lab.sameGates(g, g), true);
+  });
+
+  it("faFromDecision maps ENTER / WATCH / BLOCK", () => {
+    assert.equal(Lab.faFromDecision("ENTER"), "pass");
+    assert.equal(Lab.faFromDecision("WATCH"), "weak");
+    assert.equal(Lab.faFromDecision("BLOCK"), "fail");
   });
 });

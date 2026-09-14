@@ -87,7 +87,7 @@
             : name === "check-email"
               ? "Проверьте почту"
               : name === "setup"
-                ? "Auth не настроен"
+                ? "Вход ещё не подключён"
                 : "Кабинет";
   }
 
@@ -227,7 +227,7 @@
       showPanel("setup");
       setError("");
       setInfo(
-        "Заполните supabaseUrl и supabaseAnonKey (js/cabinet-config.local.js). Инструкция: docs/SUPABASE_SETUP.md"
+        "Вход на этом сайте ещё не подключён. Напишите на info@trinity.trading. Если настраиваете кабинет — см. js/cabinet-config.local.js и docs/SUPABASE_SETUP.md"
       );
       return { session: null };
     }
@@ -237,7 +237,7 @@
       document.body.classList.add("cabinet-locked");
       if (gate) gate.hidden = false;
       showPanel("setup");
-      setError("Не загрузился supabase-js. Проверьте CDN и сеть.");
+      setError("Не загрузилась библиотека входа. Обновите страницу или проверьте сеть.");
       return { session: null };
     }
 
@@ -285,7 +285,7 @@
         showPanel("login");
       }
       if (event === "PASSWORD_RECOVERY") {
-        setInfo("Можно задать новый пароль через письмо восстановления (Supabase).");
+        setInfo("Можно задать новый пароль через письмо восстановления.");
       }
     });
 

@@ -4,7 +4,7 @@ const Auth = require("../js/lib/auth-errors.js");
 
 describe("TrinityAuthErrors", () => {
   it("mapAuthError: null / generic", () => {
-    assert.equal(Auth.mapAuthError(null), "Ошибка аутентификации");
+    assert.equal(Auth.mapAuthError(null), "Не получилось войти");
     assert.equal(Auth.mapAuthError({ message: "weird" }), "weird");
   });
 
@@ -15,7 +15,7 @@ describe("TrinityAuthErrors", () => {
       "NetworkError when attempting",
       "Network request failed",
     ]) {
-      assert.match(Auth.mapAuthError({ message: msg }), /Сеть/);
+      assert.match(Auth.mapAuthError({ message: msg }), /сервисом входа/);
     }
   });
 
@@ -57,7 +57,7 @@ describe("TrinityAuthErrors", () => {
     assert.equal(Auth.panelTitle("login"), "Вход в кабинет");
     assert.equal(Auth.panelTitle("register"), "Регистрация");
     assert.equal(Auth.panelTitle("check-email"), "Проверьте почту");
-    assert.equal(Auth.panelTitle("setup"), "Auth не настроен");
+    assert.equal(Auth.panelTitle("setup"), "Вход ещё не подключён");
     assert.equal(Auth.panelTitle("other"), "Кабинет");
   });
 });

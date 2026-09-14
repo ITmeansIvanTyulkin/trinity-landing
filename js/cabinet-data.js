@@ -4,24 +4,29 @@
  * Auth config: js/cabinet-config.js (+ optional cabinet-config.local.js).
  * Auth runtime: js/cabinet-auth.js (Supabase).
  *
- * Optional live read-only IMOEX (CORS required):
- *   GET {imoexBase}/api/paper/journal
- *   GET {imoexBase}/api/analysis/regime
- * Set CABINET_CONFIG.imoexBase — e.g. "http://localhost:8080"
+ * Live desk numbers: Supabase `desk_snapshots` (written by the desktop app).
+ * Optional local fallback: GET pairs + trend + calendar-arb journals and regime
+ *   — developer machine only; never shown as a user URL.
  *
- * NO order placement, NO broker token entry here. Trading stays in IMOEX /view.
+ * NO order placement, NO broker token entry here.
  */
 window.CABINET_DATA = {
   subscription: {
     tier: "Оператор",
     priceRub: 7500,
-    delivery: "Core Lite",
+    delivery: "Базовая",
     trialActive: false,
     trialDaysLeft: 0,
-    trialTotalDays: 14,
-    nextBilling: "Биллинг не подключён",
+    trialTotalDays: 7,
+    nextBilling: "Оплата ещё не подключена",
     reverseTrialNote:
-      "Подписка и reverse-trial заведутся после биллинга / Instance delivery. Сейчас кабинет — аккаунт и research-обзор, без выдуманных оплат.",
+      "Скачайте приложение на компьютер. Семь дней триала начнутся с первого запуска. В триале нет живых заявок у брокера.",
+  },
+
+  liveSource: {
+    kind: "empty",
+    flag: "Нет снимка",
+    line: "Это не живые данные. Приложение ещё не присылало снимок — блоки пустые, без выдуманного результата.",
   },
 
   unlockKey: {
@@ -29,13 +34,13 @@ window.CABINET_DATA = {
     masked: "—",
     full: "",
     lastRotated: "",
-    note: "Unlock-ключ выдаётся после Instance delivery. Перевыпуск из кабинета пока недоступен.",
+    note: "Ключ появится вместе с приложением. Триал 7 дней — с первого запуска, без живых заявок.",
   },
 
   regime: {
     current: "UNKNOWN",
     book: "DAILY",
-    note: "Режим рынка смотрите в IMOEX /view. Здесь — только если подключён read-only imoexBase.",
+    note: "Режим рынка придёт из приложения, когда оно пришлёт снимок. Запустите стол на компьютере.",
     source: "offline",
     adx: null,
   },
@@ -43,22 +48,12 @@ window.CABINET_DATA = {
   /* Empty until /api/paper/journal answers (or stay empty offline). */
   openSlots: [],
 
-  allocation: {
-    pairs: 100,
-    trend: 0,
-    arbitrage: 0,
-    labels: {
-      pairs: "Pairs (DAILY paper)",
-      trend: "Trend (BR M5 desk)",
-      arbitrage: "Arbitrage (calendar desk)",
-    },
-    note: "Тариф Оператор / Core Lite: фокус DAILY pairs. Trend и arb desks — на Full Core / Instance.",
-  },
+  bookSplit: [],
 
   equityCurve: {
     points: [],
-    label: "Нет paper equity в кабинете",
-    note: "Кривая капитала — в IMOEX /view (paper statement). Здесь не рисуем иллюстративный PnL.",
+    label: "Пока нечего показать",
+    note: "Кривая появится, когда приложение на компьютере пришлёт снимок. Здесь мы не рисуем выдуманный результат.",
   },
 
   paperSummary: {
@@ -71,31 +66,9 @@ window.CABINET_DATA = {
 
   payments: [],
 
-  roadmap: [
-    { label: "Pairs DAILY", detail: "live paper", status: "live" },
-    { label: "INTRADAY", detail: "research only", status: "research" },
-    { label: "Trend BR M5", detail: "SANDBOX_FAIR desk", status: "live" },
-    { label: "Calendar arb", detail: "fair-paper desk", status: "live" },
-  ],
+  strategies: [],
 
-  labPairs: [
-    {
-      id: "magn-nlmk",
-      label: "MAGN / NLMK",
-      sector: "METALS",
-      note: "Металлы · типичный sideways mean-rev кандидат (лаборатория, не live-слот)",
-    },
-    {
-      id: "sber-vtbr",
-      label: "SBER / VTBR",
-      sector: "BANKS",
-      note: "Банки · чувствителен к режиму и FA (лаборатория)",
-    },
-    {
-      id: "gmkn-plzl",
-      label: "GMKN / PLZL",
-      sector: "METALS",
-      note: "Драгметаллы · cluster обычно eligible (лаборатория)",
-    },
-  ],
+  /* Filled from the desk analysis / catalog in decision-lab.js */
+  labPairs: [],
+  labDesk: null,
 };

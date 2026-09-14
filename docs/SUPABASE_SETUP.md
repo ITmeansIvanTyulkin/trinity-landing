@@ -19,8 +19,12 @@
 
 ## 2. SQL
 
-В SQL Editor выполните [`supabase/profiles.sql`](../supabase/profiles.sql)
-(можно повторно: колонки профиля + согласие ПДн добавляются через `ADD COLUMN IF NOT EXISTS`).
+В SQL Editor по очереди:
+
+1. [`supabase/profiles.sql`](../supabase/profiles.sql)
+2. [`supabase/desk_snapshots.sql`](../supabase/desk_snapshots.sql) — снимок стола с компьютера пользователя (режим, paper, дни триала). Без токена брокера.
+
+Можно повторно: колонки добавляются через `ADD COLUMN IF NOT EXISTS`.
 
 Поля профиля при регистрации: имя, телефон, пол, возраст, опыт торговли,
 `pdn_consent`, отдельно `marketing_opt_in`. Политика: [`privacy.html`](../privacy.html).
@@ -61,7 +65,9 @@ RLS: `auth.uid() = user_id` на select/insert/update/delete. Анонимный
 может вернуть пользователя на cabinet — это нормально; после входа открывается
 лаунчер «Открыть защищённый портфель».
 
-## 6. Phase 2 (IMOEX)
+## 6. Стол на компьютере (IMOEX)
+
+Облачного инстанса нет. Человек скачивает приложение; триал **7 дней с первого запуска**, без живых заявок. После оплаты — автоторги роботом у брокера (токен только в приложении).
 
 Тот же project URL + **JWT Secret** (Settings → API → JWT Secret) в `application-local.yml`:
 
@@ -73,5 +79,9 @@ imoex:
       url: https://YOUR_PROJECT.supabase.co
       jwt-secret: "YOUR_JWT_SECRET"
 ```
+
+Приложение логинится тем же email, что кабинет, и пишет в `desk_snapshots` **только рынок** (режим, paper). Поля лицензии (`license_status`, `live_trading`, даты триала) пользовательским JWT не меняются: триггер в SQL их замораживает. Оплату (`active`) выставляет только `service_role` — вы руками или позже webhook Stripe.
+
+Кабинет строку только читает. Контракт: [`supabase/desk_snapshots.sql`](../supabase/desk_snapshots.sql).
 
 См. репозиторий IMOEX: `docs/AUTH_SUPABASE.md`.

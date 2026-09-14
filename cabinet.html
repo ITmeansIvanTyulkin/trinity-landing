@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TRINITY — Личный кабинет</title>
-  <meta name="description" content="Личный кабинет TRINITY: подписка, paper-метрики, инвестиции (research), пайплайн-лаборатория. Без торговли и токенов брокера." />
+  <meta name="description" content="Операторский кабинет TRINITY: подписка, метрики со стола, лаборатория пар. Без торговли и токенов брокера." />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="googlebot" content="noindex, nofollow" />
   <meta name="theme-color" content="#0c1a22" />
@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1789299472" />
+  <link rel="stylesheet" href="css/styles.css?v=1789422000" />
 </head>
 <body class="cabinet-page cabinet-locked">
   <!-- Supabase email/password + confirm (shared IdP with future IMOEX Phase 2) -->
@@ -32,8 +32,8 @@
       </div>
       <h1 id="cabinet-gate-title">Вход в кабинет</h1>
       <p class="cabinet-gate-lead">
-        Один аккаунт: email и пароль. После подтверждения почты тот же логин
-        откроет кабинет — и позже дашборд IMOEX.
+        Один аккаунт — почта и пароль. После входа скачаете приложение:
+        семь дней триала без живых заявок. Автоторги — после оплаты.
       </p>
 
       <p class="cabinet-gate-error" data-gate-error hidden></p>
@@ -41,9 +41,10 @@
 
       <div data-auth-panel="setup" hidden>
         <p class="cabinet-gate-lead">
-          Нужен проект Supabase. Скопируйте
+          Вход на этом сайте ещё не подключён. Если вы настраиваете кабинет —
+          скопируйте
           <code>js/cabinet-config.example.js</code> →
-          <code>js/cabinet-config.local.js</code> и укажите URL + anon key.
+          <code>js/cabinet-config.local.js</code> и укажите адрес проекта и ключ.
         </p>
         <p class="cabinet-gate-foot">
           <a href="docs/SUPABASE_SETUP.md">Инструкция</a>
@@ -109,7 +110,7 @@
             <input id="cabinet-reg-pdn" type="checkbox" required />
             <span>
               Согласен на обработку персональных данных
-              (<a href="privacy.html" target="_blank" rel="noopener noreferrer">по политике</a>
+              (<a href="privacy.html" target="_blank" rel="noopener noreferrer">по политике</a>)
             </span>
           </label>
           <label class="cabinet-check">
@@ -177,16 +178,22 @@
     <section class="cab-hero">
       <div class="wrap">
         <p class="eyebrow">Личный кабинет</p>
-        <h1>Операторский контур</h1>
+        <h1>Операторский кабинет</h1>
         <p class="lead cab-hero-lead">
-          Подписка, paper-метрики, лаунчер защищённого портфеля и пайплайн-лаборатория.
-          Здесь нет ордеров и токенов брокера — торговля остаётся в IMOEX
-          <a href="http://localhost:8080/view" rel="noopener">/view</a>.
-          Калькулятор капитала — на <a href="index.html#calculator">лендинге</a>.
+          Подписка, цифры с вашего приложения и лаборатория пар.
+          Это не раздел «Инвестиции»: там долгий горизонт, портфель и разбор тикера.
+          Заявок и ключей брокера здесь нет.
         </p>
-        <p class="cab-source" data-data-source>
-          Офлайн-кабинет: без выдуманного PnL. Paper и режим — в IMOEX /view.
+        <p class="cab-source" data-data-source data-live-kind="empty">
+          Это не живые данные. Приложение ещё не присылало снимок — блоки пустые, без выдуманного результата.
         </p>
+        <div class="cab-download">
+          <button type="button" class="btn btn-primary" data-desk-download disabled>Скачать приложение</button>
+          <p class="cab-download-note">
+            Установщик ещё собираем. Триал 7 дней начнётся с первого запуска.
+            В триале нет живых заявок; автоторги у брокера — после оплаты.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -196,42 +203,49 @@
         <div class="section-head reveal">
           <p class="eyebrow">Подписка</p>
           <h2>Обзор аккаунта</h2>
+          <p class="cab-live-status" data-live-status data-live-kind="empty">
+            Это не живые данные. Приложение ещё не присылало снимок — блоки пустые, без выдуманного результата.
+          </p>
         </div>
 
         <div class="cab-overview reveal">
           <article class="cab-card cab-card-tier">
             <div class="cab-card-top">
               <span class="cab-label">Тариф</span>
-              <span class="trial-pill" data-trial-badge>Триал</span>
+              <span class="trial-pill" data-trial-badge>Пробный период</span>
             </div>
             <h3 data-tier>Оператор</h3>
             <p class="cab-price" data-tier-price>7 500 ₽/мес</p>
-            <p class="cab-meta">Доставка: <strong data-delivery>Core Lite</strong></p>
+            <p class="cab-meta">Поставка: <strong data-delivery>Базовая</strong></p>
             <div class="trial-track" aria-hidden="true">
               <i data-trial-bar></i>
             </div>
             <p class="cab-meta muted">Следующее списание: <span data-next-billing>—</span></p>
           </article>
 
-          <article class="cab-card">
-            <span class="cab-label">Режим рынка</span>
-            <div class="cab-regime-row">
-              <span class="mode-pill" data-regime-pill data-mode="UNKNOWN">UNKNOWN</span>
-              <span class="cab-book" data-regime-book>DAILY</span>
+          <article class="cab-card cab-card-regime" data-regime-card data-live-kind="empty">
+            <div class="cab-card-top">
+              <span class="cab-label">Режим рынка · пары</span>
+              <span class="cab-live-flag" data-regime-live data-live-kind="empty">Нет снимка</span>
             </div>
-            <p class="cab-meta" data-regime-note></p>
+            <div class="cab-regime-row">
+              <span class="mode-pill" data-regime-pill data-mode="UNKNOWN">Нет данных</span>
+              <span class="cab-book" data-regime-book hidden>Дневной</span>
+            </div>
+            <p class="cab-meta" data-regime-note>Режим дневных пар придёт из приложения.</p>
+            <p class="cab-meta muted">Это только коинтеграция на дневках. Нефть и арбитраж — свои статусы ниже, у них нет этого режима.</p>
           </article>
 
           <article class="cab-card cab-card-note">
-            <span class="cab-label">Reverse-trial</span>
+            <span class="cab-label">Пробный период</span>
             <p data-trial-note></p>
             <p class="cab-boundary">
-              Research / decision-support. Без flatten-all и place order в кабинете.
+              В триале стол помогает смотреть и решать. Живые заявки и автоторги робота — только после оплаты, в приложении.
             </p>
           </article>
         </div>
 
-        <div class="road-chips reveal" data-roadmap-chips aria-label="Статус стратегий"></div>
+        <div class="cab-strategies reveal" data-strategy-cards aria-label="Статус стратегий со стола"></div>
       </div>
     </section>
 
@@ -239,12 +253,14 @@
     <section class="section cab-section cab-charts" id="charts">
       <div class="wrap">
         <div class="section-head reveal">
-          <p class="eyebrow">Paper metrics</p>
+          <p class="eyebrow">С торгового стола</p>
           <h2>Метрики</h2>
           <p class="lead">
-            Данные с деска IMOEX — только при read-only <code>imoexBase</code>.
-            На публичном сайте Instance обычно не открыт → блоки пустые (не mock).
-            Живой journal и statement — в операторке <code>/view</code>.
+            Сюда приходят сделки со стола: пары, тренд по нефти и календарный арбитраж.
+            Пока приложения нет — блоки пустые. Чужих цифр мы не рисуем.
+          </p>
+          <p class="cab-live-status" data-live-status data-live-kind="empty">
+            Это не живые данные. Приложение ещё не присылало снимок — блоки пустые, без выдуманного результата.
           </p>
         </div>
 
@@ -252,19 +268,22 @@
           <article class="cab-panel reveal">
             <div class="cab-panel-head">
               <div>
-                <h3>Equity / paper</h3>
-                <p class="cab-panel-sub" data-equity-sub>Кривая не рисуется из выдуманных точек</p>
+                <h3>Кривая капитала</h3>
+                <p class="cab-panel-sub" data-equity-sub>Пустой график — не ошибка, а отсутствие данных</p>
               </div>
               <strong class="cab-equity-end mono" data-equity-end>—</strong>
             </div>
-            <canvas id="equity-chart" width="640" height="260" aria-label="Кривая капитала (paper, если есть данные)"></canvas>
+            <div class="cab-equity-wrap">
+              <canvas id="equity-chart" width="640" height="260" aria-label="Кривая капитала, если есть данные со стола"></canvas>
+              <div class="cab-equity-tip" data-equity-tip hidden></div>
+            </div>
           </article>
 
           <article class="cab-panel reveal">
             <div class="cab-panel-head">
               <div>
-                <h3>Аллокация</h3>
-                <p class="cab-panel-sub">Тариф Оператор: 100% DAILY pairs · не прогноз доходности</p>
+                <h3>По стратегиям</h3>
+                <p class="cab-panel-sub">Закрытый paper со стола. Это не доли тарифа и не прогноз</p>
               </div>
             </div>
             <div class="alloc-bars" data-alloc-bars></div>
@@ -274,19 +293,19 @@
         <article class="cab-panel reveal" style="margin-top:1.15rem">
           <div class="cab-panel-head">
             <div>
-              <h3>Открытые слоты</h3>
-              <p class="cab-panel-sub">Открытые paper-позиции из журнала IMOEX, если подключен read-only источник · иначе пусто</p>
+              <h3>Сделки</h3>
+                <p class="cab-panel-sub">Открытые и последние закрытые по всем стратегиям. Нажмите на строку — откроются детали. Повторный клик свернёт плашку.</p>
             </div>
           </div>
           <div class="cab-table-wrap">
             <table class="cab-table">
               <thead>
                 <tr>
-                  <th>Пара</th>
-                  <th>Book</th>
+                  <th>Инструмент</th>
+                  <th>Стратегия</th>
                   <th>Z</th>
                   <th>Статус</th>
-                  <th>Size</th>
+                  <th>Размер</th>
                 </tr>
               </thead>
               <tbody data-slots-body></tbody>
@@ -300,12 +319,11 @@
     <section class="section cab-section cab-invest" id="invest">
       <div class="wrap">
         <div class="section-head reveal">
-          <p class="eyebrow">Средний и длинный горизонт</p>
+          <p class="eyebrow">Отдельный раздел</p>
           <h2>Инвестиции</h2>
           <p class="lead">
-            Research / decision-support в отдельном защищённом контуре.
-            Не ордера и не токены брокера — торговля остаётся в IMOEX
-            <a href="http://localhost:8080/view" rel="noopener">/view</a>.
+            Долгий горизонт, портфель и разбор тикера — в соседнем защищённом разделе.
+            Здесь остаются подписка, цифры со стола и лаборатория.
           </p>
         </div>
 
@@ -314,18 +332,18 @@
             <div>
               <h3>Защищённый портфель</h3>
               <p class="cab-panel-sub">
-                Анкета риска, активы и пассивы, автоанализ тикера MOEX и длинный отчёт.
-                Сессия та же, что у кабинета.
+                Анкета риска, активы и пассивы, разбор тикера Мосбиржи и длинный отчёт.
+                Входите тем же аккаунтом.
               </p>
             </div>
-            <span class="cab-status-pill">Research</span>
+            <span class="cab-status-pill">Без заявок</span>
           </div>
           <p>
-            Paper-позиции деска подмешиваются в диаграмму только read-only
-            (при заданном <code>imoexBase</code>). Три desk-стратегии здесь не дублируются.
+            Позиции со стола могут появиться на диаграмме, если стол подключён — только чтобы вы их видели.
+            Стратегии стола сюда не переносятся.
           </p>
           <p class="calc-disclaimer cab-calc-disclaimer">
-            Не индивидуальная инвестрекомендация и не гарантия прибыли.
+            Не индивидуальная рекомендация и не обещание прибыли.
           </p>
           <a class="btn btn-primary" href="invest.html">Открыть защищённый портфель</a>
         </article>
@@ -336,49 +354,53 @@
     <section class="section cab-section" id="lab">
       <div class="wrap">
         <div class="section-head reveal">
-          <p class="eyebrow">Пайплайн-лаборатория</p>
-          <h2>Почему ENTER / WATCH / BLOCK</h2>
+          <p class="eyebrow">Лаборатория</p>
+          <h2>Почему вход, наблюдение или блок</h2>
           <p class="lead">
-            Интерактивный sandbox пайплайна DAILY pairs:
-            техника → regime → cluster → FA → вердикт.
-            Не ордер и не live-брокер — обучение логике продукта.
+            Выберите пару — режим, расхождение и сектор подставятся со стола.
+            Щелчки остаются как «а что, если». Это разбор логики, не заявка брокеру.
           </p>
+          <p class="lab-live-line" data-lab-live-line></p>
         </div>
 
         <div class="lab-layout reveal">
           <div class="lab-controls cab-panel">
             <div class="lab-field">
-              <label for="lab-pair">Пара</label>
+              <div class="lab-field-head">
+                <label for="lab-pair">Пара</label>
+                <span class="lab-mode" data-lab-mode hidden>Вселенная</span>
+              </div>
               <select id="lab-pair"></select>
               <p class="lab-hint" data-lab-pair-note></p>
             </div>
 
             <div class="lab-field">
-              <label for="lab-z">|Z|-score <span class="mono" data-lab-z>1.80</span></label>
-              <input id="lab-z" type="range" min="0.5" max="3" step="0.05" value="1.85" />
-              <p class="lab-hint">Пороги: WATCH ≥ 1.4 · вход ≥ 1.8 (иллюстрация)</p>
+              <label for="lab-z">Насколько пара разошлась <span class="mono" data-lab-z>1.00</span></label>
+              <input id="lab-z" type="range" min="0" max="4" step="0.05" value="1" />
+              <p class="lab-hint">Подождать от 1,4 · входить от 1,8. Ползунок — сценарий, если со стола нет Z</p>
             </div>
+            <button type="button" class="lab-reset" data-lab-reset hidden>Как на столе</button>
 
             <fieldset class="cab-regime-pick">
               <legend>Режим рынка</legend>
               <div class="cab-regime-seg" role="radiogroup" aria-label="Режим">
                 <label class="cab-regime-opt">
                   <input type="radio" name="lab-regime" value="SIDEWAYS" checked />
-                  <span>SIDEWAYS</span>
+                  <span>Боковик</span>
                 </label>
                 <label class="cab-regime-opt">
                   <input type="radio" name="lab-regime" value="NEUTRAL" />
-                  <span>NEUTRAL</span>
+                  <span>Нейтральный</span>
                 </label>
                 <label class="cab-regime-opt">
                   <input type="radio" name="lab-regime" value="TREND" />
-                  <span>TREND</span>
+                  <span>Тренд</span>
                 </label>
               </div>
             </fieldset>
 
             <fieldset class="lab-seg-field">
-              <legend>Cluster eligible</legend>
+              <legend>Сектор в списке</legend>
               <div class="lab-seg" role="radiogroup">
                 <label class="lab-seg-opt">
                   <input type="radio" name="lab-cluster" value="yes" checked />
@@ -392,47 +414,47 @@
             </fieldset>
 
             <fieldset class="lab-seg-field">
-              <legend>Фундамент (FA)</legend>
+              <legend>Фундамент</legend>
               <div class="lab-seg lab-seg-3" role="radiogroup">
                 <label class="lab-seg-opt">
                   <input type="radio" name="lab-fa" value="pass" checked />
-                  <span>Pass</span>
+                  <span>Подходит</span>
                 </label>
                 <label class="lab-seg-opt">
                   <input type="radio" name="lab-fa" value="weak" />
-                  <span>Weak</span>
+                  <span>Слабо</span>
                 </label>
                 <label class="lab-seg-opt">
                   <input type="radio" name="lab-fa" value="fail" />
-                  <span>Fail</span>
+                  <span>Нет</span>
                 </label>
               </div>
             </fieldset>
 
             <fieldset class="lab-seg-field">
-              <legend>Book</legend>
+              <legend>Горизонт</legend>
               <div class="lab-seg" role="radiogroup">
                 <label class="lab-seg-opt">
                   <input type="radio" name="lab-book" value="DAILY" checked />
-                  <span>DAILY</span>
+                  <span>Дневной</span>
                 </label>
                 <label class="lab-seg-opt">
                   <input type="radio" name="lab-book" value="INTRADAY" />
-                  <span>INTRADAY</span>
+                  <span>Внутри дня</span>
                 </label>
               </div>
             </fieldset>
 
             <fieldset class="lab-seg-field" data-lab-atas-wrap hidden>
-              <legend>ATAS / volume (INTRADAY)</legend>
+              <legend>Объём (внутри дня)</legend>
               <div class="lab-seg" role="radiogroup">
                 <label class="lab-seg-opt">
                   <input type="radio" name="lab-atas" value="pass" checked />
-                  <span>Pass</span>
+                  <span>Подходит</span>
                 </label>
                 <label class="lab-seg-opt">
                   <input type="radio" name="lab-atas" value="block" />
-                  <span>Block</span>
+                  <span>Нет</span>
                 </label>
               </div>
             </fieldset>
@@ -440,14 +462,14 @@
 
           <div class="lab-result cab-panel">
             <div class="lab-verdict-wrap">
-              <span class="cab-label">Вердикт пайплайна</span>
-              <p class="lab-verdict lab-out-enter" data-lab-verdict>PAPER OPEN</p>
+              <span class="cab-label">Итог</span>
+              <p class="lab-verdict lab-out-enter" data-lab-verdict>Можно открыть</p>
               <p class="lab-why" data-lab-why></p>
             </div>
             <ol class="lab-steps" data-lab-steps></ol>
             <p class="calc-disclaimer cab-calc-disclaimer">
-              Иллюстрация порядка гейтов в продукте. Не автоторговля и не сигнал «купить сейчас».
-              Реальные решения — в IMOEX <code>/view</code> после FA.
+              Так выглядит порядок проверок. Это не автоторговля и не совет купить прямо сейчас.
+              Решения принимаются в торговом приложении.
             </p>
           </div>
         </div>
@@ -471,7 +493,7 @@
 
         <form class="help-composer reveal" data-help-form>
           <label class="sr-only" for="help-input">Опишите проблему</label>
-          <input id="help-input" data-help-input type="text" maxlength="280" autocomplete="off" placeholder="Например: не приходит письмо или не открывается /view" />
+          <input id="help-input" data-help-input type="text" maxlength="280" autocomplete="off" placeholder="Например: не приходит письмо или не открывается стол" />
           <button type="submit" class="btn btn-primary">Найти</button>
         </form>
 
@@ -502,13 +524,13 @@
 
         <div class="cab-account-grid">
           <article class="cab-panel reveal">
-            <h3>Unlock-ключ</h3>
-            <p class="cab-panel-sub" data-key-note>Выдаётся после Instance delivery</p>
+            <h3>Ключ активации</h3>
+            <p class="cab-panel-sub" data-key-note>Ключ появится вместе с приложением. Триал 7 дней — с первого запуска</p>
             <p class="cab-key mono" data-key-masked>Ключ ещё не выдан</p>
             <p class="cab-meta muted" data-key-rotated></p>
             <div class="cab-actions">
               <button type="button" class="btn btn-line" data-key-toggle disabled>Недоступно</button>
-              <button type="button" class="btn btn-dark" data-key-regen disabled>После Instance</button>
+              <button type="button" class="btn btn-dark" data-key-regen disabled>Пока недоступно</button>
             </div>
           </article>
 
@@ -523,15 +545,15 @@
               <li><a href="https://t.me/" rel="noopener noreferrer">Telegram · задать вопрос</a></li>
               <li><a href="mailto:info@trinity.trading?subject=TRINITY%20cabinet">Написать в поддержку</a></li>
             </ul>
-            <p class="cab-boundary" style="margin-top:1rem">
-              Торговый UI: <a href="http://localhost:8080/view">localhost:8080/view</a>
+            <p class="cab-boundary">
+              Скачайте приложение на компьютер. Кабинет заявки не ставит и токен брокера не хранит.
             </p>
           </article>
         </div>
 
         <article class="cab-panel reveal" style="margin-top:1.15rem">
           <h3>История платежей</h3>
-          <p class="cab-panel-sub">Реальный биллинг ещё не подключён — таблица пустая.</p>
+          <p class="cab-panel-sub">Оплата ещё не подключена — таблица пустая, без выдуманных чеков.</p>
           <div class="cab-table-wrap">
             <table class="cab-table">
               <thead>
@@ -563,7 +585,7 @@
             </span>
             TRINITY
           </div>
-          <p>Research / decision-support. Кабинет не размещает ордера и не хранит токены брокера.</p>
+          <p>Кабинет помогает смотреть и решать. Заявки и ключи брокера здесь не хранятся. Автоторги — только в оплаченном приложении.</p>
         </div>
         <div>
           <h4>Навигация</h4>
@@ -586,22 +608,24 @@
       </div>
       <div class="footer-legal">
         <span>TRINITY © 2026. Все права защищены. Регистрация ПО в Роспатенте. Без письменного согласия — копирование, форки и использование запрещены. <a href="https://github.com/ITmeansIvanTyulkin/trinity-landing/blob/dev/LICENSE">LICENSE</a></span>
-        <span>Метрики без выдуманного PnL. Paper — в IMOEX /view, биллинг — позже.</span>
+        <span>Пустые цифры — не ошибка: стол ещё не прислал снимок. Триал 7 дней — в приложении.</span>
       </div>
     </div>
   </footer>
   </div><!-- /.cabinet-shell -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-  <script src="js/lib/auth-errors.js?v=1789115892"></script>
-  <script src="js/lib/decision-lab.js?v=1789115892"></script>
+  <script src="js/lib/auth-errors.js?v=1789317600"></script>
+  <script src="js/lib/decision-lab.js?v=1789422000"></script>
   <script src="js/lib/unlock-key.js?v=1789115892"></script>
-  <script src="js/lib/cabinet-help.js?v=1789115892"></script>
+  <script src="js/lib/desk-snapshot.js?v=1789421000"></script>
+  <script src="js/lib/desk-journals.js?v=1789421000"></script>
+  <script src="js/lib/cabinet-help.js?v=1789422000"></script>
   <script src="js/cabinet-config.js?v=1789115892"></script>
   <!-- Optional gitignored override; 404 is fine when absent -->
   <script src="js/cabinet-config.local.js"></script>
-  <script src="js/cabinet-data.js?v=1789115892"></script>
-  <script src="js/cabinet-auth.js?v=1789115892"></script>
-  <script src="js/cabinet.js?v=1789115892"></script>
+  <script src="js/cabinet-data.js?v=1789422000"></script>
+  <script src="js/cabinet-auth.js?v=1789317600"></script>
+  <script src="js/cabinet.js?v=1789422000"></script>
 </body>
 </html>
