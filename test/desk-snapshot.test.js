@@ -3,8 +3,8 @@ const assert = require("node:assert/strict");
 const Snap = require("../js/lib/desk-snapshot.js");
 
 describe("TrinityDeskSnapshot", () => {
-  it("exposes a 7-day trial", () => {
-    assert.equal(Snap.TRIAL_DAYS, 7);
+  it("exposes a 5-day calendar trial", () => {
+    assert.equal(Snap.TRIAL_DAYS, 5);
   });
 
   it("empty row: download copy, not live trading", () => {
@@ -22,7 +22,7 @@ describe("TrinityDeskSnapshot", () => {
       updated_at: new Date().toISOString(),
     });
     assert.equal(n.trialActive, true);
-    assert.match(Snap.licenseCopy(n), /5 из 7/);
+    assert.match(Snap.licenseCopy(n), /5 из 5/);
     assert.match(Snap.licenseCopy(n), /Живых заявок/);
   });
 

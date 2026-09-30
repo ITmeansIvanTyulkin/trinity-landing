@@ -103,7 +103,7 @@
     if (n === 1) {
       return regime === "TREND"
         ? "Только pairs: в TREND новые входы редки / блокируются ADX — сценарий standby."
-        : "Только pairs (strategy 1) — соответствует тарифу Оператор / live paper.";
+        : "Сценарий только pairs — узкий режим для боковика, не весь тариф Оператор.";
     }
     if (n === 2) {
       return (
@@ -115,7 +115,7 @@
     return (
       "Full Trinity · режим " +
       regime +
-      " — иллюстративный Full Core сценарий; arb и trend — fair-paper desk."
+      " — полный контур в сценарии; arb и trend — fair-paper desk."
     );
   }
 

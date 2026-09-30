@@ -1,6 +1,6 @@
 /**
  * Normalize a desk_snapshots row for the cabinet (pure).
- * Trial is 7 days from first desktop launch. Live broker robot is paid-only.
+ * Trial is 5 calendar days from first desktop launch (weekends count). Live broker robot is paid-only.
  */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) {
@@ -11,7 +11,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
-  const TRIAL_DAYS = 7;
+  const TRIAL_DAYS = 5;
   const STALE_MS = 30 * 60 * 1000;
 
   function asNumber(v) {
@@ -97,7 +97,7 @@
       return "Подписка активна. Автоторги роботом — в приложении на вашем компьютере, у брокера.";
     }
     if (status === "expired") {
-      return "Семь дней триала закончились. Приложение открывается, но не работает, пока не оплатите. После оплаты включатся автоторги у брокера.";
+      return "Пять дней триала закончились. Приложение открывается, но не работает, пока не оплатите. После оплаты включатся автоторги у брокера.";
     }
     if (status === "trial") {
       return (
@@ -108,7 +108,7 @@
         " дней. Живых заявок и автоторгов у брокера нет — только разбор и учебный журнал."
       );
     }
-    return "Скачайте приложение на компьютер. Семь дней триала начнутся с первого запуска. В триале нет живых заявок у брокера.";
+    return "Скачайте приложение на компьютер. Пять календарных дней триала начнутся с первого запуска (выходные тоже считаются). В триале нет живых заявок у брокера.";
   }
 
   function formatAge(updatedAt, now) {

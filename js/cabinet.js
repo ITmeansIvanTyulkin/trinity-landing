@@ -109,7 +109,7 @@
 
   function applyNormalizedSnapshot(snap) {
     const s = data.subscription;
-    s.trialTotalDays = (Snap && Snap.TRIAL_DAYS) || 7;
+    s.trialTotalDays = (Snap && Snap.TRIAL_DAYS) || 5;
     s.licenseStatus = (snap && snap.licenseStatus) || "";
     s.trialActive = Boolean(snap && snap.trialActive);
     s.trialDaysLeft = (snap && snap.trialDaysLeft) || 0;
@@ -290,7 +290,7 @@
 
     if (licenseSnap && licenseSnap.hasRow && Snap) {
       const s = data.subscription;
-      s.trialTotalDays = Snap.TRIAL_DAYS || 7;
+      s.trialTotalDays = Snap.TRIAL_DAYS || 5;
       s.licenseStatus = licenseSnap.licenseStatus || "";
       s.trialActive = Boolean(licenseSnap.trialActive);
       s.trialDaysLeft = licenseSnap.trialDaysLeft || 0;
