@@ -80,8 +80,8 @@ imoex:
       jwt-secret: "YOUR_JWT_SECRET"
 ```
 
-Приложение логинится тем же email, что кабинет, и пишет в `desk_snapshots` **только рынок** (режим, paper). Поля лицензии (`license_status`, `live_trading`, даты триала) пользовательским JWT не меняются: триггер в SQL их замораживает. Оплату (`active`) выставляет только `service_role` — вы руками или позже webhook Stripe.
+Приложение логинится тем же email, что кабинет, и пишет в `desk_snapshots` **только рынок** (режим, paper) раз в ~60 с. Поля лицензии (`license_status`, `live_trading`, даты триала) пользовательским JWT не меняются: триггер в SQL их замораживает. Оплату (`active`) выставляет только `service_role` — вы руками или позже webhook Stripe.
 
-Кабинет строку только читает. Контракт: [`supabase/desk_snapshots.sql`](../supabase/desk_snapshots.sql).
+Кабинет строку только читает и сам обновляет цифры раз в минуту (и при возврате на вкладку). Контракт: [`supabase/desk_snapshots.sql`](../supabase/desk_snapshots.sql).
 
-См. репозиторий IMOEX: `docs/AUTH_SUPABASE.md`.
+См. репозиторий IMOEX: `docs/AUTH_SUPABASE.md` (login → cloud session → `POST /api/desk/snapshot/publish`).

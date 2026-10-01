@@ -1624,6 +1624,18 @@
       .catch(() => {});
   }
 
+  /* Auto-refresh cabinet from desk_snapshots while the tab is open. */
+  const DESK_POLL_MS = 60000;
+  setInterval(function () {
+    if (document.visibilityState === "hidden") return;
+    loadDeskLive().catch(function () {});
+  }, DESK_POLL_MS);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") {
+      loadDeskLive().catch(function () {});
+    }
+  });
+
   window.addEventListener("resize", () => {
     drawEquity();
   });
