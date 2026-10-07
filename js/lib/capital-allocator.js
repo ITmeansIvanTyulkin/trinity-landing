@@ -19,11 +19,11 @@
 
   const REGIME_NOTES = {
     SIDEWAYS:
-      "ADX низкий → pairs mean-reversion в фокусе; trend/arb — резерв сценария.",
+      "Спокойный индекс → в сценарии больше доля «Инвестиций»; тренд и арбитраж — резерв.",
     NEUTRAL:
-      "Смешанный режим → капитал делится между books более равномерно.",
+      "Смешанный режим → капитал делится между тремя книгами ровнее.",
     TREND:
-      "ADX высокий → новые pairs-входы блокируются; в сценарии доминируют Trend desk / Arb.",
+      "ADX индекса высокий → доля сценария уходит тренд-деску и календарю. Книга «Инвестиции» не блокируется.",
   };
 
   function formatRub(n) {
@@ -71,18 +71,10 @@
     };
     let { lowPct, highPct } = bands[n] || bands[1];
 
-    if (n === 1) {
-      if (regime === "TREND") {
-        lowPct *= 0.35;
-        highPct *= 0.45;
-      } else if (regime === "NEUTRAL") {
-        lowPct *= 0.75;
-        highPct *= 0.85;
-      }
-    } else if (regime === "SIDEWAYS") {
+    if (n > 1 && regime === "SIDEWAYS") {
       lowPct *= 0.92;
       highPct *= 0.88;
-    } else if (regime === "TREND") {
+    } else if (n > 1 && regime === "TREND") {
       lowPct *= 1.05;
       highPct *= 1.12;
     }
@@ -102,20 +94,20 @@
   function strategyWarn(n, regime) {
     if (n === 1) {
       return regime === "TREND"
-        ? "Только pairs: в TREND новые входы редки / блокируются ADX — сценарий standby."
-        : "Сценарий только pairs — узкий режим для боковика, не весь тариф Оператор.";
+        ? "Только «Инвестиции»: книга акций по чеклисту. Тренд-деск и календарь в этом сценарии не участвуют."
+        : "Сценарий одной книги — «Инвестиции». Полный штаб включает ещё тренд и арбитраж.";
     }
     if (n === 2) {
       return (
-        "Pairs + Trend desk — веса по режиму " +
+        "Инвестиции + тренд-деск — доли по режиму " +
         regime +
-        "; fair-paper SANDBOX_FAIR, live FORTS gated."
+        "; fair-paper, live на срочке только после явного включения."
       );
     }
     return (
-      "Full Trinity · режим " +
+      "Полный контур · режим " +
       regime +
-      " — полный контур в сценарии; arb и trend — fair-paper desk."
+      " — инвестиции, тренд и арбитраж в одном сценарии; срочка остаётся fair-paper, пока live не включён."
     );
   }
 

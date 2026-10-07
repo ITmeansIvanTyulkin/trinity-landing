@@ -1975,8 +1975,16 @@ h2 {
 
 .product-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 0.65rem;
+}
+
+.product-actions .btn {
+  flex: 0 1 auto;
+  white-space: nowrap;
+  padding: 0.78rem 1.15rem;
+  font-size: 0.9rem;
 }
 
 .product-ghost {
@@ -2106,6 +2114,7 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  margin-top: 1.75rem;
   padding: 1.25rem 1.4rem;
   border: 1px solid rgba(247, 244, 238, 0.14);
   background: rgba(247, 244, 238, 0.04);

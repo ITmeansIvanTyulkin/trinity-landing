@@ -11,25 +11,29 @@
 
 ## Яндекс (подсказки, отфильтрованы оффтоп)
 
-### Парный трейдинг / коинтеграция
-- парный трейдинг
-- парный трейдинг это
-- что такое парный трейдинг
-- парный трейдинг акциями
-- парный трейдинг на фьючерсах на ммвб
-- парный трейдинг на форекс
-- парный трейдинг криптовалют
-- коинтеграция это
-- что такое коинтеграция
-- коинтеграция временных рядов
-- коинтеграция в трейдинге
-- статистический арбитраж
-- статистический арбитраж в трейдинге
-- корреляция акций
-- корреляция акций на московской бирже
-- pairs trading
-- mean reversion
-- mean reversion strategy
+### Инвестиции / активный отбор акций
+- инвестиции
+- инвестиции что это
+- инвестиции с нуля
+- инвестиции онлайн
+- инвестиции в акции
+- инвестиции в акции для начинающих
+- инвестиции на бирже
+- инвестиции на бирже для новичков
+- инвестиции на бирже с чего начать
+- инвестиции для начинающих
+- активные инвестиции
+- активные инвестиции на бирже
+- инвестиционный портфель
+- портфель акций
+- фундаментальный анализ акций
+- анализ акций на московской бирже
+- как выбрать акции для инвестиций
+- мини-фьючерс
+- мини-фьючерсы мосбиржа
+- мини фьючерс на нефть
+- фьючерс BRM
+- BRM мини
 
 ### Объём / стакан / ATAS / Tiger
 - анализ объемов в трейдинге
@@ -192,4 +196,4 @@
 
 ## Google (EN + RU формулировки той же темы)
 
-pairs trading MOEX, cointegration stocks, statistical arbitrage, z-score pairs, Engle Granger, ADF test, hedge ratio, market neutral strategy, calendar spread futures, contango backwardation, order flow trading, footprint chart, cluster chart, volume profile, POC value area, depth of market, level 2 order book, smart tape, time and sales, iceberg orders, volume delta, cumulative delta, ATAS alternative, Tiger.trade alternative, QUIK volume analysis, T-Invest sandbox, paper trading MOEX, investing for beginners, how to start investing, stock market for beginners, learn to trade stocks, how to trade on the stock market, brokerage account, paper trading for beginners
+investing for beginners, how to start investing, stock market for beginners, learn to trade stocks, how to trade on the stock market, brokerage account, paper trading for beginners, paper trading MOEX, active investing MOEX, stock fundamentals analysis, mini futures MOEX, Brent mini futures, calendar spread futures, contango backwardation, order flow trading, footprint chart, cluster chart, volume profile, POC value area, depth of market, level 2 order book, smart tape, time and sales, iceberg orders, volume delta, cumulative delta, ATAS alternative, Tiger.trade alternative, QUIK volume analysis, T-Invest sandbox, trend trading oil futures

@@ -1,7 +1,7 @@
 (() => {
   const Modes = window.TrinityProductModes;
   const modes = (Modes && Modes.MODES) || [
-    { id: "SIDEWAYS", book: "DAILY", alloc: "100% pairs", focus: "mean-rev" },
+    { id: "SIDEWAYS", book: "D1", alloc: "инвестиции", focus: "фундамент" },
   ];
 
   const pill = document.querySelector("[data-mode-pill]");
@@ -85,7 +85,10 @@
       const title = showcase.querySelector("[data-shot-title]");
       const lead = showcase.querySelector("[data-shot-lead]");
       const bullets = showcase.querySelector("[data-shot-bullets]");
-      if (chromeUrl) chromeUrl.textContent = data.url;
+      if (chromeUrl) {
+        chromeUrl.textContent = "";
+        chromeUrl.hidden = true;
+      }
       if (kicker) kicker.textContent = data.kicker;
       if (title) title.textContent = data.title;
       if (lead) lead.textContent = data.lead;

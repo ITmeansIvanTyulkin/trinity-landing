@@ -11,42 +11,30 @@
   "use strict";
 
   const MODES = [
-    { id: "SIDEWAYS", book: "DAILY", alloc: "100% pairs", focus: "mean-rev" },
+    { id: "SIDEWAYS", book: "D1", alloc: "инвестиции", focus: "фундамент" },
     { id: "TREND", book: "M5", alloc: "trend desk", focus: "BRV6" },
     { id: "ARBITRAGE", book: "FUT", alloc: "calendar", focus: "spread" },
   ];
 
   const SHOTS = {
     dashboard: {
-      url: "/view · dashboard",
+      url: "",
       kicker: "Multi-strategy",
       title: "Дашборд",
       lead:
-        "Четыре столпа на одном экране: коинтеграция (ресёрch), тренд диапазон BRV6, позиционная и календарный арбитраж. Лента «Сейчас», paper PnL и «Анализ + paper».",
+        "Пять карточек штаба: инвестиции, тренд по диапазону, позиция, мини-фьючерс BRM и календарный арбитраж. Лента «Сейчас», paper PnL и «Анализ + paper».",
       bullets: [
-        "Коинтеграция: sit-out / ресёрch — cash РФ или quality-пары",
-        "Тренд · диапазон: BRV6 · последняя TP2 +224 ₽ · ждём confirm",
-        "Calendar arb: FORTS spread · T-Invest · paper, live gated",
-      ],
-    },
-    charts: {
-      url: "/view/charts · pair spread",
-      kicker: "Техника пары",
-      title: "Спред / Z-score",
-      lead:
-        "Спред с KAMA и Z-score с порогами ±2: стрелки входа/выхода и текущий сигнал — rationale mean-reversion наглядно.",
-      bullets: [
-        "Спред + Kaufman Adaptive MA",
-        "Z-score: купить / продать / выход",
-        "Пороги и «СЕЙЧАС» — без чёрного ящика",
+        "Инвестиции: фундамент, дневной тренд, зоны и кластеры",
+        "Тренд · диапазон и BRM мини — один нефтяной чеклист, разный номинал",
+        "Календарный арбитраж: спред FORTS, paper, live только после включения",
       ],
     },
     broker: {
-      url: "/view/settings · broker",
+      url: "",
       kicker: "Исполнение",
       title: "Брокерская консоль",
       lead:
-        "T-Invest sandbox: токен и счёт в UI, reconcile, пополнение песочницы и kill-switch — без правки application-local.yml.",
+        "T-Invest sandbox: токен и счёт в UI, reconcile, пополнение песочницы и kill-switch.",
       bullets: [
         "Статус и сверка paper ↔ брокер",
         "AUTO / sandbox / лимитные заявки",
@@ -56,13 +44,13 @@
   };
 
   const TIPS = {
-    cointegration: {
-      label: "Коинтеграция",
-      body: "Sit-out / ресёрch: ни один сектор не доказан — cash РФ или quality-пары.",
+    investments: {
+      label: "Инвестиции",
+      body: "Книга акций: фундамент, дневной тренд, зоны объёма и кластеры. Авторежим включается на деске, вручную стратегия открывается в кабинете.",
     },
     trendRange: {
       label: "Тренд · диапазон",
-      body: "BRV6 · интрадей. Последняя TP2 +224 ₽ — зона размечена, ждём confirm на графике.",
+      body: "Нефть BR на M5: зона размечена, ждём confirm. Тот же чеклист доступен на мини-фьючерсе BRM.",
     },
     calendarArb: {
       label: "Календарный арбитраж",
@@ -70,15 +58,15 @@
     },
     regime: {
       label: "Режим рынка",
-      body: "TREND + ADX 34 → блок новых pairs-входов. Mean-reversion ждёт SIDEWAYS.",
+      body: "Режим индекса смещает долю сценария между книгами. Высокий ADX не выключает «Инвестиции»: акции идут по своему чеклисту.",
     },
     capital: {
       label: "Капитал",
-      body: "Equity 200 000 ₽ · 100% DAILY · INTRADAY 0%. Плечо выкл при equity &lt; 1M ₽.",
+      body: "Equity 200 000 ₽. Плечо выключено, пока счёт меньше 1 млн ₽.",
     },
     universe: {
       label: "Вселенная",
-      body: "55 тикеров · 178 пар · топ-2 по коинтеграции. Исследовательский контур, не автоордер.",
+      body: "Ликвидные акции широкого рынка: нефть, металлы, банки, ритейл. Отбор идёт по чеклисту фундамента.",
     },
     broker: {
       label: "Брокер",
@@ -102,7 +90,7 @@
     },
     sandbox: {
       label: "Песочница",
-      body: "T-Invest sandbox готов: paper pairs и позиции брокера сверяются без боевого риска.",
+      body: "Песочница брокера готова: paper-журнал и позиции сверяются без боевого риска.",
     },
     token: {
       label: "Токен / счёт",

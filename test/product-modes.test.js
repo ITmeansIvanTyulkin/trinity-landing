@@ -24,10 +24,10 @@ describe("TrinityProductModes", () => {
   it("SHOTS and TIPS cover product showcase surface", () => {
     assert.deepEqual(Object.keys(Modes.SHOTS).sort(), [
       "broker",
-      "charts",
       "dashboard",
     ]);
-    assert.ok(Modes.TIPS.zscore.body.includes("Z-score") || Modes.TIPS.zscore.body.includes("±2"));
+    assert.equal(Modes.TIPS.investments.label, "Инвестиции");
+    assert.equal(Modes.modeAt(0).alloc, "инвестиции");
   });
 
   it("chromeTilt maps pointer to small rotate degrees", () => {

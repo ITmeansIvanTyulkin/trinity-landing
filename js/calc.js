@@ -38,11 +38,11 @@
     set("[data-calc-gross]", Calc.formatRub(s.capital));
     set(
       "[data-calc-split]",
-      "Pairs " +
+      "Инвестиции " +
         s.split.pairs +
         "%" +
-        (s.split.trend ? " · Trend desk " + s.split.trend + "%" : "") +
-        (s.split.arb ? " · Arb " + s.split.arb + "%" : "") +
+        (s.split.trend ? " · Тренд " + s.split.trend + "%" : "") +
+        (s.split.arb ? " · Арбитраж " + s.split.arb + "%" : "") +
         ' <span class="scenario-tag">' +
         s.regime +
         "</span>"

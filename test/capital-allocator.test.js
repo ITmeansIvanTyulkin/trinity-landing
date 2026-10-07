@@ -53,7 +53,7 @@ describe("TrinityCapitalAllocator", () => {
   it("scenarioRange respects regime multipliers", () => {
     const base = Calc.scenarioRange(200000, 1, "SIDEWAYS");
     const trend = Calc.scenarioRange(200000, 1, "TREND");
-    assert.ok(trend.high < base.high);
+    assert.equal(trend.high, base.high);
     const full = Calc.scenarioRange(200000, 3, "TREND");
     assert.ok(full.high > Calc.scenarioRange(200000, 3, "SIDEWAYS").high);
   });
@@ -64,10 +64,10 @@ describe("TrinityCapitalAllocator", () => {
   });
 
   it("strategyWarn covers n=1/2/3", () => {
-    assert.match(Calc.strategyWarn(1, "TREND"), /standby/);
-    assert.match(Calc.strategyWarn(1, "SIDEWAYS"), /Оператор/);
-    assert.match(Calc.strategyWarn(2, "NEUTRAL"), /Trend desk/);
-    assert.match(Calc.strategyWarn(3, "SIDEWAYS"), /Full Trinity/);
+    assert.match(Calc.strategyWarn(1, "TREND"), /Инвестиции/);
+    assert.match(Calc.strategyWarn(1, "SIDEWAYS"), /Инвестиции/);
+    assert.match(Calc.strategyWarn(2, "NEUTRAL"), /тренд-деск/);
+    assert.match(Calc.strategyWarn(3, "SIDEWAYS"), /Полный контур/);
   });
 
   it("buildScenario assembles a full illustrative packet", () => {
