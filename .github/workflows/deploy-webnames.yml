@@ -62,10 +62,10 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # Webnames usually wants FTPS. If upload fails on TLS, set secret FTP_PROTOCOL=ftp
-          # and change this line to: ${{ secrets.FTP_PROTOCOL }}
-          protocol: ftps
-          # Remote site root from Webnames panel (often ./ or public_html/ or www/) — trailing slash required
+          # Panel shows port 21 → plain FTP. If host requires TLS, switch to ftps.
+          protocol: ftp
+          port: 21
+          # Remote site root (./ if FTP home is already the site folder)
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
           timeout: 600000
           exclude: |
