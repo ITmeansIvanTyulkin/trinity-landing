@@ -65,7 +65,8 @@
       };
     }
     const fromEnds = daysLeftFromEnds(row && row.trial_ends_at, now);
-    const left = fromEnds != null ? fromEnds : asInt(row && row.trial_days_left, 0);
+    const leftRaw = fromEnds != null ? fromEnds : asInt(row && row.trial_days_left, 0);
+    const left = Math.min(TRIAL_DAYS, Math.max(0, leftRaw == null ? 0 : leftRaw));
     if (left > 0) {
       return {
         licenseStatus: "trial",

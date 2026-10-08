@@ -873,8 +873,16 @@
       )
       .replace(/\b\d{10,16}\b/g, "[digits]")
       .replace(
-        /\b(t\.[a-z0-9_-]{20,}|Bearer\s+\S+|sk-[A-Za-z0-9]{10,})\b/gi,
+        /\b(eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})\b/g,
+        "[jwt]"
+      )
+      .replace(
+        /\b(t\.[a-z0-9_-]{20,}|Bearer\s+\S+|sk-[A-Za-z0-9]{10,}|live_[A-Za-z0-9_-]{16,}|sandbox_[A-Za-z0-9_-]{16,})\b/gi,
         "[token]"
+      )
+      .replace(
+        /(пароль|password|passwd|pwd|токен|token|api[_-]?key|секрет|secret)\s*[:=]\s*\S+/gi,
+        "$1=[redacted]"
       )
       .replace(/trinity-[a-z0-9-]{8,}/gi, "[unlock]");
     if (s.length > cap) s = s.slice(0, cap - 1) + "…";

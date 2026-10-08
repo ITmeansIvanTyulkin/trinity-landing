@@ -1130,17 +1130,30 @@
       }
       if (!userId) return;
       const left = [];
+      let missingTable = false;
       for (let i = 0; i < queue.length; i++) {
         const row = Object.assign({}, queue[i], { user_id: userId });
         try {
           const { error } = await sb.from("masha_help_logs").insert(row);
-          if (error) left.push(queue[i]);
+          if (error) {
+            if (/relation|schema cache|does not exist/i.test(error.message || "")) {
+              missingTable = true;
+              left.push(queue[i]);
+              break;
+            }
+            left.push(queue[i]);
+          }
         } catch {
           left.push(queue[i]);
         }
       }
       writeHelpQueue(left);
+      if (missingTable && agentStatusEl) {
+        agentStatusEl.textContent =
+          "Логи помощи пока не пишутся в облако (нужен SQL masha_help_logs).";
+      }
     }
+    window.__trinityFlushHelpLogs = flushHelpLogs;
 
     function recordHelp(opts) {
       if (!Help.buildHelpLog) return;
@@ -1868,6 +1881,26 @@
         return loadDeskLive();
       })
       .catch(() => {});
+  }
+
+  /* After interactive login — reload desk immediately (do not wait for 60s poll). */
+  window.addEventListener("trinity:cabinet-auth", function (ev) {
+    const detail = ev && ev.detail;
+    if (!detail) return;
+    if (detail.event === "SIGNED_IN") {
+      refreshUserEmail();
+      loadDeskLive().catch(function () {});
+      flushHelpLogsIfReady();
+    }
+  });
+
+  function flushHelpLogsIfReady() {
+    /* setupHelp closes over flushHelpLogs — nudge via custom hook if present */
+    try {
+      if (typeof window.__trinityFlushHelpLogs === "function") {
+        window.__trinityFlushHelpLogs();
+      }
+    } catch (_) {}
   }
 
   /* Auto-refresh cabinet from desk_snapshots while the tab is open. */

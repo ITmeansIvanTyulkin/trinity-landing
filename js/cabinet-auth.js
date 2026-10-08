@@ -317,19 +317,35 @@
       if (emailInput) setTimeout(() => emailInput.focus(), 60);
     }
 
+    function emitAuth(event, session) {
+      try {
+        window.dispatchEvent(
+          new CustomEvent("trinity:cabinet-auth", {
+            detail: { event: event, session: session || null },
+          })
+        );
+      } catch (_) {
+        /* IE / sandboxed */
+      }
+    }
+
     sb.auth.onAuthStateChange((event, next) => {
       if (event === "SIGNED_IN" && next) {
         persistSession(next);
         unlockCabinet(next.user && next.user.email);
         if (next.user) refreshDisplayName(next.user);
+        emitAuth("SIGNED_IN", next);
       }
       if (event === "SIGNED_OUT") {
         persistSession(null);
         lockCabinet();
         showPanel("login");
+        emitAuth("SIGNED_OUT", null);
       }
       if (event === "PASSWORD_RECOVERY") {
-        setInfo("Можно задать новый пароль через письмо восстановления.");
+        setError("");
+        setInfo("Задайте новый пароль ниже.");
+        showPanel("new-password");
       }
     });
 
@@ -341,18 +357,24 @@
         const password = (document.getElementById("cabinet-login-pass") || {}).value || "";
         const btn = loginForm.querySelector('button[type="submit"]');
         if (btn) btn.disabled = true;
-        const { data, error } = await sb.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-        if (btn) btn.disabled = false;
-        if (error) {
-          setError(mapAuthError(error));
-          return;
+        try {
+          const { data, error } = await sb.auth.signInWithPassword({
+            email: email.trim(),
+            password,
+          });
+          if (error) {
+            setError(mapAuthError(error));
+            return;
+          }
+          persistSession(data.session);
+          unlockCabinet(data.user && data.user.email);
+          emitAuth("SIGNED_IN", data.session);
+          loginForm.reset();
+        } catch (err) {
+          setError(mapAuthError(err) || "Не удалось войти. Проверьте сеть и попробуйте снова.");
+        } finally {
+          if (btn) btn.disabled = false;
         }
-        persistSession(data.session);
-        unlockCabinet(data.user && data.user.email);
-        loginForm.reset();
       });
     }
 
@@ -375,46 +397,109 @@
         }
         const btn = registerForm.querySelector('button[type="submit"]');
         if (btn) btn.disabled = true;
-        const redirectTo = new URL("cabinet.html", window.location.href).href;
-        const { data, error } = await sb.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            emailRedirectTo: redirectTo,
-            data: {
-              display_name: profile.display_name,
-              phone: profile.phone,
-              gender: profile.gender,
-              age_years: String(profile.age_years),
-              trading_experience: profile.trading_experience,
-              marketing_opt_in: profile.marketing_opt_in,
-              pdn_consent: profile.pdn_consent,
-              source: "cabinet",
+        try {
+          const redirectTo = new URL("cabinet.html", window.location.href).href;
+          const { data, error } = await sb.auth.signUp({
+            email: email.trim(),
+            password,
+            options: {
+              emailRedirectTo: redirectTo,
+              data: {
+                display_name: profile.display_name,
+                phone: profile.phone,
+                gender: profile.gender,
+                age_years: String(profile.age_years),
+                trading_experience: profile.trading_experience,
+                marketing_opt_in: profile.marketing_opt_in,
+                pdn_consent: profile.pdn_consent,
+                source: "cabinet",
+              },
             },
-          },
-        });
-        if (btn) btn.disabled = false;
-        if (error) {
-          setError(mapAuthError(error));
+          });
+          if (error) {
+            setError(mapAuthError(error));
+            return;
+          }
+          /* If email confirm required, session may be null */
+          if (data.session && data.user) {
+            await ensureProfile(data.user, profile);
+            persistSession(data.session);
+            persistDisplayName(profile.display_name);
+            unlockCabinet(data.user.email);
+            emitAuth("SIGNED_IN", data.session);
+          } else {
+            const checkEmail = document.querySelector("[data-check-email-addr]");
+            if (checkEmail) checkEmail.textContent = email.trim();
+            showPanel("check-email");
+            setInfo("");
+          }
+          registerForm.reset();
+          const marketing = document.getElementById("cabinet-reg-marketing");
+          if (marketing) marketing.checked = false;
+          const pdn = document.getElementById("cabinet-reg-pdn");
+          if (pdn) pdn.checked = false;
+        } catch (err) {
+          setError(mapAuthError(err) || "Не удалось зарегистрироваться. Проверьте сеть.");
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      });
+    }
+
+    const recoverForm = document.getElementById("cabinet-recover-form");
+    if (recoverForm) {
+      recoverForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setError("");
+        setInfo("");
+        const email = ((document.getElementById("cabinet-recover-email") || {}).value || "").trim();
+        const btn = recoverForm.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
+        try {
+          const { error } = await sb.auth.resetPasswordForEmail(email, {
+            redirectTo: new URL("cabinet.html", window.location.href).href,
+          });
+          if (error) {
+            setError(mapAuthError(error));
+            return;
+          }
+          setInfo("Если аккаунт есть, отправили письмо со ссылкой для смены пароля.");
+          showPanel("login");
+        } catch (err) {
+          setError(mapAuthError(err) || "Не удалось отправить письмо. Попробуйте позже.");
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      });
+    }
+
+    const newPassForm = document.getElementById("cabinet-newpass-form");
+    if (newPassForm) {
+      newPassForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setError("");
+        setInfo("");
+        const password = (document.getElementById("cabinet-newpass") || {}).value || "";
+        if (password.length < 6) {
+          setError("Пароль: минимум 6 символов.");
           return;
         }
-        /* If email confirm required, session may be null */
-        if (data.session && data.user) {
-          await ensureProfile(data.user, profile);
-          persistSession(data.session);
-          persistDisplayName(profile.display_name);
-          unlockCabinet(data.user.email);
-        } else {
-          const checkEmail = document.querySelector("[data-check-email-addr]");
-          if (checkEmail) checkEmail.textContent = email.trim();
-          showPanel("check-email");
-          setInfo("");
+        const btn = newPassForm.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
+        try {
+          const { error } = await sb.auth.updateUser({ password: password });
+          if (error) {
+            setError(mapAuthError(error));
+            return;
+          }
+          setInfo("Пароль обновлён. Можно пользоваться кабинетом.");
+          newPassForm.reset();
+          showPanel("login");
+        } catch (err) {
+          setError(mapAuthError(err) || "Не удалось сохранить пароль.");
+        } finally {
+          if (btn) btn.disabled = false;
         }
-        registerForm.reset();
-        const marketing = document.getElementById("cabinet-reg-marketing");
-        if (marketing) marketing.checked = false;
-        const pdn = document.getElementById("cabinet-reg-pdn");
-        if (pdn) pdn.checked = false;
       });
     }
 
@@ -430,25 +515,40 @@
           showPanel("register");
           return;
         }
-        const { error } = await sb.auth.resend({
-          type: "signup",
-          email: addr.trim(),
-          options: {
-            emailRedirectTo: new URL("cabinet.html", window.location.href).href,
-          },
-        });
-        if (error) setError(mapAuthError(error));
-        else setInfo("Письмо отправлено повторно (если аккаунт ещё не подтверждён).");
+        resendBtn.disabled = true;
+        try {
+          const { error } = await sb.auth.resend({
+            type: "signup",
+            email: addr.trim(),
+            options: {
+              emailRedirectTo: new URL("cabinet.html", window.location.href).href,
+            },
+          });
+          if (error) setError(mapAuthError(error));
+          else setInfo("Письмо отправлено повторно (если аккаунт ещё не подтверждён).");
+        } catch (err) {
+          setError(mapAuthError(err) || "Не удалось отправить письмо.");
+        } finally {
+          resendBtn.disabled = false;
+        }
       });
     }
 
     if (logout) {
       logout.addEventListener("click", async () => {
-        await sb.auth.signOut();
-        persistSession(null);
-        lockCabinet();
-        showPanel("login");
-        setError("");
+        logout.disabled = true;
+        try {
+          await sb.auth.signOut();
+          persistSession(null);
+          lockCabinet();
+          showPanel("login");
+          setError("");
+          emitAuth("SIGNED_OUT", null);
+        } catch (err) {
+          setError(mapAuthError(err) || "Не удалось выйти. Обновите страницу.");
+        } finally {
+          logout.disabled = false;
+        }
       });
     }
 

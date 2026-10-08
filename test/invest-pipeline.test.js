@@ -248,6 +248,39 @@ describe("TrinityInvestPipeline", () => {
     assert.equal(v.verdict, "skip");
   });
 
+  it("composeVerdict never upgrades CAT4 Skip to invest", () => {
+    const v = Pipe.composeVerdict({
+      fund: { status: "Pass" },
+      liquidity: { status: "Pass" },
+      trend: { status: "Pass" },
+      zones: { status: "Pass" },
+      potential: { status: "Pass" },
+      category: { status: "Skip", detail: "CAT4" },
+      indicators: { status: "Pass" },
+      cluster: { status: "Pass" },
+      size: { status: "Skip", detail: "CAT not investable" },
+    });
+    assert.equal(v.verdict, "skip");
+    assert.ok(v.weighted >= 0.7);
+  });
+
+  it("desk relative fractions do not invent ruble notional", () => {
+    const legs = Pipe.deskLegsFromJournal({
+      entries: [
+        {
+          status: "OPEN",
+          tickerY: "SBER",
+          tickerX: "GAZP",
+          book: "DAILY",
+          remainingFraction: 0.5,
+        },
+      ],
+    });
+    assert.equal(legs[0].valueKind, "relative");
+    assert.equal(legs[0].value, 0);
+    assert.equal(legs[0].remainingFraction, 0.5);
+  });
+
   it("desk open legs become source=desk assets labelled by book", () => {
     const legs = Pipe.deskLegsFromJournal({
       entries: [

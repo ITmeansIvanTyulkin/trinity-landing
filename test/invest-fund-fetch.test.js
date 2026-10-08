@@ -67,4 +67,19 @@ describe("TrinityInvestFundFetch", () => {
     assert.equal(Fetch.matchRowKey("Чистые активы , млрд руб"), "equity");
     assert.equal(Fetch.matchRowKey("Чистый долг , млрд руб"), null);
   });
+
+  it("parses markdown pipe tables for Smart-Lab rows", () => {
+    const md = `
+| Показатель | 2022 | 2023 | 2024 |
+| --- | --- | --- | --- |
+| Выручка , млрд руб | 9431 | 7928 | 4421 |
+| Долг , млрд руб | 758 | 396 | 380 |
+| Чистые активы , млрд руб | 4123 | 4523 | 4600 |
+`;
+    const packed = Fetch.toFields(Fetch.parseSmartLabMarkdown(md));
+    assert.equal(packed.sector, "nonfin");
+    assert.equal(packed.fields.revenue_curr, 4421);
+    assert.equal(packed.fields.revenue_prev, 7928);
+    assert.equal(packed.fields.debt_curr, 380);
+  });
 });

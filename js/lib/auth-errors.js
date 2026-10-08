@@ -45,6 +45,8 @@
     if (name === "login") return "Вход в кабинет";
     if (name === "register") return "Регистрация";
     if (name === "check-email") return "Проверьте почту";
+    if (name === "recover") return "Сброс пароля";
+    if (name === "new-password") return "Новый пароль";
     if (name === "setup") return "Вход ещё не подключён";
     return "Кабинет";
   }

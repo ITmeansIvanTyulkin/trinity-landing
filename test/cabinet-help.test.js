@@ -121,6 +121,16 @@ describe("TrinityCabinetHelp", () => {
     assert.doesNotMatch(s, /user@trinity/);
   });
 
+  it("sanitizeHelpText redacts passwords and JWTs", () => {
+    const jwt =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n00nul0";
+    const s = Help.sanitizeHelpText("пароль: Secret123! jwt " + jwt);
+    assert.match(s, /пароль=\[redacted\]/i);
+    assert.match(s, /\[jwt\]/);
+    assert.doesNotMatch(s, /Secret123/);
+    assert.doesNotMatch(s, /eyJhbGci/);
+  });
+
   it("buildHelpLog packs turn for training", () => {
     const row = Help.buildHelpLog({
       sessionId: "mabc",

@@ -261,6 +261,7 @@
   }
 
   function posRub(p) {
+    if (p && p.valueKind === "relative") return null;
     return toRub(p && p.value, positionCcy(p));
   }
 
@@ -1402,9 +1403,18 @@
             const canDel = r.source !== "desk" && r.id && String(r.id).indexOf("desk-") !== 0;
             const src =
               r.source === "desk"
-                ? '<span class="invest-src-pill">desk · ' + (Pipe.bookLabel(r.book) || r.book || "") + "</span>"
+                ? '<span class="invest-src-pill">desk · ' +
+                  escHtml(Pipe.bookLabel(r.book) || r.book || "") +
+                  "</span>"
                 : "manual";
-            const valNote = r.valueKind === "relative" ? " <span class=\"muted\">усл. ед.</span>" : "";
+            const valNote =
+              r.valueKind === "relative"
+                ? ' <span class="muted">доля · не ₽' +
+                  (r.remainingFraction != null
+                    ? " · " + escHtml(String(Math.round(Number(r.remainingFraction) * 100)) + "%")
+                    : "") +
+                  "</span>"
+                : "";
             const ccy = positionCcy(r);
             const rub = posRub(r);
             const income = monthlyIncome(r);
@@ -1451,11 +1461,11 @@
               "<td>" +
               escHtml(r.name || "") +
               "</td>" +
-              "<td class=\"mono\">" +
-              (r.ticker || "—") +
+              '<td class="mono">' +
+              escHtml(r.ticker || "—") +
               "</td>" +
-              "<td class=\"mono\">" +
-              fmtMoney(r.value, ccy) +
+              '<td class="mono">' +
+              (r.valueKind === "relative" ? "—" : fmtMoney(r.value, ccy)) +
               valNote +
               rubHint +
               "</td>" +
@@ -2183,20 +2193,28 @@
     }
     if (off.inn) bits.push("ИНН " + off.inn);
     if (off.search) {
-      bits.push('<a href="' + off.search + '" target="_blank" rel="noopener noreferrer">поиск e-disclosure</a>');
+      bits.push(
+        '<a href="' +
+          escHtml(off.search) +
+          '" target="_blank" rel="noopener noreferrer">поиск e-disclosure</a>'
+      );
     }
     if (result.sources && result.sources.smartlab && result.sources.smartlab.url) {
       bits.push(
-        '<a href="' + result.sources.smartlab.url + '" target="_blank" rel="noopener noreferrer">Smart-Lab МСФО</a>'
+        '<a href="' +
+          escHtml(result.sources.smartlab.url) +
+          '" target="_blank" rel="noopener noreferrer">Smart-Lab МСФО</a>'
       );
     }
     files.forEach((u) => {
-      bits.push('<a href="' + u + '" target="_blank" rel="noopener noreferrer">файл раскрытия</a>');
+      bits.push(
+        '<a href="' + escHtml(u) + '" target="_blank" rel="noopener noreferrer">файл раскрытия</a>'
+      );
     });
     if (result.sources && result.sources.smartlab && !result.sources.smartlab.ok) {
-      bits.push("Smart-Lab: " + (result.sources.smartlab.error || "нет данных"));
+      bits.push("Smart-Lab: " + escHtml(result.sources.smartlab.error || "нет данных"));
     }
-    bits.push(result.note || "");
+    if (result.note) bits.push(escHtml(result.note));
     if (note) note.innerHTML = bits.filter(Boolean).join(" · ");
     const box = $("[data-fund-box]");
     if (box) box.open = true;
@@ -2258,12 +2276,19 @@
     }
   }
 
+  let analyzeSeq = 0;
+
   async function runAnalysis(ticker) {
+    const seq = ++analyzeSeq;
     const status = $("[data-analyze-status]");
+    const form = $("[data-analyze-form]");
+    const btn = form && form.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
     if (status) status.textContent = "Готовим разбор…";
     const issBase = cfg().issBase || undefined;
     try {
       const fundamentals = await ensureFundamentals(ticker, status);
+      if (seq !== analyzeSeq) return;
       if (status) {
         status.textContent = fundamentals
           ? "Снимаем цену на Мосбирже…"
@@ -2275,6 +2300,7 @@
         issBase: issBase,
         issReader: cfg().issReader,
       });
+      if (seq !== analyzeSeq) return;
       if (status) {
         const Explain = window.TrinityInvestExplain;
         const label =
@@ -2290,6 +2316,7 @@
       renderReport(result);
       persistRun(result);
     } catch (err) {
+      if (seq !== analyzeSeq) return;
       const msg = err && err.message ? err.message : String(err);
       if (status) {
         status.textContent =
@@ -2297,6 +2324,8 @@
           msg +
           ". Попробуйте ещё раз чуть позже.";
       }
+    } finally {
+      if (seq === analyzeSeq && btn) btn.disabled = false;
     }
   }
 
@@ -3142,6 +3171,20 @@
       edit.addEventListener("click", () => {
         const wrap = $("[data-risk-form-wrap]");
         if (wrap) wrap.hidden = false;
+        const form = $("[data-risk-form]");
+        const p = state.profile;
+        const answers = (p && p.answers) || {};
+        if (form) {
+          Object.keys(answers).forEach((field) => {
+            const val = answers[field];
+            if (val == null || val === "") return;
+            const input = form.querySelector(
+              'input[name="' + field + '"][value="' + String(val).replace(/"/g, "") + '"]'
+            );
+            if (input) input.checked = true;
+          });
+          if (form.acknowledgement) form.acknowledgement.checked = true;
+        }
       });
     }
 

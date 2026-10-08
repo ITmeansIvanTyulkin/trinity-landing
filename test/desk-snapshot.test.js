@@ -76,6 +76,7 @@ describe("TrinityDeskSnapshot", () => {
     assert.equal(n.openSlots[0].pair, "SBER / VTBR");
     assert.equal(n.openSlots[0].side, "BUY");
     assert.equal(n.openSlots[0].entryPrice, 280.5);
+    assert.equal(n.trialDaysLeft, 5, "clamp DB days to TRIAL_DAYS");
   });
 
   it("source copy: empty is not live", () => {

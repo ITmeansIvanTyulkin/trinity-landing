@@ -11,13 +11,22 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1786700300" />
+  <link rel="stylesheet" href="css/styles.css?v=1789514000" />
 </head>
-<body>
+<body class="page-privacy">
   <header class="site-nav">
     <div class="wrap">
       <a class="nav-brand" href="index.html">TRINITY</a>
-      <ul class="nav-links">
+      <button
+        class="nav-toggle"
+        type="button"
+        aria-label="Меню"
+        aria-expanded="false"
+        data-nav-toggle
+      >
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" data-nav-links>
         <li><a href="cabinet.html">Кабинет</a></li>
         <li><a class="nav-cta" href="index.html">На лендинг</a></li>
       </ul>
@@ -69,5 +78,16 @@
       </p>
     </div>
   </main>
+  <script>
+    (function () {
+      var toggle = document.querySelector("[data-nav-toggle]");
+      var links = document.querySelector("[data-nav-links]");
+      if (!toggle || !links) return;
+      toggle.addEventListener("click", function () {
+        var open = links.classList.toggle("open");
+        toggle.setAttribute("aria-expanded", String(open));
+      });
+    })();
+  </script>
 </body>
 </html>

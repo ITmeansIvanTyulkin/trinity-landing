@@ -167,11 +167,31 @@
     String(md || "")
       .split(/\n/)
       .forEach((line) => {
-        const plain = normName(line);
-        const key = matchRowKey(plain);
-        if (!key) return;
-        const after = plain.replace(/^.*?((?:-?\d|\d{1,3}\s\d{3}|-?\d+[.,]\d+|-?\d+%).*)/, "$1");
-        const nums = parseNumberSequence(after.indexOf("%") >= 0 || /\d/.test(after) ? after : plain);
+        const trimmed = String(line || "").trim();
+        if (!trimmed || /^[\|\s:\-]+$/.test(trimmed)) return;
+        let label = trimmed;
+        let nums = null;
+        if (trimmed.indexOf("|") >= 0) {
+          const cells = trimmed
+            .split("|")
+            .map((c) => c.trim())
+            .filter((c) => c !== "");
+          if (cells.length < 2) return;
+          label = cells[0];
+          /* One number per cell — do not join (would look like thousand-spaced). */
+          nums = cells.slice(1).map(parseNum).filter((n) => n != null);
+        } else {
+          const plain = normName(trimmed);
+          const after = plain.replace(
+            /^.*?((?:-?\d|\d{1,3}\s\d{3}|-?\d+[.,]\d+|-?\d+%).*)/,
+            "$1"
+          );
+          nums = parseNumberSequence(
+            after.indexOf("%") >= 0 || /\d/.test(after) ? after : plain
+          );
+        }
+        const key = matchRowKey(label);
+        if (!key || !nums || !nums.length) return;
         series[key + "_cells"] = nums;
       });
     return packSeries(years, series, md);

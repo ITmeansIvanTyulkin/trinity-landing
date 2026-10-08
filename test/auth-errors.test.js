@@ -57,6 +57,8 @@ describe("TrinityAuthErrors", () => {
     assert.equal(Auth.panelTitle("login"), "Вход в кабинет");
     assert.equal(Auth.panelTitle("register"), "Регистрация");
     assert.equal(Auth.panelTitle("check-email"), "Проверьте почту");
+    assert.equal(Auth.panelTitle("recover"), "Сброс пароля");
+    assert.equal(Auth.panelTitle("new-password"), "Новый пароль");
     assert.equal(Auth.panelTitle("setup"), "Вход ещё не подключён");
     assert.equal(Auth.panelTitle("other"), "Кабинет");
   });

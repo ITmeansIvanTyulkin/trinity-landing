@@ -93,15 +93,14 @@
     if (!closes || closes.length < p + 1) return null;
     let gain = 0;
     let loss = 0;
-    const start = closes.length - p - 1;
-    for (let i = start + 1; i <= start + p; i++) {
+    for (let i = 1; i <= p; i++) {
       const ch = closes[i] - closes[i - 1];
       if (ch >= 0) gain += ch;
       else loss -= ch;
     }
     let avgGain = gain / p;
     let avgLoss = loss / p;
-    for (let i = start + p + 1; i < closes.length; i++) {
+    for (let i = p + 1; i < closes.length; i++) {
       const ch = closes[i] - closes[i - 1];
       const g = ch > 0 ? ch : 0;
       const l = ch < 0 ? -ch : 0;
@@ -1107,6 +1106,7 @@
     const liq = gates.liquidity || {};
     const trend = gates.trend || {};
     const size = gates.size || {};
+    const category = gates.category || {};
     const volume = gates.indicators || {};
     const cluster = gates.cluster || {};
     const fails = Object.keys(gates).filter(function (k) {
@@ -1114,11 +1114,15 @@
     }).length;
 
     let verdict = "skip";
+    /* CAT4 / non-investable → size+category Skip must never upgrade to invest. */
     if (
       fund.status === "Fail" ||
       liq.status === "Fail" ||
       trend.status === "Skip" ||
       size.status === "Fail" ||
+      size.status === "Skip" ||
+      category.status === "Fail" ||
+      category.status === "Skip" ||
       volume.status === "Fail" ||
       volume.status === "NoData" ||
       cluster.status === "Fail"
@@ -1296,8 +1300,10 @@
                   ? Number(e.capitalRub)
                   : null;
         const frac = e.remainingFraction != null ? Number(e.remainingFraction) : null;
-        const value = rub != null && Number.isFinite(rub) && rub > 0 ? rub : frac != null ? Math.abs(frac) * 1000 : 0;
-        const valueKind = rub != null && rub > 0 ? "rub" : frac != null ? "relative" : "unknown";
+        const hasRub = rub != null && Number.isFinite(rub) && rub > 0;
+        /* Relative desk fractions are not rubles — never invent a notional for totals. */
+        const value = hasRub ? rub : 0;
+        const valueKind = hasRub ? "rub" : frac != null && Number.isFinite(frac) ? "relative" : "unknown";
         return {
           id: "desk-" + (e.id || e.slotId || i),
           side: "asset",
@@ -1306,6 +1312,7 @@
           ticker: e.tickerY || "",
           value,
           valueKind,
+          remainingFraction: frac != null && Number.isFinite(frac) ? frac : null,
           currency: "RUB",
           notes: "desk · " + book,
           source: "desk",
