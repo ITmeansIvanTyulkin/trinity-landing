@@ -68,11 +68,32 @@ docs/SEO.md
 - Кабинет не торгует и не хранит токен брокера
 - Research / decision-support, не гарантия прибыли
 
-## Деплой
+## Деплой (Webnames FTP)
 
-Любой static host: GitHub Pages, Cloudflare Pages, Netlify.
+Сайт живёт на **Webnames**. Вместо ручного zip:
 
-На деплое подставьте Supabase URL/anon в `js/cabinet-config.js` (или сгенерируйте файл в CI).
+- **`main`** → GitHub Action заливает файлы по FTP (прод)
+- **`dev`** → только разработка и локальный просмотр, на хостинг **не** деплоится
+
+Workflow: [`.github/workflows/deploy-webnames.yml`](.github/workflows/deploy-webnames.yml)  
+(даже ручной Run workflow всегда чекаутит `main`).
+
+В GitHub → Settings → Secrets and variables → Actions добавьте:
+
+| Secret | Пример |
+|--------|--------|
+| `FTP_HOST` | хост из панели Webnames (часто `ftp.…` или IP) |
+| `FTP_USER` | FTP-логин |
+| `FTP_PASSWORD` | FTP-пароль |
+| `FTP_SERVER_DIR` | каталог сайта **со слэшем в конце**, напр. `./` или `public_html/` |
+| `SUPABASE_URL` | `https://….supabase.co` |
+| `SUPABASE_ANON_KEY` | anon key |
+
+Перед заливкой CI пишет `js/cabinet-config.js` из `SUPABASE_*` (на сервере ключи не правятся руками).  
+Не заливаются: `test/`, `docs/`, `supabase/`, `.github/`, `*.md`, `cabinet-config.local.js`.
+
+Ручной запуск: Actions → **Deploy Webnames** → Run workflow.  
+Если FTPS не проходит — в workflow временно поставьте `protocol: ftp` (или согласуйте с поддержкой Webnames).
 
 ## SEO
 
