@@ -6,6 +6,7 @@
    */
   const TOKEN_KEY = "trinity.supabase.access_token";
   const USER_KEY = "trinity.supabase.user_email";
+  const NAME_KEY = "trinity.supabase.display_name";
 
   function cfg() {
     return window.CABINET_CONFIG || {};
@@ -38,6 +39,22 @@
     return window.__trinitySb;
   }
 
+  function persistDisplayName(name) {
+    try {
+      const n = String(name || "").trim();
+      if (n) localStorage.setItem(NAME_KEY, n);
+      else localStorage.removeItem(NAME_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function displayNameFromUser(user) {
+    if (!user) return "";
+    const meta = user.user_metadata || {};
+    return String(meta.display_name || meta.full_name || meta.name || "").trim();
+  }
+
   function persistSession(session) {
     try {
       if (session && session.access_token) {
@@ -45,13 +62,38 @@
         if (session.user && session.user.email) {
           localStorage.setItem(USER_KEY, session.user.email);
         }
+        const fromMeta = displayNameFromUser(session.user);
+        if (fromMeta) persistDisplayName(fromMeta);
       } else {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
+        localStorage.removeItem(NAME_KEY);
       }
     } catch {
       /* ignore */
     }
+  }
+
+  async function refreshDisplayName(user) {
+    const fromMeta = displayNameFromUser(user);
+    if (fromMeta) persistDisplayName(fromMeta);
+    const sb = getClient();
+    if (!sb || !user || !user.id) return fromMeta || "";
+    try {
+      const { data } = await sb
+        .from("profiles")
+        .select("display_name")
+        .eq("id", user.id)
+        .maybeSingle();
+      const fromRow = data && data.display_name ? String(data.display_name).trim() : "";
+      if (fromRow) {
+        persistDisplayName(fromRow);
+        return fromRow;
+      }
+    } catch {
+      /* offline / RLS — keep meta */
+    }
+    return fromMeta || "";
   }
 
   function unlockCabinet(email) {
@@ -266,6 +308,7 @@
     if (session && session.user) {
       persistSession(session);
       unlockCabinet(session.user.email);
+      refreshDisplayName(session.user);
       showPanel("login");
     } else {
       lockCabinet();
@@ -278,6 +321,7 @@
       if (event === "SIGNED_IN" && next) {
         persistSession(next);
         unlockCabinet(next.user && next.user.email);
+        if (next.user) refreshDisplayName(next.user);
       }
       if (event === "SIGNED_OUT") {
         persistSession(null);
@@ -358,6 +402,7 @@
         if (data.session && data.user) {
           await ensureProfile(data.user, profile);
           persistSession(data.session);
+          persistDisplayName(profile.display_name);
           unlockCabinet(data.user.email);
         } else {
           const checkEmail = document.querySelector("[data-check-email-addr]");
@@ -414,7 +459,10 @@
     setupAuth,
     isConfigured,
     getClient,
+    refreshDisplayName,
+    persistDisplayName,
     tokenKey: TOKEN_KEY,
     userKey: USER_KEY,
+    nameKey: NAME_KEY,
   };
 })();

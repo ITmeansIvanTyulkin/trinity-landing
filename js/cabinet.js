@@ -316,41 +316,17 @@
     }
   }
 
-  function applyLabDesk(parts) {
+  function applyLabDesk() {
     if (!Lab || typeof Lab.buildLabState !== "function") return;
-    const state = Lab.buildLabState(parts || {});
-    data.labDesk = state;
-    data.labPairs = state.pairs || [];
+    data.labDesk = Lab.buildLabState();
+    data.labPairs = [];
     refreshLab();
   }
 
   async function loadLabFromDesk() {
-    const base = imoexBase();
-    if (!base || !Lab) return false;
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 5000);
-    try {
-      const [regime, report, cluster, finals, pairs] = await Promise.all([
-        getJson(base + "/api/analysis/regime", ctrl.signal),
-        getJson(base + "/api/analysis/report", ctrl.signal),
-        getJson(base + "/api/analysis/cluster-review", ctrl.signal),
-        getJson(base + "/api/analysis/final", ctrl.signal),
-        getJson(base + "/api/paper/journal", ctrl.signal),
-      ]);
-      clearTimeout(t);
-      if (!(regime || report || cluster || finals || pairs)) return false;
-      applyLabDesk({
-        regime: regime,
-        report: report,
-        cluster: cluster,
-        finals: finals || [],
-        journal: pairs,
-      });
-      return true;
-    } catch {
-      clearTimeout(t);
-      return false;
-    }
+    /* Calendar-arb lab is fully manual — no pairs feed from the desk. */
+    applyLabDesk();
+    return true;
   }
 
   /* —— Optional local IMOEX (developer machine only) —— */
@@ -1063,9 +1039,10 @@
     paint();
   }
 
-  /* —— Self-help chat (no live first-line) —— */
+  /* —— Self-help chat · Маша (no live first-line) —— */
   function setupHelp() {
     const Help = window.TrinityCabinetHelp;
+    const Auth = window.TrinityCabinetAuth;
     const log = document.querySelector("[data-help-log]");
     const form = document.querySelector("[data-help-form]");
     const input = document.querySelector("[data-help-input]");
@@ -1074,22 +1051,122 @@
     const mailEmail = document.querySelector("[data-help-mail-email]");
     const mailBody = document.querySelector("[data-help-mail-body]");
     const mailCancel = document.querySelector("[data-help-mail-cancel]");
+    const agentNameEl = document.querySelector("[data-help-agent-name]");
+    const agentStatusEl = document.querySelector("[data-help-agent-status]");
     if (!Help || !log || !form || !input) return;
 
     const supportTo =
       (cfg().supportEmail) || Help.DEFAULT_SUPPORT_EMAIL;
+    const avatarSrc = Help.AGENT_AVATAR || "assets/masha-avatar.png";
+    const HELP_QUEUE_KEY = "trinity.masha.help_queue";
     let lastQuery = "";
     let pathTitles = [];
+    let cachedName = "";
+    let lastTurn = null;
+    let helpSessionId = "";
+
+    try {
+      helpSessionId =
+        sessionStorage.getItem("trinity.masha.session") ||
+        "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      sessionStorage.setItem("trinity.masha.session", helpSessionId);
+    } catch {
+      helpSessionId = "m" + Date.now().toString(36);
+    }
+
+    if (agentNameEl) agentNameEl.textContent = Help.AGENT_NAME || "Маша";
 
     function userEmail() {
       return (
         (window.localStorage &&
           localStorage.getItem(
-            (window.TrinityCabinetAuth && window.TrinityCabinetAuth.userKey) ||
-              "trinity.supabase.user_email"
+            (Auth && Auth.userKey) || "trinity.supabase.user_email"
           )) ||
         ""
       );
+    }
+
+    function storedDisplayName() {
+      try {
+        return (
+          localStorage.getItem(
+            (Auth && Auth.nameKey) || "trinity.supabase.display_name"
+          ) || ""
+        );
+      } catch {
+        return "";
+      }
+    }
+
+    function readHelpQueue() {
+      try {
+        const raw = localStorage.getItem(HELP_QUEUE_KEY);
+        const list = raw ? JSON.parse(raw) : [];
+        return Array.isArray(list) ? list : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function writeHelpQueue(list) {
+      try {
+        localStorage.setItem(HELP_QUEUE_KEY, JSON.stringify(list.slice(-40)));
+      } catch {
+        /* quota */
+      }
+    }
+
+    async function flushHelpLogs() {
+      const sb = Auth && typeof Auth.getClient === "function" ? Auth.getClient() : null;
+      if (!sb) return;
+      const queue = readHelpQueue();
+      if (!queue.length) return;
+      let userId = null;
+      try {
+        const { data } = await sb.auth.getSession();
+        userId = data && data.session && data.session.user && data.session.user.id;
+      } catch {
+        return;
+      }
+      if (!userId) return;
+      const left = [];
+      for (let i = 0; i < queue.length; i++) {
+        const row = Object.assign({}, queue[i], { user_id: userId });
+        try {
+          const { error } = await sb.from("masha_help_logs").insert(row);
+          if (error) left.push(queue[i]);
+        } catch {
+          left.push(queue[i]);
+        }
+      }
+      writeHelpQueue(left);
+    }
+
+    function recordHelp(opts) {
+      if (!Help.buildHelpLog) return;
+      const payload = Help.buildHelpLog(
+        Object.assign(
+          {
+            sessionId: helpSessionId,
+            path: pathTitles.join(" → "),
+          },
+          opts || {}
+        )
+      );
+      if (payload.event_type === "turn") {
+        lastTurn = {
+          userText: payload.user_text,
+          replyMode: payload.reply_mode,
+          replySummary: payload.reply_summary,
+          topicIds: payload.topic_ids,
+          wikiId: payload.wiki_id,
+          wikiHref: payload.wiki_href,
+        };
+      }
+      const queue = readHelpQueue();
+      queue.push(payload);
+      writeHelpQueue(queue);
+      flushHelpLogs();
     }
 
     function scrollLog() {
@@ -1103,10 +1180,23 @@
       return node;
     }
 
+    function botAvatar() {
+      const img = el("img", "help-avatar");
+      img.src = avatarSrc;
+      img.alt = Help.AGENT_NAME || "Маша";
+      img.width = 40;
+      img.height = 40;
+      img.decoding = "async";
+      return img;
+    }
+
     function botText(text) {
+      const row = el("div", "help-row help-row-bot");
+      row.appendChild(botAvatar());
       const wrap = el("div", "help-msg help-bot");
       wrap.appendChild(el("p", "", text));
-      log.appendChild(wrap);
+      row.appendChild(wrap);
+      log.appendChild(row);
       scrollLog();
     }
 
@@ -1119,11 +1209,7 @@
 
     function renderOptions(cards, prompt) {
       if (prompt) botText(prompt);
-      if (!cards.length) {
-        botText("По этому тексту вариантов нет. Перефразируйте или напишите человеку — ответ придёт письмом.");
-        showEscalate(true);
-        return;
-      }
+      if (!cards.length) return;
       const box = el("div", "help-options");
       cards.forEach(function (card) {
         const btn = el("button", "help-opt", card.title);
@@ -1135,21 +1221,7 @@
       scrollLog();
     }
 
-    function renderSolution(node) {
-      const wrap = el("div", "help-msg help-bot");
-      wrap.appendChild(el("p", "", node.title));
-      const ol = el("ol", "help-steps");
-      (node.steps || []).forEach(function (step) {
-        ol.appendChild(el("li", "", step));
-      });
-      wrap.appendChild(ol);
-      if (node.href && node.hrefLabel) {
-        const p = el("p");
-        const a = el("a", "", node.hrefLabel);
-        a.href = node.href;
-        p.appendChild(a);
-        wrap.appendChild(p);
-      }
+    function helpActions(wrap) {
       const actions = el("div", "help-actions");
       const ok = el("button", "btn btn-line", "Помогло");
       ok.type = "button";
@@ -1164,7 +1236,57 @@
       actions.appendChild(more);
       actions.appendChild(mail);
       wrap.appendChild(actions);
-      log.appendChild(wrap);
+    }
+
+    function renderSolution(node) {
+      const row = el("div", "help-row help-row-bot");
+      row.appendChild(botAvatar());
+      const wrap = el("div", "help-msg help-bot");
+      wrap.appendChild(el("p", "", node.title));
+      const ol = el("ol", "help-steps");
+      (node.steps || []).forEach(function (step) {
+        ol.appendChild(el("li", "", step));
+      });
+      wrap.appendChild(ol);
+      if (node.href && node.hrefLabel) {
+        const p = el("p", "help-wiki-link");
+        const a = el("a", "", node.hrefLabel);
+        a.href = node.href;
+        p.appendChild(document.createTextNode("Подробнее: "));
+        p.appendChild(a);
+        wrap.appendChild(p);
+      }
+      helpActions(wrap);
+      row.appendChild(wrap);
+      log.appendChild(row);
+      scrollLog();
+    }
+
+    function renderWiki(hit, alt) {
+      if (!hit) return;
+      const row = el("div", "help-row help-row-bot");
+      row.appendChild(botAvatar());
+      const wrap = el("div", "help-msg help-bot");
+      wrap.appendChild(el("p", "help-wiki-title", hit.title));
+      wrap.appendChild(el("p", "", hit.blurb));
+      const p = el("p", "help-wiki-link");
+      const a = el("a", "", "Читать статью →");
+      a.href = hit.href;
+      p.appendChild(a);
+      wrap.appendChild(p);
+      if (alt && alt.length) {
+        const more = el("p", "help-wiki-alt", "Ещё по теме:");
+        alt.forEach(function (w, i) {
+          if (i) more.appendChild(document.createTextNode(" · "));
+          const link = el("a", "", w.title);
+          link.href = w.href;
+          more.appendChild(link);
+        });
+        wrap.appendChild(more);
+      }
+      helpActions(wrap);
+      row.appendChild(wrap);
+      log.appendChild(row);
       scrollLog();
     }
 
@@ -1174,20 +1296,120 @@
       pathTitles.push(node.title);
       userText(node.title);
       if (node.children && node.children.length) {
-        renderOptions(Help.childrenOf(id), node.prompt || "Уточните:");
+        const kids = Help.childrenOf(id);
+        renderOptions(kids, node.prompt || "Уточните:");
+        recordHelp({
+          eventType: "turn",
+          userText: node.title,
+          replyMode: "branch",
+          replySummary: Help.summarizeResolved
+            ? Help.summarizeResolved({ mode: "branch", topics: kids })
+            : kids.map(function (c) {
+                return c.title;
+              }).join(" · "),
+          topicIds: [id].concat(
+            kids.map(function (c) {
+              return c.id;
+            })
+          ),
+        });
         return;
       }
       renderSolution(node);
+      recordHelp({
+        eventType: "turn",
+        userText: node.title,
+        replyMode: "solution",
+        replySummary: Help.summarizeSolution
+          ? Help.summarizeSolution(node)
+          : node.title,
+        topicIds: [id],
+        wikiHref: node.href || null,
+      });
     }
 
     function search(text) {
       lastQuery = text;
-      const cards = Help.matchQuery(text);
-      if (text) {
-        renderOptions(cards, cards.length ? "Похоже на одно из этого:" : null);
-      } else {
-        renderOptions(cards, "Частые темы — или напишите своими словами:");
+      const resolved =
+        typeof Help.resolveHelp === "function"
+          ? Help.resolveHelp(text)
+          : {
+              mode: text ? "topics" : "menu",
+              topics: Help.matchQuery(text),
+              wiki: null,
+              wikiAlt: [],
+            };
+
+      if (resolved.mode === "menu") {
+        renderOptions(
+          resolved.topics,
+          "Частые темы — или напишите своими словами (кабинет, стол, Wiki):"
+        );
+        return;
       }
+
+      if (resolved.mode === "wiki" && resolved.wiki) {
+        botText(
+          "Прямого пункта в меню нет — кратко из Wiki, дальше ссылка на статью."
+        );
+        renderWiki(resolved.wiki, resolved.wikiAlt);
+        if (resolved.topics && resolved.topics.length) {
+          renderOptions(resolved.topics, "Похожие темы в кабинете:");
+        }
+        recordHelp({
+          eventType: "turn",
+          userText: text,
+          replyMode: "wiki",
+          replySummary: Help.summarizeResolved
+            ? Help.summarizeResolved(resolved)
+            : resolved.wiki.blurb,
+          topicIds: (resolved.topics || []).map(function (t) {
+            return t.id;
+          }),
+          wikiId: resolved.wiki.id,
+          wikiHref: resolved.wiki.href,
+        });
+        return;
+      }
+
+      if (resolved.mode === "topics" && resolved.topics.length) {
+        renderOptions(resolved.topics, "Похоже на одно из этого:");
+        if (resolved.wiki) {
+          botText("Ещё кратко из Wiki по соседней теме:");
+          renderWiki(resolved.wiki, []);
+        }
+        recordHelp({
+          eventType: "turn",
+          userText: text,
+          replyMode: "topics",
+          replySummary: Help.summarizeResolved
+            ? Help.summarizeResolved(resolved)
+            : resolved.topics
+                .map(function (t) {
+                  return t.title;
+                })
+                .join(" · "),
+          topicIds: resolved.topics.map(function (t) {
+            return t.id;
+          }),
+          wikiId: resolved.wiki ? resolved.wiki.id : null,
+          wikiHref: resolved.wiki ? resolved.wiki.href : null,
+        });
+        return;
+      }
+
+      botText(
+        "По этому тексту готового ответа нет. Перефразируйте, выберите тему или напишите человеку — ответим письмом."
+      );
+      showEscalate(true);
+      renderOptions(Help.matchQuery(""), "Или начните с частой темы:");
+      recordHelp({
+        eventType: "turn",
+        userText: text,
+        replyMode: "empty",
+        replySummary: "no_match",
+        topicIds: [],
+      });
     }
 
     function showEscalate(open) {
@@ -1200,10 +1422,53 @@
     function greet() {
       log.innerHTML = "";
       pathTitles = [];
-      botText(
-        "Напишите, что случилось — подберём шаги. Живого чата нет: если не помогло, человек ответит письмом."
-      );
+      const line = Help.buildGreeting({
+        displayName: cachedName || storedDisplayName(),
+        email: userEmail(),
+      });
+      botText(line);
+      if (agentStatusEl) {
+        const name = Help.resolveDisplayName({
+          displayName: cachedName || storedDisplayName(),
+          email: userEmail(),
+        });
+        agentStatusEl.textContent = name
+          ? "Онлайн · для " + name
+          : "Онлайн · подберу шаги";
+      }
       search("");
+    }
+
+    async function resolveNameThenGreet() {
+      cachedName = storedDisplayName();
+      greet();
+      try {
+        const sb = Auth && typeof Auth.getClient === "function" ? Auth.getClient() : null;
+        if (!sb || typeof Auth.refreshDisplayName !== "function") return;
+        const { data } = await sb.auth.getSession();
+        const user = data && data.session && data.session.user;
+        if (!user) return;
+        const fresh = await Auth.refreshDisplayName(user);
+        if (fresh && fresh !== cachedName) {
+          cachedName = fresh;
+          greet();
+        }
+      } catch {
+        /* keep cached greeting */
+      }
+    }
+
+    function logFeedback(kind) {
+      recordHelp({
+        eventType: "feedback",
+        userText: lastTurn ? lastTurn.userText : lastQuery,
+        replyMode: lastTurn ? lastTurn.replyMode : null,
+        replySummary: lastTurn ? lastTurn.replySummary : null,
+        topicIds: lastTurn ? lastTurn.topicIds : [],
+        wikiId: lastTurn ? lastTurn.wikiId : null,
+        wikiHref: lastTurn ? lastTurn.wikiHref : null,
+        feedback: kind,
+      });
     }
 
     log.addEventListener("click", function (ev) {
@@ -1215,11 +1480,14 @@
       const act = ev.target.closest("[data-help-act]");
       if (!act) return;
       if (act.dataset.helpAct === "ok") {
-        botText("Хорошо. Если всплывёт другое — напишите снова или выберите тему.");
+        logFeedback("helped");
+        botText("Рада, что помогло. Если всплывёт другое — напишите снова или выберите тему.");
       } else if (act.dataset.helpAct === "more") {
+        logFeedback("more");
         pathTitles = [];
         search("");
       } else if (act.dataset.helpAct === "mail") {
+        logFeedback("mail");
         showEscalate(true);
       }
     });
@@ -1245,6 +1513,7 @@
     if (mailForm) {
       mailForm.addEventListener("submit", function (ev) {
         ev.preventDefault();
+        logFeedback("escalate_mail");
         const href = Help.composeMailto({
           to: supportTo,
           email: mailEmail ? mailEmail.value : "",
@@ -1257,7 +1526,11 @@
       });
     }
 
-    greet();
+    resolveNameThenGreet();
+    flushHelpLogs();
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") flushHelpLogs();
+    });
   }
 
   /* —— Payments —— */
@@ -1326,20 +1599,14 @@
     });
   }
 
-  /* —— Decision Lab (pipeline sandbox) —— */
+  /* —— Decision Lab: calendar arb manual scenario —— */
   let refreshLab = function () {};
 
   function setupLab() {
-    const pairSel = document.getElementById("lab-pair");
+    const familySel = document.getElementById("lab-family");
     const zEl = document.getElementById("lab-z");
     const zLabel = document.querySelector("[data-lab-z]");
-    const regimeInputs = document.querySelectorAll('input[name="lab-regime"]');
-    const clusterInputs = document.querySelectorAll('input[name="lab-cluster"]');
-    const faInputs = document.querySelectorAll('input[name="lab-fa"]');
-    const bookInputs = document.querySelectorAll('input[name="lab-book"]');
-    const atasInputs = document.querySelectorAll('input[name="lab-atas"]');
-    const atasWrap = document.querySelector("[data-lab-atas-wrap]");
-    const pairNote = document.querySelector("[data-lab-pair-note]");
+    const familyNote = document.querySelector("[data-lab-family-note]");
     const liveLine = document.querySelector("[data-lab-live-line]");
     const resetBtn = document.querySelector("[data-lab-reset]");
     const modeEl = document.querySelector("[data-lab-mode]");
@@ -1348,10 +1615,20 @@
     const why = document.querySelector("[data-lab-why]");
     const controls = document.querySelector(".lab-controls");
 
-    if (!pairSel || !zEl || !stepsRoot) return;
+    const structureInputs = document.querySelectorAll('input[name="lab-structure"]');
+    const sideInputs = document.querySelectorAll('input[name="lab-side"]');
+    const sessionInputs = document.querySelectorAll('input[name="lab-session"]');
+    const rollInputs = document.querySelectorAll('input[name="lab-roll"]');
+    const eventInputs = document.querySelectorAll('input[name="lab-event"]');
+    const curveInputs = document.querySelectorAll('input[name="lab-curve"]');
+    const costInputs = document.querySelectorAll('input[name="lab-cost"]');
+    const goInputs = document.querySelectorAll('input[name="lab-go"]');
+    const recedeInputs = document.querySelectorAll('input[name="lab-recede"]');
+
+    if (!familySel || !zEl || !stepsRoot || !Lab) return;
 
     let applying = false;
-    let liveGates = null;
+    let baseline = null;
     let labBound = false;
 
     function val(inputs, fallback) {
@@ -1368,119 +1645,79 @@
       if (!hit && inputs[0]) inputs[0].checked = true;
     }
 
-    function currentPair() {
-      return (
-        (data.labPairs || []).find((p) => p.id === pairSel.value) ||
-        (data.labPairs || [])[0] ||
-        null
-      );
+    function fillFamilies() {
+      const prev = familySel.value;
+      familySel.innerHTML = "";
+      const list = Lab.FAMILIES || [];
+      list.forEach(function (f) {
+        const opt = document.createElement("option");
+        opt.value = f.id;
+        opt.textContent = f.label;
+        familySel.appendChild(opt);
+      });
+      if (prev && list.some((f) => f.id === prev)) familySel.value = prev;
+      else if (list[0]) familySel.value = list[0].id;
     }
 
     function readGates() {
       return {
         zAbs: Number(zEl.value),
-        regime: val(regimeInputs, "SIDEWAYS"),
-        cluster: val(clusterInputs, "yes") === "yes",
-        fa: val(faInputs, "pass"),
-        book: val(bookInputs, "DAILY"),
-        atas: val(atasInputs, "pass") === "pass",
+        side: val(sideInputs, "cheap"),
+        family: familySel.value || "BR",
+        structure: val(structureInputs, "spread"),
+        session: val(sessionInputs, "yes") === "yes",
+        rollOk: val(rollInputs, "yes") === "yes",
+        eventClear: val(eventInputs, "yes") === "yes",
+        curve: val(curveInputs, "ok"),
+        costOk: val(costInputs, "yes") === "yes",
+        goOk: val(goInputs, "yes") === "yes",
+        recede: val(recedeInputs, "yes") === "yes",
       };
     }
 
-    function fillSelect() {
-      const prev = pairSel.value;
-      pairSel.innerHTML = "";
-      const rows = data.labPairs || [];
-      if (!rows.length && Lab && typeof Lab.catalogPairs === "function") {
-        data.labPairs = Lab.catalogPairs();
-      }
-      const list = data.labPairs || [];
-      const live = list.filter((p) => p.live);
-      const rest = list.filter((p) => !p.live);
-      function addGroup(label, items) {
-        if (!items.length) return;
-        const g = document.createElement("optgroup");
-        g.label = label;
-        items.forEach(function (p) {
-          const opt = document.createElement("option");
-          opt.value = p.id;
-          opt.textContent = p.label;
-          g.appendChild(opt);
-        });
-        pairSel.appendChild(g);
-      }
-      if (live.length && rest.length) {
-        addGroup("Со стола", live);
-        addGroup("Вселенная", rest);
-      } else {
-        list.forEach(function (p) {
-          const opt = document.createElement("option");
-          opt.value = p.id;
-          opt.textContent = p.label;
-          pairSel.appendChild(opt);
-        });
-      }
-      if (prev && list.some((p) => p.id === prev)) pairSel.value = prev;
-    }
-
-    function applyLive(pair) {
-      if (!pair || !Lab || typeof Lab.gatesFromPair !== "function") return;
-      const g = Lab.gatesFromPair(pair, {
-        regime: (data.regime && data.regime.current) || pair.regime,
-      });
+    function applyGates(g) {
+      if (!g) return;
       applying = true;
       const z = Math.max(0, Math.min(4, Number(g.zAbs) || 0));
       zEl.value = String(z);
-      setRadio(regimeInputs, g.regime);
-      setRadio(clusterInputs, g.cluster ? "yes" : "no");
-      setRadio(faInputs, g.fa);
-      setRadio(bookInputs, g.book || "DAILY");
+      if (g.family) familySel.value = g.family;
+      setRadio(structureInputs, g.structure || "spread");
+      setRadio(sideInputs, g.side || "cheap");
+      setRadio(sessionInputs, g.session === false ? "no" : "yes");
+      setRadio(rollInputs, g.rollOk === false ? "no" : "yes");
+      setRadio(eventInputs, g.eventClear === false ? "no" : "yes");
+      setRadio(curveInputs, g.curve || "ok");
+      setRadio(costInputs, g.costOk === false ? "no" : "yes");
+      setRadio(goInputs, g.goOk === false ? "no" : "yes");
+      setRadio(recedeInputs, g.recede === false ? "no" : "yes");
       applying = false;
-      liveGates = g;
+      baseline = readGates();
       update();
     }
 
     function update() {
-      const pair = currentPair();
       const ui = readGates();
-      const zAbs = ui.zAbs;
-      const dirty =
-        liveGates && Lab && Lab.sameGates
-          ? !Lab.sameGates(ui, liveGates)
-          : false;
+      const dirty = baseline && Lab.sameGates ? !Lab.sameGates(ui, baseline) : false;
+      const fam = Lab.familyById ? Lab.familyById(ui.family) : null;
 
-      if (zLabel) zLabel.textContent = zAbs.toFixed(2);
-      if (pairNote) pairNote.textContent = pair ? pair.note : "";
-      if (atasWrap) atasWrap.hidden = ui.book !== "INTRADAY";
+      if (zLabel) zLabel.textContent = ui.zAbs.toFixed(2);
+      if (familyNote) familyNote.textContent = fam ? fam.note : "";
       if (liveLine) {
         liveLine.textContent =
           (data.labDesk && data.labDesk.line) ||
-          "Выберите пару. Цифры со стола подставятся сами, щелчки — сценарий.";
+          "Крутите тумблеры и ползунок — это ручной сценарий календарного спреда.";
       }
-      if (resetBtn) resetBtn.hidden = !dirty;
       if (modeEl) {
         modeEl.hidden = false;
-        modeEl.textContent = dirty ? "Сценарий" : pair && pair.live ? "Со стола" : "Вселенная";
-        modeEl.className =
-          "lab-mode" + (dirty ? " is-scenario" : pair && pair.live ? " is-live" : "");
+        modeEl.textContent = dirty ? "Сценарий изменён" : "Базовый сценарий";
+        modeEl.className = "lab-mode" + (dirty ? " is-scenario" : "");
       }
       if (controls) controls.classList.toggle("is-scenario", dirty);
 
-      const result = Lab
-        ? Lab.evaluatePipeline({
-            zAbs: zAbs,
-            regime: ui.regime,
-            cluster: ui.cluster,
-            fa: ui.fa,
-            book: ui.book,
-            atas: ui.atas,
-            sector: pair && (Lab.sectorLabel ? Lab.sectorLabel(pair.sector) : pair.sector),
-          })
-        : null;
-
+      const result = Lab.evaluatePipeline(ui);
       const steps = result ? result.steps : [];
       stepsRoot.innerHTML = "";
-      steps.forEach((s, i) => {
+      steps.forEach(function (s, i) {
         const li = document.createElement("li");
         li.className = "lab-step lab-" + s.status;
         const n = document.createElement("span");
@@ -1511,37 +1748,46 @@
     }
 
     refreshLab = function () {
-      fillSelect();
-      applyLive(currentPair());
+      fillFamilies();
+      if (!baseline && Lab.defaultGates) {
+        applyGates(Lab.defaultGates());
+      } else {
+        update();
+      }
     };
 
     if (!labBound) {
       labBound = true;
-      pairSel.addEventListener("change", function () {
-        applyLive(currentPair());
+      familySel.addEventListener("change", function () {
+        if (!applying) update();
       });
       zEl.addEventListener("input", function () {
         if (!applying) update();
       });
-      [regimeInputs, clusterInputs, faInputs, bookInputs, atasInputs].forEach(
-        function (list) {
-          list.forEach(function (i) {
-            i.addEventListener("change", function () {
-              if (!applying) update();
-            });
+      [
+        structureInputs,
+        sideInputs,
+        sessionInputs,
+        rollInputs,
+        eventInputs,
+        curveInputs,
+        costInputs,
+        goInputs,
+        recedeInputs,
+      ].forEach(function (list) {
+        list.forEach(function (i) {
+          i.addEventListener("change", function () {
+            if (!applying) update();
           });
-        }
-      );
+        });
+      });
       if (resetBtn) {
         resetBtn.addEventListener("click", function () {
-          applyLive(currentPair());
+          if (Lab.defaultGates) applyGates(Lab.defaultGates());
         });
       }
     }
 
-    if (!(data.labPairs && data.labPairs.length) && Lab && Lab.catalogPairs) {
-      data.labPairs = Lab.catalogPairs();
-    }
     refreshLab();
   }
 

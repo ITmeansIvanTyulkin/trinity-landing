@@ -17,13 +17,28 @@ function candlesFromCloses(closes, vol) {
   }));
 }
 
-/** Mild uptrend that finishes with mid RSI and price above SMA20/50. */
+/**
+ * Mild uptrend above SMA20/50 with Volume/CD Pass
+ * (desk VolumeIndicatorsGate: absorb + delta↑ on the last bars).
+ */
 function grindCandles(n) {
-  const closes = [];
+  const out = [];
   for (let i = 0; i < n; i++) {
-    closes.push(100 + i * 0.04 + Math.sin((i + 4) / 5) * 1.2);
+    const close = 100 + i * 0.35;
+    const last = i === n - 1;
+    /* Prior bars close near high → positive CD; last bar high-vol down → absorption. */
+    out.push({
+      open: last ? close + 0.5 : close - 0.5,
+      close: close,
+      high: last ? close + 0.6 : close + 0.15,
+      low: last ? close - 0.9 : close - 0.9,
+      volume: last ? 2500 : 1000,
+      value: close * 1000,
+      begin: "2025-01-01",
+      end: "2025-01-01",
+    });
   }
-  return candlesFromCloses(closes, 1000);
+  return out;
 }
 
 describe("TrinityInvestFundamentals", () => {
@@ -163,7 +178,7 @@ describe("TrinityInvestPipeline", () => {
     assert.match(fundSec.body, /отчётности|отчётность/i);
   });
 
-  it("emits Invest when market/fund/indicators/strategy are constructive", () => {
+  it("emits Invest when desk-style gates are constructive", () => {
     const candles = grindCandles(90);
     const result = Pipe.analyzePrepared({
       ticker: "LKOH",
@@ -174,6 +189,7 @@ describe("TrinityInvestPipeline", () => {
         board: "TQBR",
         shortName: "ЛУКОЙЛ",
         listLevel: 1,
+        valToday: 200_000_000,
       },
       candles,
       fundamentals: {
@@ -195,30 +211,39 @@ describe("TrinityInvestPipeline", () => {
       riskProfile: { risk_level: "moderate", warn_drawdown_pct: 25 },
     });
     assert.equal(result.fund.status, "Pass");
-    assert.notEqual(result.gates.market.status, "Fail");
+    assert.equal(result.gates.trend.status, "Pass");
+    assert.equal(result.playbook, "investments-desk");
     assert.equal(result.verdict, "invest");
     assert.equal(result.explanation.sections.length, 9);
   });
 
   it("composeVerdict never upgrades NoData fund to invest", () => {
     const gates = {
-      market: { status: "Pass" },
       fund: { status: "NoData" },
+      liquidity: { status: "Pass" },
+      trend: { status: "Pass" },
+      zones: { status: "Pass" },
+      potential: { status: "Pass" },
+      category: { status: "Pass" },
       indicators: { status: "Pass" },
-      strategy: { status: "Pass" },
       cluster: { status: "Pass" },
+      size: { status: "Pass" },
     };
     const v = Pipe.composeVerdict(gates);
     assert.equal(v.verdict, "watch");
   });
 
-  it("composeVerdict returns skip on market Fail", () => {
+  it("composeVerdict returns skip on liquidity Fail (desk-style)", () => {
     const v = Pipe.composeVerdict({
-      market: { status: "Fail" },
       fund: { status: "Pass" },
+      liquidity: { status: "Fail" },
+      trend: { status: "Pass" },
+      zones: { status: "Pass" },
+      potential: { status: "Pass" },
+      category: { status: "Pass" },
       indicators: { status: "Pass" },
-      strategy: { status: "Pass" },
       cluster: { status: "Pass" },
+      size: { status: "Pass" },
     });
     assert.equal(v.verdict, "skip");
   });

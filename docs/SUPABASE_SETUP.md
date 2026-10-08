@@ -23,6 +23,7 @@
 
 1. [`supabase/profiles.sql`](../supabase/profiles.sql)
 2. [`supabase/desk_snapshots.sql`](../supabase/desk_snapshots.sql) — снимок стола с компьютера пользователя (режим, paper, дни триала). Без токена брокера.
+3. [`supabase/masha_help_logs.sql`](../supabase/masha_help_logs.sql) — пары «вопрос пользователя → ответ Маши» (+ feedback) для дообучения помощи. RLS: insert/select только своих строк.
 
 Можно повторно: колонки добавляются через `ADD COLUMN IF NOT EXISTS`.
 

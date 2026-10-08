@@ -1,17 +1,12 @@
 /**
- * Invest auto-pipeline: MOEX ISS market + indicators + strategy skeleton +
- * volume profile (POC / value area) + close-location delta + composite verdict.
+ * Invest auto-pipeline aligned with desk InvestmentsPlaybook (IMOEX-core):
+ * fund → liquidity → trend D1 → VAP zones → potential/CAT → volume/CD →
+ * daily profile proxy for clusters → weighted verdict.
+ *
+ * Cabinet = research only (no limit ladder / auto-execution).
+ * M5 Bid×Ask tape lives on the desk; here cluster uses daily VAP + soft WEAK.
  *
  * Thresholds live in THRESHOLDS (edit in one place).
- *
- * TODO (strategy PDF, ~141 pp — not fully ported in MVP):
- * - full issuer screen / universe filters
- * - dividend calendar and payout quality
- * - position sizing / pyramid rules
- * - accompaniment playbook after fill
- * - sector relative-value vs peers
- *
- * TODO (indicators PDF): MACD, ADX, Bollinger, stochastic, VWAP — slot later.
  */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) {
@@ -54,18 +49,27 @@
     profileMinBars: 40,
     profileDefaultBars: 220,
     deltaTailBars: 20,
+    maxAddonGapPct: 0.25,
+    requireUptrendD1: true,
+    minTurnoverRub: 50_000_000,
+    /** Desk InvestmentsPlaybook.weighted ids (macro/size optional / often NoData). */
     weights: {
-      market: 0.15,
-      fund: 0.3,
-      indicators: 0.2,
-      strategy: 0.25,
-      cluster: 0.1,
+      fund: 0.28,
+      liquidity: 0.1,
+      macro: 0.07,
+      trend: 0.12,
+      zones: 0.1,
+      potential: 0.08,
+      category: 0.05,
+      indicators: 0.08,
+      cluster: 0.07,
+      size: 0.05,
     },
     investMin: 0.72,
     watchMin: 0.4,
   };
 
-  const STATUS_SCORE = { Pass: 1, Weak: 0.55, Fail: 0, NoData: null };
+  const STATUS_SCORE = { Pass: 1, Weak: 0.55, Fail: 0, Skip: 0, NoData: null };
 
   function clamp(n, a, b) {
     return Math.min(b, Math.max(a, n));
@@ -289,6 +293,8 @@
       listLevel: row.LISTLEVEL != null ? Number(row.LISTLEVEL) : null,
       lotSize: row.LOTSIZE != null ? Number(row.LOTSIZE) : null,
       volToday: row.VOLTODAY != null ? Number(row.VOLTODAY) : null,
+      valToday: row.VALTODAY != null ? Number(row.VALTODAY) : null,
+      issueCap: row.ISSUECAPITALIZATION != null ? Number(row.ISSUECAPITALIZATION) : null,
       isin: row.ISIN || null,
       asOf: row.TIME || row.SYSTIME || row.UPDATETIME || null,
     };
@@ -556,181 +562,425 @@
     };
   }
 
-  function gateIndicators(ind) {
-    const parts = [];
-    let smaStatus = "NoData";
-    if (ind.last != null && ind.smaFast != null && ind.smaSlow != null) {
-      const up = ind.last > ind.smaFast && ind.smaFast > ind.smaSlow;
-      const down = ind.last < ind.smaFast && ind.smaFast < ind.smaSlow;
-      smaStatus = up ? "Pass" : down ? "Fail" : "Weak";
-      parts.push(
-        "SMA" +
-          THRESHOLDS.smaFast +
-          "/" +
-          THRESHOLDS.smaSlow +
-          ": close " +
-          round(ind.last, 2) +
-          " vs " +
-          round(ind.smaFast, 2) +
-          " / " +
-          round(ind.smaSlow, 2) +
-          " → " +
-          smaStatus
-      );
-    } else {
-      parts.push("SMA: недостаточно баров");
+  /** Desk TrendGate — long sleeve, requireUptrendD1. */
+  function gateTrend(ind) {
+    if (!ind || ind.bars < 40 || ind.last == null || ind.smaFast == null || ind.smaSlow == null) {
+      return {
+        id: "trend",
+        title: "Тренд D1",
+        status: "NoData",
+        detail: "need ≥40 daily bars",
+        metrics: ind || {},
+      };
     }
-
-    let rsiStatus = "NoData";
-    if (ind.rsi != null) {
-      if (ind.rsi >= THRESHOLDS.rsiPassLow && ind.rsi <= THRESHOLDS.rsiPassHigh) rsiStatus = "Pass";
-      else if (ind.rsi > THRESHOLDS.rsiWeakHigh || ind.rsi < THRESHOLDS.rsiWeakLow) rsiStatus = "Fail";
-      else rsiStatus = "Weak";
-      parts.push("RSI(" + THRESHOLDS.rsiPeriod + ")=" + round(ind.rsi, 1) + " → " + rsiStatus);
-    } else {
-      parts.push("RSI: недостаточно баров");
+    const up = ind.last > ind.smaFast && ind.smaFast > ind.smaSlow;
+    const down = ind.last < ind.smaFast && ind.smaFast < ind.smaSlow;
+    if (down && THRESHOLDS.requireUptrendD1) {
+      return {
+        id: "trend",
+        title: "Тренд D1",
+        status: "Skip",
+        detail: "D1 downtrend — skip",
+        metrics: { uptrend: false },
+      };
     }
-
-    let volStatus = "NoData";
-    if (ind.volRatio != null) {
-      if (ind.volRatio < THRESHOLDS.volumeFailLow || ind.volRatio > THRESHOLDS.volumeFailHigh) {
-        volStatus = "Fail";
-      } else if (ind.volRatio >= THRESHOLDS.volumePassLow && ind.volRatio <= THRESHOLDS.volumePassHigh) {
-        volStatus = "Pass";
-      } else {
-        volStatus = "Weak";
-      }
-      parts.push("объём/SMA(объём)=" + round(ind.volRatio, 2) + " → " + volStatus);
+    if (up) {
+      return {
+        id: "trend",
+        title: "Тренд D1",
+        status: "Pass",
+        detail: "D1 uptrend",
+        metrics: { uptrend: true },
+      };
     }
-
-    const status = worstStatus([smaStatus, rsiStatus, volStatus].filter((s) => s !== "NoData"));
     return {
-      id: "indicators",
-      title: "Индикаторы",
-      status: status || "NoData",
-      detail: parts.join("; "),
+      id: "trend",
+      title: "Тренд D1",
+      status: "Weak",
+      detail: "D1 mixed / sideways",
+      metrics: { uptrend: false },
+    };
+  }
+
+  /** Desk LiquidityFilter — soft proxy from ISS listing / turnover. */
+  function gateLiquidity(quote) {
+    const q = quote || {};
+    if (!q.found) {
+      return {
+        id: "liquidity",
+        title: "Ликвидность",
+        status: "Fail",
+        detail: "no quote",
+        metrics: {},
+      };
+    }
+    const val = q.valToday != null && Number.isFinite(q.valToday) ? q.valToday : null;
+    const cap = q.issueCap != null && Number.isFinite(q.issueCap) ? q.issueCap : null;
+    if (val != null && val < THRESHOLDS.minTurnoverRub) {
+      return {
+        id: "liquidity",
+        title: "Ликвидность",
+        status: "Fail",
+        detail: "turnover below min",
+        metrics: { valToday: val, issueCap: cap },
+      };
+    }
+    if (q.listLevel != null && q.listLevel >= 3) {
+      return {
+        id: "liquidity",
+        title: "Ликвидность",
+        status: "Fail",
+        detail: "listing level " + q.listLevel,
+        metrics: { listLevel: q.listLevel, valToday: val },
+      };
+    }
+    if (val != null || q.listLevel === 1) {
+      return {
+        id: "liquidity",
+        title: "Ликвидность",
+        status: "Pass",
+        detail: "liquid",
+        metrics: { listLevel: q.listLevel, valToday: val, issueCap: cap },
+      };
+    }
+    if (q.listLevel === 2) {
+      return {
+        id: "liquidity",
+        title: "Ликвидность",
+        status: "Weak",
+        detail: "listing level 2",
+        metrics: { listLevel: 2 },
+      };
+    }
+    return {
+      id: "liquidity",
+      title: "Ликвидность",
+      status: "NoData",
+      detail: "no liquidity snapshot",
+      metrics: {},
+    };
+  }
+
+  /**
+   * Desk VolumeProfileZones on daily bars (cabinet has no H4 feed).
+   */
+  function evaluateZones(candles) {
+    const bars = candles || [];
+    if (bars.length < 30) {
+      return {
+        status: "NoData",
+        detail: "need ≥30 bars for profile",
+        range1: null,
+        range2: null,
+        chartPotentialPct: null,
+        targetPrice: null,
+      };
+    }
+    const last = bars[bars.length - 1].close;
+    let min = bars[0].low;
+    let max = bars[0].high;
+    for (let i = 1; i < bars.length; i++) {
+      if (bars[i].low < min) min = bars[i].low;
+      if (bars[i].high > max) max = bars[i].high;
+    }
+    if (!(max > min)) {
+      return {
+        status: "Fail",
+        detail: "flat range",
+        range1: null,
+        range2: null,
+        chartPotentialPct: null,
+        targetPrice: null,
+      };
+    }
+    const bins = 40;
+    const vol = new Array(bins).fill(0);
+    const step = (max - min) / bins;
+    for (let i = 0; i < bars.length; i++) {
+      const b = bars[i];
+      const typ = (b.high + b.low + b.close) / 3;
+      const idx = Math.min(bins - 1, Math.max(0, Math.floor((typ - min) / step)));
+      vol[idx] += b.volume > 0 ? b.volume : Math.max(b.high - b.low, 1e-9);
+    }
+    const peaks = [];
+    for (let i = 1; i < bins - 1; i++) {
+      if (vol[i] >= vol[i - 1] && vol[i] >= vol[i + 1] && vol[i] > 0) {
+        peaks.push({ i: i, v: vol[i] });
+      }
+    }
+    peaks.sort(function (a, b) {
+      return b.v - a.v;
+    });
+    function zoneAt(i) {
+      const lo = min + i * step;
+      return { low: lo, high: lo + step, mid: lo + step / 2 };
+    }
+    function pot(lastPx, target, entryMid) {
+      const base = entryMid > 0 ? entryMid : lastPx;
+      if (!(base > 0) || !(target > base)) {
+        return Math.max(0, ((target - lastPx) / Math.max(lastPx, 1e-9)) * 100);
+      }
+      return ((target - base) / base) * 100;
+    }
+    const below = [];
+    for (let p = 0; p < peaks.length; p++) {
+      const z = zoneAt(peaks[p].i);
+      if (z.mid < last) below.push(z);
+      if (below.length >= 2) break;
+    }
+    if (!below.length) {
+      const r1 = {
+        low: min,
+        high: min + (last - min) * 0.35,
+        mid: min + (last - min) * 0.175,
+      };
+      return {
+        status: "Weak",
+        detail: "no HVN below — fallback zone",
+        range1: r1,
+        range2: null,
+        chartPotentialPct: pot(last, max, r1.mid),
+        targetPrice: max,
+      };
+    }
+    const r1 = below[0];
+    const r2 = below.length > 1 ? below[1] : null;
+    if (r2) {
+      const gap = Math.abs(r1.mid - r2.mid) / r1.mid;
+      if (gap > THRESHOLDS.maxAddonGapPct) {
+        return {
+          status: "Weak",
+          detail: "addon gap >" + Math.round(THRESHOLDS.maxAddonGapPct * 100) + "%",
+          range1: r1,
+          range2: r2,
+          chartPotentialPct: pot(last, max, r1.mid),
+          targetPrice: max,
+        };
+      }
+    }
+    let target = max;
+    for (let p = 0; p < peaks.length; p++) {
+      const mid = min + (peaks[p].i + 0.5) * step;
+      if (mid > last) {
+        target = mid;
+        break;
+      }
+    }
+    return {
+      status: "Pass",
+      detail: "zones from HVN (daily)",
+      range1: r1,
+      range2: r2,
+      chartPotentialPct: pot(last, target, r1.mid),
+      targetPrice: target,
+    };
+  }
+
+  function gateZones(zoneEval) {
+    const z = zoneEval || {};
+    return {
+      id: "zones",
+      title: "Зоны VAP (D1)",
+      status: z.status || "NoData",
+      detail: z.detail || "",
       metrics: {
-        smaFast: round(ind.smaFast, 4),
-        smaSlow: round(ind.smaSlow, 4),
-        rsi: round(ind.rsi, 2),
-        volRatio: round(ind.volRatio, 3),
-        rangePct: round(ind.rangePct, 4),
-        smaStatus,
-        rsiStatus,
-        volStatus,
+        range1: z.range1,
+        range2: z.range2,
+        targetPrice: z.targetPrice != null ? round(z.targetPrice, 4) : null,
+        chartPotentialPct:
+          z.chartPotentialPct != null ? round(z.chartPotentialPct, 2) : null,
       },
     };
   }
 
-  function gateStrategy(ind, fundGate, quote, profile) {
-    /* Playbook skeleton: context → selection → entry zone → risk → accompaniment. */
-    const rules = [];
-
-    let context = "NoData";
-    if (ind.last != null && ind.smaSlow != null) {
-      context = ind.last >= ind.smaSlow ? "Pass" : "Weak";
-      rules.push({
-        id: "context",
-        status: context,
-        text: "Контекст тренда: цена относительно SMA" + THRESHOLDS.smaSlow,
-      });
+  function gatePotentialAndCategory(fundScored, zoneEval) {
+    const chart =
+      zoneEval && zoneEval.chartPotentialPct != null && Number.isFinite(zoneEval.chartPotentialPct)
+        ? zoneEval.chartPotentialPct
+        : null;
+    let formal = null;
+    let method = "chart";
+    if (fundScored && fundScored.potential != null && Number.isFinite(fundScored.potential)) {
+      formal = fundScored.potential * 100;
+      method = "fund_delta_potential";
     }
-
-    let selection = "NoData";
-    if (ind.rsi != null) {
-      selection = ind.rsi > THRESHOLDS.rsiWeakHigh ? "Fail" : ind.rsi >= THRESHOLDS.rsiPassHigh ? "Weak" : "Pass";
-      rules.push({
-        id: "selection",
-        status: selection,
-        text: "Отбор: RSI не в зоне перекупленности для нового интереса",
-      });
+    let blended;
+    if (formal == null && chart == null) blended = null;
+    else if (formal == null) {
+      blended = chart;
+      method = "chart_fallback";
+    } else if (chart == null) blended = formal;
+    else {
+      blended = formal * 0.65 + chart * 0.35;
+      method = method + "+chart";
     }
+    const potGate = {
+      id: "potential",
+      title: "Потенциал",
+      status: blended == null ? "NoData" : "Pass",
+      detail:
+        blended == null
+          ? "n/a"
+          : method + " " + (Math.round(blended * 10) / 10).toFixed(1) + "%",
+      metrics: {
+        formalPct: formal != null ? round(formal, 2) : null,
+        chartPct: chart != null ? round(chart, 2) : null,
+        blendedPct: blended != null ? round(blended, 2) : null,
+        method: method,
+      },
+    };
 
-    let entry = "NoData";
-    if (ind.last != null && ind.smaFast != null) {
-      const dist = Math.abs(ind.last - ind.smaFast) / ind.smaFast;
-      const between =
-        ind.smaSlow != null &&
-        ((ind.last <= ind.smaFast && ind.last >= ind.smaSlow) ||
-          (ind.last >= ind.smaFast && ind.last <= ind.smaSlow));
-      entry = dist <= THRESHOLDS.entryBandPct || between ? "Pass" : "Weak";
-      rules.push({
-        id: "entry",
-        status: entry,
-        text: "Зона входа: близость к SMA" + THRESHOLDS.smaFast + " или коридор SMA",
-      });
+    const bank = fundScored && fundScored.sector === "fin";
+    const reliable = fundScored && fundScored.reliable === true;
+    const pot = blended == null ? 0 : blended;
+    const m = (fundScored && fundScored.metrics) || {};
+    let cat = 4;
+    let reason = "unreliable";
+    if (!reliable) {
+      if (!bank && m.debtEbitda != null && m.debtEbitda > 4) {
+        cat = 4;
+        reason = "DE>4";
+      } else if (pot >= 50) {
+        cat = 3;
+        reason = "unreliable+potential≥50";
+      } else {
+        cat = 4;
+        reason = "unreliable+low_potential";
+      }
+    } else if (bank) {
+      if (pot >= 30) {
+        cat = 1;
+        reason = "bank+potential≥30";
+      } else if (pot >= 10) {
+        cat = 2;
+        reason = "bank+potential_10_30";
+      } else {
+        cat = 4;
+        reason = "bank+potential<10";
+      }
+    } else if (pot >= 30 && (m.debtEbitda == null || m.debtEbitda <= 3)) {
+      cat = 1;
+      reason = "reliable+potential≥30";
+    } else if (pot >= 10) {
+      cat = 2;
+      reason = "reliable+potential≥10";
+    } else {
+      cat = 4;
+      reason = "reliable+potential<10";
     }
+    const investable = cat <= 3;
+    const catGate = {
+      id: "category",
+      title: "Категория",
+      status: investable ? "Pass" : "Skip",
+      detail: "CAT" + cat + " " + reason,
+      metrics: { category: cat, reason: reason, investable: investable },
+    };
+    return { potGate: potGate, catGate: catGate, blendedPct: blended, category: cat };
+  }
 
-    let chase = "NoData";
-    if (ind.last != null && ind.smaFast != null && ind.smaFast > 0) {
-      const ext = (ind.last - ind.smaFast) / ind.smaFast;
-      chase = ext > THRESHOLDS.chasePct ? "Fail" : ext > THRESHOLDS.entryBandPct * 2 ? "Weak" : "Pass";
-      rules.push({
-        id: "chase",
-        status: chase,
-        text: "Не догонять растяжку от SMA" + THRESHOLDS.smaFast,
-      });
+  /** Desk VolumeIndicatorsGate on daily close-location CD. */
+  function gateIndicators(ind, candles) {
+    const bars = candles || [];
+    if (bars.length < 25) {
+      return {
+        id: "indicators",
+        title: "Volume/CD",
+        status: "NoData",
+        detail: "need bars for volume/CD",
+        metrics: ind || {},
+      };
     }
-
-    let risk = "NoData";
-    if (ind.rangePct != null) {
-      const warn = profile && profile.warn_drawdown_pct != null ? Number(profile.warn_drawdown_pct) / 100 : 0.15;
-      risk = ind.rangePct > warn * 1.6 ? "Fail" : ind.rangePct > warn * 1.15 ? "Weak" : "Pass";
-      rules.push({
-        id: "risk",
-        status: risk,
-        text: "Риск: 20-дневный диапазон vs граница предупреждения анкеты",
-      });
+    const n = bars.length;
+    let volSma = 0;
+    for (let i = n - 20; i < n; i++) volSma += bars[i].volume || 0;
+    volSma /= 20;
+    const last = bars[n - 1];
+    const ratio = volSma <= 0 ? 1 : (last.volume || 0) / volSma;
+    let delta = 0;
+    const from = Math.max(0, n - 20);
+    for (let i = from; i < n; i++) {
+      const b = bars[i];
+      const range = (b.high || 0) - (b.low || 0);
+      const loc = range <= 0 ? 0 : ((b.close - b.low) / range) * 2 - 1;
+      delta += loc * (b.volume > 0 ? b.volume : 1);
     }
-
-    let accompany = "NoData";
-    if (ind.volRatio != null) {
-      accompany = ind.volRatio >= 0.8 ? "Pass" : "Weak";
-      rules.push({
-        id: "accompany",
-        status: accompany,
-        text: "Сопровождение: объём не «мёртвый» относительно своей SMA",
-      });
+    if (ratio < 0.5 || ratio > 4) {
+      return {
+        id: "indicators",
+        title: "Volume/CD",
+        status: "Fail",
+        detail: "volume extreme",
+        metrics: {
+          volRatio: round(ratio, 3),
+          deltaTail: round(delta, 2),
+          smaFast: ind && round(ind.smaFast, 4),
+          smaSlow: ind && round(ind.smaSlow, 4),
+          rsi: ind && round(ind.rsi, 2),
+        },
+      };
     }
-
-    let list = "NoData";
-    if (quote && quote.listLevel != null) {
-      list = quote.listLevel === 1 ? "Pass" : quote.listLevel === 2 ? "Weak" : "Fail";
-      rules.push({
-        id: "listing",
-        status: list,
-        text: "Листинг MOEX уровень " + quote.listLevel,
-      });
+    const absorb = ratio >= 1.2 && last.close < last.open;
+    const deltaBull = delta > 0;
+    let status = "Weak";
+    let detail = "no clear volume edge";
+    if (absorb && deltaBull) {
+      status = "Pass";
+      detail = "absorption+delta↑";
+    } else if (deltaBull || absorb) {
+      status = "Weak";
+      detail = "partial volume/CD";
     }
-
-    let fundAlign = "Weak";
-    if (!fundGate || fundGate.status === "NoData") fundAlign = "Weak";
-    else if (fundGate.status === "Fail") fundAlign = "Fail";
-    else fundAlign = fundGate.status;
-    rules.push({
-      id: "fund_align",
-      status: fundAlign,
-      text: "Стыковка с фундаментальным скорингом (если поля есть)",
-    });
-
-    const statuses = rules.map((r) => r.status).filter((s) => s !== "NoData");
-    const fails = statuses.filter((s) => s === "Fail").length;
-    let status = worstStatus(statuses.length ? statuses : ["NoData"]);
-    if (fails >= 2) status = "Fail";
-    else if (fails === 1 && status === "Fail") {
-      /* single fail stays Fail only if chase/selection/fund — already Fail */
-    }
-
     return {
-      id: "strategy",
-      title: "Стратегия (каркас playbook)",
-      status: status || "NoData",
-      detail: rules.map((r) => r.id + ":" + r.status).join(" · "),
-      metrics: { rules },
+      id: "indicators",
+      title: "Volume/CD",
+      status: status,
+      detail: detail,
+      metrics: {
+        volRatio: round(ratio, 3),
+        deltaTail: round(delta, 2),
+        smaFast: ind && round(ind.smaFast, 4),
+        smaSlow: ind && round(ind.smaSlow, 4),
+        rsi: ind && round(ind.rsi, 2),
+        rangePct: ind && round(ind.rangePct, 4),
+      },
     };
   }
 
-  function gateCluster(ind, cluster) {
+  /** Explain-facing alias: strategy section follows D1 trend gate. */
+  function gateStrategy(trendGate, fundGate, quote) {
+    const t = trendGate || { status: "NoData", detail: "" };
+    const rules = [
+      {
+        id: "trend",
+        status: t.status === "Skip" ? "Fail" : t.status,
+        text: t.detail || "D1 trend",
+      },
+    ];
+    if (quote && quote.listLevel != null) {
+      rules.push({
+        id: "listing",
+        status: quote.listLevel === 1 ? "Pass" : quote.listLevel === 2 ? "Weak" : "Fail",
+        text: "Листинг MOEX уровень " + quote.listLevel,
+      });
+    }
+    if (fundGate) {
+      rules.push({
+        id: "fund_align",
+        status: fundGate.status === "NoData" ? "Weak" : fundGate.status,
+        text: "Стыковка с фундаментом",
+      });
+    }
+    return {
+      id: "strategy",
+      title: "Тренд и вход (как на столе)",
+      status: t.status === "Skip" ? "Fail" : t.status || "NoData",
+      detail: t.detail || "",
+      metrics: { rules: rules, deskAligned: true },
+    };
+  }
+
+  function gateCluster(ind, cluster, zoneEval) {
     const vol = ind && ind.volRatio;
     const loc = cluster && cluster.location;
     const metrics = {
@@ -739,42 +989,112 @@
       val: cluster && cluster.val,
       vah: cluster && cluster.vah,
       location: loc || null,
-      source: "daily",
+      source: "daily-vap",
       tailDelta: cluster && cluster.tailDelta,
+      deskNote: "M5 Bid×Ask tape — только на столе; здесь дневной VAP",
+      range1: zoneEval && zoneEval.range1,
+      targetPrice: zoneEval && zoneEval.targetPrice,
     };
-    if (vol == null && !(cluster && cluster.poc)) {
+    if (!(cluster && cluster.poc) && !(zoneEval && zoneEval.range1)) {
       return {
         id: "cluster",
-        title: "Профиль и дельта",
-        status: "NoData",
-        detail: "Нет ряда объёмов — профиль не собрать.",
+        title: "Профиль / кластер (D1 proxy)",
+        status: "Weak",
+        detail: "нет дневного профиля — footprint только на столе",
         metrics: metrics,
       };
     }
     let status = "Weak";
-    if (vol != null && vol < THRESHOLDS.volumeFailLow) status = "Fail";
-    else if (loc === "inside" && (vol == null || (vol >= 0.8 && vol <= 2.5))) status = "Pass";
-    else if (loc === "above" && ind && ind.rsi != null && ind.rsi > 70) status = "Weak";
-    else if (vol != null && vol >= 0.8 && vol <= 2.5) status = "Pass";
-    else status = "Weak";
+    if (loc === "inside") status = "Pass";
+    else if (loc === "below" && zoneEval && zoneEval.range1) status = "Pass";
+    else if (loc === "above") status = "Weak";
+    else if (zoneEval && zoneEval.status === "Pass") status = "Weak";
     return {
       id: "cluster",
-      title: "Профиль и дельта",
+      title: "Профиль / кластер (D1 proxy)",
       status: status,
       detail:
         (cluster && cluster.poc != null
-          ? "точка контроля " + cluster.poc + " · зона " + cluster.val + "–" + cluster.vah
-          : "профиля нет") +
-        (vol != null ? " · оборот " + round(vol, 2) + "×" : ""),
+          ? "POC " + cluster.poc + " · VA " + cluster.val + "–" + cluster.vah
+          : "HVN zone") + " · без M5 footprint (стол)",
       metrics: metrics,
     };
   }
 
+  function gateMacro() {
+    return {
+      id: "macro",
+      title: "Макро/сектор",
+      status: "NoData",
+      detail: "macro overlay — на столе",
+      metrics: {},
+    };
+  }
+
+  function gateSize(zoneEval, category) {
+    if (!zoneEval || !zoneEval.range1 || zoneEval.targetPrice == null) {
+      return {
+        id: "size",
+        title: "Сайзинг",
+        status: "NoData",
+        detail: "no zones for RR",
+        metrics: {},
+      };
+    }
+    const entry = zoneEval.range1.mid;
+    let stop = zoneEval.range1.low;
+    if (zoneEval.range2 && zoneEval.range2.low < stop) stop = zoneEval.range2.low;
+    if (!(stop < entry)) stop = entry * 0.97;
+    let target = zoneEval.targetPrice;
+    if (!(target > entry)) target = entry * 1.08;
+    const risk = entry - stop;
+    const reward = target - entry;
+    const rr = risk > 0 ? reward / risk : 0;
+    if (!(category <= 3)) {
+      return {
+        id: "size",
+        title: "Сайзинг",
+        status: "Skip",
+        detail: "CAT not investable",
+        metrics: { rr: round(rr, 2) },
+      };
+    }
+    if (rr < 2) {
+      return {
+        id: "size",
+        title: "Сайзинг",
+        status: "Fail",
+        detail: "RR=" + round(rr, 2) + " < 2",
+        metrics: {
+          rr: round(rr, 2),
+          entry: round(entry, 4),
+          stop: round(stop, 4),
+          target: round(target, 4),
+        },
+      };
+    }
+    return {
+      id: "size",
+      title: "Сайзинг",
+      status: "Pass",
+      detail: "RR=" + round(rr, 2) + " (research, без лестницы лимиток)",
+      metrics: {
+        rr: round(rr, 2),
+        entry: round(entry, 4),
+        stop: round(stop, 4),
+        target: round(target, 4),
+      },
+    };
+  }
+
+  /**
+   * Desk InvestmentsPlaybook.composeVerdict + softTape (vol & cluster both WEAK → watch).
+   */
   function composeVerdict(gates) {
     const w = THRESHOLDS.weights;
     let num = 0;
     let den = 0;
-    Object.keys(w).forEach((k) => {
+    Object.keys(w).forEach(function (k) {
       const g = gates[k];
       if (!g) return;
       const s = STATUS_SCORE[g.status];
@@ -784,30 +1104,40 @@
     });
     const weighted = den > 0 ? num / den : 0;
     const fund = gates.fund || {};
-    const market = gates.market || {};
-    const strategy = gates.strategy || {};
-    const fails = Object.keys(gates).filter((k) => gates[k].status === "Fail").length;
+    const liq = gates.liquidity || {};
+    const trend = gates.trend || {};
+    const size = gates.size || {};
+    const volume = gates.indicators || {};
+    const cluster = gates.cluster || {};
+    const fails = Object.keys(gates).filter(function (k) {
+      return gates[k] && (gates[k].status === "Fail" || gates[k].status === "Skip");
+    }).length;
 
-    let verdict = "watch";
-    if (market.status === "Fail" || fails >= 2 || weighted < THRESHOLDS.watchMin) {
-      verdict = "skip";
-    } else if (
-      fund.status !== "NoData" &&
-      fund.status !== "Fail" &&
-      market.status !== "Fail" &&
-      strategy.status !== "Fail" &&
-      weighted >= THRESHOLDS.investMin
+    let verdict = "skip";
+    if (
+      fund.status === "Fail" ||
+      liq.status === "Fail" ||
+      trend.status === "Skip" ||
+      size.status === "Fail" ||
+      volume.status === "Fail" ||
+      volume.status === "NoData" ||
+      cluster.status === "Fail"
     ) {
+      verdict = "skip";
+    } else if (weighted >= THRESHOLDS.investMin && fund.status !== "NoData") {
       verdict = "invest";
+    } else if (weighted >= THRESHOLDS.watchMin) {
+      verdict = "watch";
     } else {
+      verdict = "skip";
+    }
+
+    if (fund.status === "NoData" && verdict === "invest") verdict = "watch";
+    if (verdict === "invest" && volume.status === "Weak" && cluster.status === "Weak") {
       verdict = "watch";
     }
 
-    /* Never Invest blindly without fundamentals. */
-    if (fund.status === "NoData" && verdict === "invest") verdict = "watch";
-    if (fund.status === "Fail" && verdict === "invest") verdict = "watch";
-
-    return { verdict, weighted: round(weighted, 4), failCount: fails };
+    return { verdict: verdict, weighted: round(weighted, 4), failCount: fails };
   }
 
   function scenariosFromFund(fund, quote) {
@@ -846,14 +1176,24 @@
     const ind = computeIndicators(candles);
     const fundScored = Fund.scoreFundamentals(fundIn, quote.last);
     const cluster = buildCluster(candles, profile, ind.last);
+    const zoneEval = evaluateZones(candles);
+    const trend = gateTrend(ind);
+    const fundGate = gateFund(fundScored);
+    const potCat = gatePotentialAndCategory(fundScored, zoneEval);
     const gates = {
       market: gateMarket(quote, candles),
-      fund: gateFund(fundScored),
-      indicators: gateIndicators(ind),
-      strategy: gateStrategy(ind, null, quote, profile),
-      cluster: gateCluster(ind, cluster),
+      fund: fundGate,
+      liquidity: gateLiquidity(quote),
+      macro: gateMacro(),
+      trend: trend,
+      zones: gateZones(zoneEval),
+      potential: potCat.potGate,
+      category: potCat.catGate,
+      indicators: gateIndicators(ind, candles),
+      strategy: gateStrategy(trend, fundGate, quote),
+      cluster: gateCluster(ind, cluster, zoneEval),
+      size: gateSize(zoneEval, potCat.category),
     };
-    gates.strategy = gateStrategy(ind, gates.fund, quote, profile);
     const composed = composeVerdict(gates);
     const scenarios = scenariosFromFund(fundScored, quote);
     const payload = {
@@ -878,9 +1218,13 @@
       },
       fund: fundScored,
       cluster: cluster,
+      zones: zoneEval,
+      category: potCat.category,
+      blendedPotentialPct: potCat.blendedPct,
       gates,
       verdict: composed.verdict,
       weighted: composed.weighted,
+      playbook: "investments-desk",
       scenarios,
       riskProfile: profile,
       candles: (candles || []).slice(-180).map((c) => ({
@@ -994,9 +1338,16 @@
     buildCluster,
     gateMarket,
     gateFund,
+    gateLiquidity,
+    gateTrend,
+    gateZones,
+    evaluateZones,
+    gatePotentialAndCategory,
     gateIndicators,
     gateStrategy,
     gateCluster,
+    gateMacro,
+    gateSize,
     composeVerdict,
     analyzePrepared,
     analyzeTicker,

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TRINITY — Личный кабинет</title>
-  <meta name="description" content="Операторский кабинет TRINITY: подписка, метрики со стола, лаборатория пар. Без торговли и токенов брокера." />
+  <meta name="description" content="Операторский кабинет TRINITY: подписка, метрики со стола, лаборатория календарного арбитража. Без торговли и токенов брокера." />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="googlebot" content="noindex, nofollow" />
   <meta name="theme-color" content="#0c1a22" />
@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1789422000" />
+  <link rel="stylesheet" href="css/styles.css?v=1789513000" />
 </head>
 <body class="cabinet-page cabinet-locked">
   <!-- Supabase email/password + confirm (shared IdP with future IMOEX Phase 2) -->
@@ -180,7 +180,7 @@
         <p class="eyebrow">Личный кабинет</p>
         <h1>Операторский кабинет</h1>
         <p class="lead cab-hero-lead">
-          Подписка, цифры из вашего приложения и лаборатория пар.
+          Подписка, цифры из вашего приложения и ручная лаборатория календарного спреда.
           Это не раздел «Инвестиции»: там полностью сверхзащищённый контур, долгий горизонт, инвестиционный портфель и разбор любого тикера по специальному автоматическому анализу.
           Кнопка перехода в раздел "Инвестиции" (сверхзащищённый контур) - ниже в этом кабинете.
           Заявок и ключей брокера здесь нет, только стейтмент из приложения.
@@ -326,7 +326,7 @@
           <h2>Инвестиции</h2>
           <p class="lead">
             Долгий горизонт, портфель и разбор тикера — в защищённом разделе.
-            Здесь остаются подписка, цифры со стола приложения и лаборатория.
+            Здесь остаются подписка, цифры со стола приложения и ручная лаборатория спреда.
           </p>
         </div>
 
@@ -353,15 +353,15 @@
       </div>
     </section>
 
-    <!-- Decision Lab -->
+    <!-- Decision Lab: calendar arb (manual scenario) -->
     <section class="section cab-section" id="lab">
       <div class="wrap">
         <div class="section-head reveal">
-          <p class="eyebrow">Лаборатория</p>
-          <h2>Почему вход, наблюдение или блок</h2>
+          <p class="eyebrow">Лаборатория · календарный арбитраж</p>
+          <h2>Что будет, если крутить спред руками</h2>
           <p class="lead">
-            Выберите пару — режим, расхождение и сектор подставятся со стола.
-            Это ответы на вопрос «а что, если». Это разбор логики, не заявка брокеру.
+            Полностью ручной сценарий near–next и бабочки на FORTS.
+            Тумблеры и ползунок — «а что, если». Стол для этого блока не нужен; заявку брокеру здесь не шлём.
           </p>
           <p class="lab-live-line" data-lab-live-line></p>
         </div>
@@ -370,97 +370,150 @@
           <div class="lab-controls cab-panel">
             <div class="lab-field">
               <div class="lab-field-head">
-                <label for="lab-pair">Пара</label>
-                <span class="lab-mode" data-lab-mode hidden>Вселенная</span>
+                <label for="lab-family">Семья</label>
+                <span class="lab-mode" data-lab-mode>Сценарий</span>
               </div>
-              <select id="lab-pair"></select>
-              <p class="lab-hint" data-lab-pair-note></p>
+              <select id="lab-family" data-lab-family></select>
+              <p class="lab-hint" data-lab-family-note></p>
             </div>
+
+            <fieldset class="lab-seg-field">
+              <legend>Конструкция</legend>
+              <div class="lab-seg" role="radiogroup" aria-label="Конструкция">
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-structure" value="spread" checked />
+                  <span>Near–next</span>
+                </label>
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-structure" value="fly" />
+                  <span>Бабочка</span>
+                </label>
+              </div>
+            </fieldset>
 
             <div class="lab-field">
-              <label for="lab-z">Насколько пара разошлась <span class="mono" data-lab-z>1.00</span></label>
-              <input id="lab-z" type="range" min="0" max="4" step="0.05" value="1" />
-              <p class="lab-hint">Подождать от 1,4 · входить от 1,8. Ползунок — сценарий, если со стола нет Z</p>
+              <label for="lab-z">Насколько спред ушёл от нормы <span class="mono" data-lab-z>2.10</span></label>
+              <input id="lab-z" type="range" min="0" max="4" step="0.05" value="2.1" />
+              <p class="lab-hint">Наблюдение от 1,5 · вход от 2,0 · поздно от 3,0</p>
             </div>
-            <button type="button" class="lab-reset" data-lab-reset hidden>Как на столе</button>
 
-            <fieldset class="cab-regime-pick">
-              <legend>Режим рынка</legend>
-              <div class="cab-regime-seg" role="radiogroup" aria-label="Режим">
-                <label class="cab-regime-opt">
-                  <input type="radio" name="lab-regime" value="SIDEWAYS" checked />
-                  <span>Боковик</span>
+            <fieldset class="lab-seg-field">
+              <legend>Сторона спреда</legend>
+              <div class="lab-seg" role="radiogroup" aria-label="Сторона">
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-side" value="cheap" checked />
+                  <span>Дешёвый</span>
                 </label>
-                <label class="cab-regime-opt">
-                  <input type="radio" name="lab-regime" value="NEUTRAL" />
-                  <span>Нейтральный</span>
-                </label>
-                <label class="cab-regime-opt">
-                  <input type="radio" name="lab-regime" value="TREND" />
-                  <span>Тренд</span>
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-side" value="rich" />
+                  <span>Дорогой</span>
                 </label>
               </div>
             </fieldset>
 
             <fieldset class="lab-seg-field">
-              <legend>Сектор в списке</legend>
+              <legend>Сессия FORTS</legend>
               <div class="lab-seg" role="radiogroup">
                 <label class="lab-seg-opt">
-                  <input type="radio" name="lab-cluster" value="yes" checked />
-                  <span>Да</span>
+                  <input type="radio" name="lab-session" value="yes" checked />
+                  <span>Основная</span>
                 </label>
                 <label class="lab-seg-opt">
-                  <input type="radio" name="lab-cluster" value="no" />
-                  <span>Нет</span>
+                  <input type="radio" name="lab-session" value="no" />
+                  <span>Вне сессии</span>
                 </label>
               </div>
             </fieldset>
 
             <fieldset class="lab-seg-field">
-              <legend>Фундамент</legend>
+              <legend>Ролл / DTE</legend>
+              <div class="lab-seg" role="radiogroup">
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-roll" value="yes" checked />
+                  <span>Окно открыто</span>
+                </label>
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-roll" value="no" />
+                  <span>Близко к роллу</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="lab-seg-field">
+              <legend>События / EIA</legend>
+              <div class="lab-seg" role="radiogroup">
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-event" value="yes" checked />
+                  <span>Чисто</span>
+                </label>
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-event" value="no" />
+                  <span>Blackout</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="lab-seg-field">
+              <legend>Качество кривой</legend>
               <div class="lab-seg lab-seg-3" role="radiogroup">
                 <label class="lab-seg-opt">
-                  <input type="radio" name="lab-fa" value="pass" checked />
-                  <span>Подходит</span>
+                  <input type="radio" name="lab-curve" value="ok" checked />
+                  <span>Mean-rev</span>
                 </label>
                 <label class="lab-seg-opt">
-                  <input type="radio" name="lab-fa" value="weak" />
-                  <span>Слабо</span>
+                  <input type="radio" name="lab-curve" value="slope" />
+                  <span>Уклон</span>
                 </label>
                 <label class="lab-seg-opt">
-                  <input type="radio" name="lab-fa" value="fail" />
-                  <span>Нет</span>
+                  <input type="radio" name="lab-curve" value="broken" />
+                  <span>Сломана</span>
                 </label>
               </div>
             </fieldset>
 
             <fieldset class="lab-seg-field">
-              <legend>Горизонт</legend>
+              <legend>Издержки двух ног</legend>
               <div class="lab-seg" role="radiogroup">
                 <label class="lab-seg-opt">
-                  <input type="radio" name="lab-book" value="DAILY" checked />
-                  <span>Дневной</span>
+                  <input type="radio" name="lab-cost" value="yes" checked />
+                  <span>Покрывает</span>
                 </label>
                 <label class="lab-seg-opt">
-                  <input type="radio" name="lab-book" value="INTRADAY" />
-                  <span>Внутри дня</span>
+                  <input type="radio" name="lab-cost" value="no" />
+                  <span>Тонко</span>
                 </label>
               </div>
             </fieldset>
 
-            <fieldset class="lab-seg-field" data-lab-atas-wrap hidden>
-              <legend>Объём (внутри дня)</legend>
+            <fieldset class="lab-seg-field">
+              <legend>ГО / маржа</legend>
               <div class="lab-seg" role="radiogroup">
                 <label class="lab-seg-opt">
-                  <input type="radio" name="lab-atas" value="pass" checked />
-                  <span>Подходит</span>
+                  <input type="radio" name="lab-go" value="yes" checked />
+                  <span>В лимите</span>
                 </label>
                 <label class="lab-seg-opt">
-                  <input type="radio" name="lab-atas" value="block" />
-                  <span>Нет</span>
+                  <input type="radio" name="lab-go" value="no" />
+                  <span>Велико</span>
                 </label>
               </div>
             </fieldset>
+
+            <fieldset class="lab-seg-field">
+              <legend>Разворот к среднему</legend>
+              <div class="lab-seg" role="radiogroup">
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-recede" value="yes" checked />
+                  <span>Уже есть</span>
+                </label>
+                <label class="lab-seg-opt">
+                  <input type="radio" name="lab-recede" value="no" />
+                  <span>Ждём</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <button type="button" class="lab-reset" data-lab-reset>Сбросить сценарий</button>
           </div>
 
           <div class="lab-result cab-panel">
@@ -471,25 +524,41 @@
             </div>
             <ol class="lab-steps" data-lab-steps></ol>
             <p class="calc-disclaimer cab-calc-disclaimer">
-              Так выглядит порядок проверок. Это не автоторговля и не совет купить прямо сейчас.
-              Решения принимаются в торговом приложении.
+              Порядок проверок как у календарного desk-playbook: Z, сессия, ролл, события, кривая, издержки, ГО, recede.
+              Это учебный сценарий, не автоторговля и не совет открыть сделку сейчас.
             </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Self-help (cabinet only, no live first-line) -->
+    <!-- Self-help · Маша (cabinet only, no live first-line) -->
     <section class="section cab-section cab-help" id="help">
       <div class="wrap help-shell">
         <div class="section-head reveal">
           <p class="eyebrow">Помощь</p>
           <h2>Разберём по шагам</h2>
           <p class="lead">
-            Напишите, что происходит или какая проблема возникла — покажем варианты.
-            Выберите один: решение или следующий уточняющий список.
-            Если шаги не закрыли вопрос, специалисту первой линии TRINITY уйдёт Ваше сообщение, ответ Вы получите на почту.
+            Маша подберёт варианты по вашему вопросу.
+            Выберите тему или напишите своими словами — решение или уточняющий список.
+            Если шаги не закрыли вопрос, специалисту первой линии TRINITY уйдёт сообщение, ответ придёт на почту.
           </p>
+        </div>
+
+        <div class="help-agent reveal" data-help-agent>
+          <img
+            class="help-agent-photo"
+            src="assets/masha-avatar.png"
+            width="56"
+            height="56"
+            alt="Маша"
+            decoding="async"
+          />
+          <div class="help-agent-meta">
+            <p class="help-agent-name" data-help-agent-name>Маша</p>
+            <p class="help-agent-role">Помощник TRINITY</p>
+            <p class="help-agent-status" data-help-agent-status>Онлайн · подберу шаги</p>
+          </div>
         </div>
 
         <div class="help-chat reveal" data-help-log aria-live="polite"></div>
@@ -499,6 +568,10 @@
           <input id="help-input" data-help-input type="text" maxlength="280" autocomplete="off" placeholder="Например: не приходит письмо или не открывается стол" />
           <button type="submit" class="btn btn-primary">Найти</button>
         </form>
+        <p class="help-train-note reveal">
+          Вопросы и ответы Маши сохраняются в вашем аккаунте, чтобы улучшать подсказки.
+          Пароли и токены в лог не пишем.
+        </p>
 
         <div class="help-escalate reveal" data-help-escalate hidden>
           <h3>Письмо человеку</h3>
@@ -619,16 +692,16 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
   <script src="js/lib/auth-errors.js?v=1789317600"></script>
-  <script src="js/lib/decision-lab.js?v=1789422000"></script>
+  <script src="js/lib/decision-lab.js?v=1789510000"></script>
   <script src="js/lib/unlock-key.js?v=1789115892"></script>
   <script src="js/lib/desk-snapshot.js?v=1789423000"></script>
   <script src="js/lib/desk-journals.js?v=1789421000"></script>
-  <script src="js/lib/cabinet-help.js?v=1789423000"></script>
+  <script src="js/lib/cabinet-help.js?v=1789513000"></script>
   <script src="js/cabinet-config.js?v=1789115892"></script>
   <!-- Optional gitignored override; 404 is fine when absent -->
   <script src="js/cabinet-config.local.js"></script>
   <script src="js/cabinet-data.js?v=1789423000"></script>
-  <script src="js/cabinet-auth.js?v=1789317600"></script>
-  <script src="js/cabinet.js?v=1789425000"></script>
+  <script src="js/cabinet-auth.js?v=1789511000"></script>
+  <script src="js/cabinet.js?v=1789513000"></script>
 </body>
 </html>

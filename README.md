@@ -53,6 +53,7 @@ wiki/                   # публикации + how-to
 robots.txt / sitemap.xml
 supabase/profiles.sql
 supabase/desk_snapshots.sql
+supabase/masha_help_logs.sql
 docs/SUPABASE_SETUP.md
 docs/SEO.md
 ```

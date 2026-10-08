@@ -2,159 +2,101 @@ const { describe, it } = require("node:test");
 const assert = require("node:assert/strict");
 const Lab = require("../js/lib/decision-lab.js");
 
-describe("TrinityDecisionLab.evaluatePipeline", () => {
-  const base = {
-    zAbs: 2.0,
-    regime: "SIDEWAYS",
-    cluster: true,
-    fa: "pass",
-    book: "DAILY",
-    atas: true,
-    sector: "METALS",
-  };
+describe("TrinityDecisionLab calendar-arb scenario", () => {
+  const base = Lab.defaultGates();
 
-  it("exposes Z thresholds", () => {
-    assert.equal(Lab.Z_ENTER, 1.8);
-    assert.equal(Lab.Z_WATCH, 1.4);
+  it("exposes Z bands and families", () => {
+    assert.equal(Lab.Z_WATCH, 1.5);
+    assert.equal(Lab.Z_ENTER, 2.0);
+    assert.equal(Lab.Z_LATE, 3.0);
+    assert.ok(Lab.FAMILIES.length >= 5);
+    assert.equal(Lab.familyById("BR").id, "BR");
   });
 
-  it("PAPER OPEN when DAILY tech+gates pass", () => {
+  it("PAPER OPEN on green default gates", () => {
     const r = Lab.evaluatePipeline(base);
     assert.equal(r.outcome, "PAPER OPEN");
     assert.equal(r.outcomeClass, "lab-out-enter");
-    assert.equal(r.steps.find((s) => s.id === "tech").status, "pass");
+    assert.match(r.reason, /buy next|дешёвый/i);
   });
 
-  it("BLOCK on TREND regime", () => {
-    const r = Lab.evaluatePipeline({ ...base, regime: "TREND" });
-    assert.equal(r.outcome, "BLOCK");
-    assert.match(r.reason, /тренд/i);
+  it("WATCH when waiting for recede", () => {
+    const r = Lab.evaluatePipeline({ ...base, recede: false });
+    assert.equal(r.outcome, "WATCH");
+    assert.match(r.reason, /recede/i);
   });
 
-  it("BLOCK when cluster ineligible", () => {
-    const r = Lab.evaluatePipeline({ ...base, cluster: false });
-    assert.equal(r.outcome, "BLOCK");
-    assert.match(r.reason, /сектор/i);
+  it("WATCH on mid |Z|", () => {
+    const r = Lab.evaluatePipeline({ ...base, zAbs: 1.7 });
+    assert.equal(r.outcome, "WATCH");
   });
 
-  it("BLOCK when FA fails", () => {
-    const r = Lab.evaluatePipeline({ ...base, fa: "fail" });
-    assert.equal(r.outcome, "BLOCK");
-    assert.match(r.reason, /фундамент/i);
-  });
-
-  it("WATCH on weak FA or low Z", () => {
+  it("BLOCK outside session / roll / event", () => {
     assert.equal(
-      Lab.evaluatePipeline({ ...base, fa: "weak" }).outcome,
-      "WATCH"
+      Lab.evaluatePipeline({ ...base, session: false }).outcome,
+      "BLOCK"
     );
     assert.equal(
-      Lab.evaluatePipeline({ ...base, zAbs: 1.0 }).outcome,
-      "WATCH"
+      Lab.evaluatePipeline({ ...base, rollOk: false }).outcome,
+      "BLOCK"
     );
     assert.equal(
-      Lab.evaluatePipeline({ ...base, zAbs: 1.5 }).outcome,
-      "WATCH"
+      Lab.evaluatePipeline({ ...base, eventClear: false }).outcome,
+      "BLOCK"
     );
   });
 
-  it("INTRADAY → RESEARCH when ATAS ok; WATCH when ATAS blocks", () => {
+  it("BLOCK on broken curve, thin costs, GO, late |Z|", () => {
     assert.equal(
-      Lab.evaluatePipeline({ ...base, book: "INTRADAY", atas: true }).outcome,
-      "RESEARCH"
+      Lab.evaluatePipeline({ ...base, curve: "broken" }).outcome,
+      "BLOCK"
     );
     assert.equal(
-      Lab.evaluatePipeline({ ...base, book: "INTRADAY", atas: false }).outcome,
-      "WATCH"
+      Lab.evaluatePipeline({ ...base, curve: "slope" }).outcome,
+      "BLOCK"
+    );
+    assert.equal(
+      Lab.evaluatePipeline({ ...base, costOk: false }).outcome,
+      "BLOCK"
+    );
+    assert.equal(
+      Lab.evaluatePipeline({ ...base, goOk: false }).outcome,
+      "BLOCK"
+    );
+    assert.equal(
+      Lab.evaluatePipeline({ ...base, zAbs: 3.2 }).outcome,
+      "BLOCK"
     );
   });
 
-  it("always returns five-ish ordered steps with ids", () => {
+  it("rich side explains short-spread scenario", () => {
+    const r = Lab.evaluatePipeline({ ...base, side: "rich" });
+    assert.equal(r.outcome, "PAPER OPEN");
+    assert.match(r.reason, /sell next|дорог/i);
+  });
+
+  it("fly structure mentions wings", () => {
+    const r = Lab.evaluatePipeline({ ...base, structure: "fly" });
+    assert.equal(r.outcome, "PAPER OPEN");
+    assert.match(r.reason, /крыл|бабоч/i);
+  });
+
+  it("returns ordered checklist steps", () => {
     const r = Lab.evaluatePipeline(base);
-    assert.ok(r.steps.length >= 5);
+    assert.ok(r.steps.length >= 8);
     assert.deepEqual(
       r.steps.slice(0, 4).map((s) => s.id),
-      ["tech", "regime", "cluster", "fa"]
+      ["tech", "session", "roll", "event"]
     );
   });
-});
 
-describe("TrinityDecisionLab.buildLabState", () => {
-  it("expands catalog beyond the three demo pairs", () => {
-    assert.ok(Lab.catalogPairs().length >= 20);
-    assert.ok(Lab.catalogPairs().some((p) => p.id === "gazp-lkoh"));
-    assert.ok(Lab.catalogPairs().some((p) => p.id === "magn-nlmk"));
-  });
-
-  it("maps desk sit-out to cluster=false and live regime", () => {
-    const s = Lab.buildLabState({
-      regime: { label: "NEUTRAL", blockEntries: false },
-      report: {
-        tickersAnalyzed: 32,
-        pairsTested: 113,
-        cointegratedPairs: 0,
-        topPairs: [],
-        recommendations: [],
-      },
-      cluster: {
-        sitOut: true,
-        champion: null,
-        sectors: [
-          { sector: "OIL_GAS", eligible: false },
-          { sector: "BANKS", eligible: false },
-          { sector: "METALS_MINING", eligible: false },
-          { sector: "RETAIL", eligible: false },
-        ],
-      },
-      recommendations: [],
-    });
-    assert.equal(s.regime, "NEUTRAL");
-    assert.equal(s.sitOut, true);
-    assert.ok(s.pairs.length >= 20);
-    const banks = s.pairs.find((p) => p.id === "sber-vtbr");
-    assert.equal(banks.cluster, false);
-    assert.equal(banks.live, false);
-    const g = Lab.gatesFromPair(banks, { regime: s.regime });
-    assert.equal(g.regime, "NEUTRAL");
-    assert.equal(g.cluster, false);
-    assert.equal(g.fa, "weak");
-    const verdict = Lab.evaluatePipeline(g);
-    assert.equal(verdict.outcome, "BLOCK");
-    assert.match(s.line, /фаворита нет/i);
-  });
-
-  it("promotes recommendation Z into live pair gates", () => {
-    const s = Lab.buildLabState({
-      regime: { label: "SIDEWAYS" },
-      recommendations: [
-        {
-          tickerY: "MAGN",
-          tickerX: "NLMK",
-          currentZScore: -2.1,
-          signal: "LONG_SPREAD",
-          summary: "Спред ниже среднего",
-        },
-      ],
-      cluster: {
-        sitOut: false,
-        champion: "METALS_MINING",
-        sectors: [{ sector: "METALS_MINING", eligible: true }],
-      },
-      finals: [{ tickerY: "MAGN", tickerX: "NLMK", decision: "ENTER" }],
-    });
-    const p = s.pairs.find((x) => x.id === "magn-nlmk");
-    assert.equal(p.live, true);
-    assert.equal(p.zAbs, 2.1);
-    assert.equal(p.cluster, true);
-    assert.equal(p.fa, "pass");
-    const g = Lab.gatesFromPair(p);
-    assert.equal(Lab.evaluatePipeline(g).outcome, "PAPER OPEN");
-    assert.equal(Lab.sameGates(g, g), true);
-  });
-
-  it("faFromDecision maps ENTER / WATCH / BLOCK", () => {
-    assert.equal(Lab.faFromDecision("ENTER"), "pass");
-    assert.equal(Lab.faFromDecision("WATCH"), "weak");
-    assert.equal(Lab.faFromDecision("BLOCK"), "fail");
+  it("sameGates / defaultGates / buildLabState", () => {
+    const a = Lab.defaultGates();
+    assert.equal(Lab.sameGates(a, Lab.defaultGates()), true);
+    assert.equal(Lab.sameGates(a, { ...a, session: false }), false);
+    const s = Lab.buildLabState();
+    assert.deepEqual(s.pairs, []);
+    assert.match(s.line, /ручн/i);
+    assert.deepEqual(Lab.catalogPairs(), []);
   });
 });
