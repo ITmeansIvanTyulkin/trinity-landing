@@ -1,0 +1,71 @@
+{
+  "asOf": "2026-10-09",
+  "note": "Медленные макроряды. В индекс только с датой и источником; окно свежести ~100 дней.",
+  "values": {
+    "m2_yoy": {
+      "value": 16.8,
+      "asOf": "2026-08-31",
+      "source": "ЦБ / денежная масса M2 YoY"
+    },
+    "pmi_mfg": {
+      "value": 49.4,
+      "asOf": "2026-09-30",
+      "source": "S&P Global PMI Manufacturing RU"
+    },
+    "pmi_svc": {
+      "value": 50.2,
+      "asOf": "2026-09-30",
+      "source": "S&P Global PMI Services RU"
+    },
+    "ind_prod_yoy": {
+      "value": 1.5,
+      "asOf": "2026-08-31",
+      "source": "Росстат · промпроизводство YoY"
+    },
+    "retail_yoy": {
+      "value": 2.1,
+      "asOf": "2026-08-31",
+      "source": "Росстат · розница YoY"
+    },
+    "unemployment": {
+      "value": 2.3,
+      "asOf": "2026-08-31",
+      "source": "Росстат · безработица"
+    },
+    "rail_yoy": {
+      "value": -0.6,
+      "asOf": "2026-08-31",
+      "source": "РЖД / погрузка YoY"
+    },
+    "urals_disc": {
+      "value": 13.5,
+      "asOf": "2026-10-08",
+      "source": "Дисконт Urals к Brent"
+    },
+    "gas_ttf": {
+      "value": 38,
+      "asOf": "2026-10-08",
+      "source": "TTF proxy €/MWh"
+    },
+    "trade_balance": {
+      "value": 8.2,
+      "asOf": "2026-08-31",
+      "source": "ФТС / торговый баланс, $ млрд/мес"
+    },
+    "cds_5y": {
+      "value": 195,
+      "asOf": "2026-10-08",
+      "source": "CDS РФ 5Y / EM-спред proxy, б.п."
+    },
+    "gold_fx_reserves": {
+      "value": 38,
+      "asOf": "2026-10-02",
+      "source": "Структура ЗВР · stress proxy 0–100"
+    },
+    "sanctions_news": {
+      "value": 42,
+      "asOf": "2026-10-09",
+      "source": "Санкционный stress dial 0–100"
+    }
+  }
+}

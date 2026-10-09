@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1789514000" />
+  <link rel="stylesheet" href="css/styles.css?v=1789521000" />
 </head>
 <body class="cabinet-page invest-page cabinet-locked">
   <p class="invest-auth-wait" data-invest-wait>Проверяем сессию…</p>
@@ -95,6 +95,16 @@
             <p class="invest-ov-gold-pct mono" data-ov-gold-pct></p>
             <p class="cab-meta" data-ov-gold-grams></p>
             <p class="cab-meta muted" data-ov-gold-note></p>
+          </article>
+          <article class="invest-ov-cri" data-ov-cri-card data-zone="elevated">
+            <span class="cab-label">Кризисный риск РФ</span>
+            <p class="invest-ov-cri-score mono" data-ov-cri-score>—</p>
+            <p class="invest-ov-cri-zone" data-ov-cri-zone>Снимаем Мосбиржу и ЦБ…</p>
+            <p class="cab-meta" data-ov-cri-outlook></p>
+            <p class="cab-meta" data-ov-cri-coverage></p>
+            <p class="cab-meta muted" data-ov-cri-note></p>
+            <button type="button" class="btn btn-line invest-ov-cri-more" data-ov-cri-toggle>Показатели</button>
+            <div class="invest-ov-cri-detail" data-ov-cri-detail hidden></div>
           </article>
         </div>
 
@@ -651,12 +661,13 @@
   <script src="js/lib/auth-errors.js?v=1789514000"></script>
   <script src="js/lib/invest-fundamentals.js?v=1789122501"></script>
   <script src="js/lib/invest-explain.js?v=1789514100"></script>
-  <script src="js/lib/invest-pipeline.js?v=1789514000"></script>
+  <script src="js/lib/crisis-risk-ru.js?v=1789523000"></script>
+  <script src="js/lib/invest-pipeline.js?v=1789523000"></script>
   <script src="js/lib/invest-fund-fetch.js?v=1789514000"></script>
   <script src="js/lib/invest-import.js?v=1789181201"></script>
   <script src="js/cabinet-config.js?v=1789122501"></script>
   <script src="js/cabinet-config.local.js"></script>
   <script src="js/cabinet-auth.js?v=1789514000"></script>
-  <script src="js/invest.js?v=1789514000"></script>
+  <script src="js/invest.js?v=1789523000"></script>
 </body>
 </html>

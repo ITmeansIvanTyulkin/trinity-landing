@@ -5180,17 +5180,124 @@ body.cabinet-page:not(.cabinet-locked) .cabinet-shell {
 
 .invest-ov-hero {
   display: grid;
-  grid-template-columns: 1.2fr 0.9fr;
+  grid-template-columns: 1.15fr 0.85fr 0.9fr;
   gap: 1rem;
   margin-bottom: 1.15rem;
 }
 
 .invest-ov-net,
-.invest-ov-gold {
+.invest-ov-gold,
+.invest-ov-cri {
   padding: 1.55rem 1.6rem 1.4rem;
   border: 1px solid var(--line);
   background: var(--panel);
   box-shadow: var(--shadow);
+}
+
+.invest-ov-cri-score {
+  margin: 0.15rem 0 0.2rem;
+  font-family: var(--display);
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.invest-ov-cri-zone {
+  margin: 0 0 0.35rem;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.invest-ov-cri[data-zone="calm"] {
+  border-color: rgba(11, 122, 102, 0.4);
+  background: linear-gradient(165deg, #fff 0%, rgba(11, 122, 102, 0.08) 140%);
+}
+
+.invest-ov-cri[data-zone="calm"] .invest-ov-cri-score,
+.invest-ov-cri[data-zone="calm"] .invest-ov-cri-zone {
+  color: #0b7a66;
+}
+
+.invest-ov-cri[data-zone="elevated"] {
+  border-color: rgba(196, 163, 90, 0.45);
+  background: linear-gradient(165deg, #fff 0%, rgba(196, 163, 90, 0.12) 140%);
+}
+
+.invest-ov-cri[data-zone="elevated"] .invest-ov-cri-score,
+.invest-ov-cri[data-zone="elevated"] .invest-ov-cri-zone {
+  color: #8a4b12;
+}
+
+.invest-ov-cri[data-zone="high"] {
+  border-color: rgba(163, 59, 59, 0.35);
+  background: linear-gradient(165deg, #fff 0%, rgba(163, 59, 59, 0.08) 140%);
+}
+
+.invest-ov-cri[data-zone="high"] .invest-ov-cri-score,
+.invest-ov-cri[data-zone="high"] .invest-ov-cri-zone {
+  color: #a33b3b;
+}
+
+.invest-ov-cri[data-zone="crisis"] {
+  border-color: rgba(120, 20, 20, 0.45);
+  background: linear-gradient(165deg, #fff 0%, rgba(120, 20, 20, 0.12) 140%);
+}
+
+.invest-ov-cri[data-zone="crisis"] .invest-ov-cri-score,
+.invest-ov-cri[data-zone="crisis"] .invest-ov-cri-zone {
+  color: #7a1515;
+}
+
+.invest-ov-cri-more {
+  margin-top: 0.75rem;
+}
+
+.invest-ov-cri-detail {
+  margin-top: 0.85rem;
+  max-height: 16rem;
+  overflow: auto;
+  border-top: 1px solid var(--line);
+  padding-top: 0.65rem;
+}
+
+.invest-ov-cri-blocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
+.invest-ov-cri-blocks span {
+  font-size: 0.78rem;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 0.15rem 0.45rem;
+}
+
+.invest-ov-cri-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.invest-ov-cri-table th,
+.invest-ov-cri-table td {
+  text-align: left;
+  padding: 0.28rem 0.35rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  vertical-align: top;
+}
+
+.invest-ov-cri-table th {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.invest-ov-cri-table td:nth-child(2),
+.invest-ov-cri-table td:nth-child(3) {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .invest-ov-net-value {

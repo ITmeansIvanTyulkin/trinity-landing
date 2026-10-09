@@ -1,6 +1,7 @@
 (() => {
   const Fund = window.TrinityInvestFundamentals;
   const Pipe = window.TrinityInvestPipeline;
+  const Cri = window.TrinityCrisisRiskRu;
   const FundFetch = window.TrinityInvestFundFetch;
   const Imp = window.TrinityInvestImport;
   const Auth = window.TrinityCabinetAuth;
@@ -75,6 +76,8 @@
     lastResult: null,
     gold: null,
     fx: {},
+    crisisRisk: null,
+    criDetailOpen: false,
     editingId: null,
     watchlist: [],
     watchRemote: false,
@@ -1182,7 +1185,178 @@
     } catch (err) {
       console.warn("overview watch", err);
     }
+    renderCrisisCard();
     renderChart(all);
+  }
+
+  function renderCrisisCard() {
+    const card = $("[data-ov-cri-card]");
+    if (!card) return;
+    const snap = state.crisisRisk;
+    if (!snap) {
+      card.setAttribute("data-zone", "elevated");
+      setText("[data-ov-cri-score]", "—");
+      setText("[data-ov-cri-zone]", "Снимаем Мосбиржу и ЦБ…");
+      setText("[data-ov-cri-outlook]", "");
+      setText("[data-ov-cri-coverage]", "");
+      setText("[data-ov-cri-note]", "");
+      return;
+    }
+    if (!snap.reliable || snap.score == null) {
+      card.setAttribute("data-zone", "elevated");
+      setText("[data-ov-cri-score]", "—");
+      setText("[data-ov-cri-zone]", "Недостаточно живых данных");
+      setText("[data-ov-cri-outlook]", "");
+      setText(
+        "[data-ov-cri-coverage]",
+        "Покрытие " +
+          (snap.coveredWeight != null ? String(snap.coveredWeight).replace(".", ",") : "0") +
+          "% из 100 · нужно ≥" +
+          (snap.minCoveredWeight != null ? snap.minCoveredWeight : 25) +
+          "%"
+      );
+      setText(
+        "[data-ov-cri-note]",
+        (snap.errors && snap.errors[0] ? snap.errors[0] + " · " : "") +
+          "Индекс не показываем, пока Мосбиржа/ЦБ не ответят."
+      );
+      return;
+    }
+
+    const zone = snap.zone || { id: "elevated", label: "—" };
+    card.setAttribute("data-zone", zone.id || "elevated");
+    setText("[data-ov-cri-score]", String(snap.score).replace(".", ","));
+    setText("[data-ov-cri-zone]", "Зона: " + (zone.label || zone.id));
+
+    const out = snap.outlook;
+    if (out && out.direction === "insufficient") {
+      setText(
+        "[data-ov-cri-outlook]",
+        "Горизонт 1–4 нед: набираем историю торгов"
+      );
+    } else if (out) {
+      setText("[data-ov-cri-outlook]", "Горизонт 1–4 нед: " + (out.label || out.direction));
+    } else {
+      setText("[data-ov-cri-outlook]", "");
+    }
+
+    const liveOk = (snap.rows || []).filter((r) => r.live && r.status === "ok").length;
+    const liveAll = (snap.rows || []).filter((r) => r.live).length;
+    setText(
+      "[data-ov-cri-coverage]",
+      "Рядов " +
+        liveOk +
+        "/" +
+        liveAll +
+        " · вес " +
+        String(snap.coveredWeight).replace(".", ",") +
+        "%"
+    );
+
+    const bits = [];
+    if (snap.asOf) {
+      const asOfLabel =
+        Cri && typeof Cri.formatAsOf === "function" ? Cri.formatAsOf(snap.asOf) : snap.asOf;
+      bits.push("на " + asOfLabel);
+    }
+    if (out && out.reasons && out.reasons[0]) bits.push(out.reasons[0]);
+    setText("[data-ov-cri-note]", bits.join(" · "));
+
+    const detail = $("[data-ov-cri-detail]");
+    const toggle = $("[data-ov-cri-toggle]");
+    if (detail) {
+      detail.hidden = !state.criDetailOpen;
+      if (state.criDetailOpen) {
+        const blockHtml = (Cri && Cri.BLOCKS ? Cri.BLOCKS : [])
+          .map((b) => {
+            const v = snap.blockScores && snap.blockScores[b.id];
+            return (
+              "<span>" +
+              escHtml(b.label) +
+              " " +
+              (v != null ? String(v).replace(".", ",") : "—") +
+              "</span>"
+            );
+          })
+          .join("");
+        const rows = (snap.rows || []).slice().sort((a, b) => {
+          if (a.status === "ok" && b.status !== "ok") return -1;
+          if (b.status === "ok" && a.status !== "ok") return 1;
+          return (b.contribution || 0) - (a.contribution || 0);
+        });
+        const body = rows
+          .map((r) => {
+            const val =
+              r.value == null
+                ? r.feed === "macro"
+                  ? "ждём макрофайл"
+                  : r.feed === "cbr"
+                    ? "ждём ЦБ"
+                    : r.live
+                      ? "ждём Мосбиржу"
+                      : "нет источника"
+                : String(r.value).replace(".", ",") + (r.unit ? " " + r.unit : "");
+            const stress =
+              r.stressScore != null ? String(r.stressScore).replace(".", ",") : "—";
+            const src = r.source ? " · " + r.source : "";
+            return (
+              "<tr><td>" +
+              escHtml(r.title) +
+              (src ? "<br><span class=\"muted\">" + escHtml(src.replace(/^ · /, "")) + "</span>" : "") +
+              "</td><td>" +
+              escHtml(val) +
+              "</td><td>" +
+              escHtml(stress) +
+              "</td></tr>"
+            );
+          })
+          .join("");
+        detail.innerHTML =
+          '<div class="invest-ov-cri-blocks">' +
+          blockHtml +
+          '</div><table class="invest-ov-cri-table"><thead><tr><th>Показатель</th><th>Сейчас</th><th>Стресс</th></tr></thead><tbody>' +
+          body +
+          "</tbody></table>";
+      }
+    }
+    if (toggle) {
+      toggle.textContent = state.criDetailOpen ? "Свернуть" : "Показатели";
+    }
+  }
+
+  async function loadCrisisRisk() {
+    if (!Cri) {
+      state.crisisRisk = null;
+      return;
+    }
+    try {
+      const opts = {
+        issBase: cfg().issBase || undefined,
+        issReader: cfg().issReader,
+        fetchIssJson:
+          Pipe && typeof Pipe.fetchIssJson === "function"
+            ? function (path, o) {
+                return Pipe.fetchIssJson(
+                  path,
+                  Object.assign(
+                    { issBase: cfg().issBase || undefined, issReader: cfg().issReader },
+                    o || {}
+                  )
+                );
+              }
+            : undefined,
+      };
+      state.crisisRisk = await Cri.loadSnapshot(null, opts);
+    } catch (err) {
+      console.warn("CRI_RU", err);
+      state.crisisRisk = {
+        reliable: false,
+        score: null,
+        coveredWeight: 0,
+        errors: [err && err.message ? err.message : String(err)],
+        rows: [],
+      };
+    }
   }
 
   function renderChart(rows) {
@@ -1821,6 +1995,7 @@
     const result = await Pipe.analyzeTicker(code, {
       fundamentals: fundamentals,
       riskProfile: state.profile,
+      crisisRisk: state.crisisRisk,
       issBase: cfg().issBase || undefined,
       issReader: cfg().issReader,
     });
@@ -2297,6 +2472,7 @@
       const result = await Pipe.analyzeTicker(ticker, {
         fundamentals: fundamentals,
         riskProfile: state.profile,
+        crisisRisk: state.crisisRisk,
         issBase: issBase,
         issReader: cfg().issReader,
       });
@@ -3313,11 +3489,27 @@
       });
     }
 
-    await Promise.all([loadProfile(), loadPositions(), loadDesk(), loadMarketQuotes(), loadWatchlist()]);
+    await Promise.all([
+      loadProfile(),
+      loadPositions(),
+      loadDesk(),
+      loadMarketQuotes(),
+      loadWatchlist(),
+      loadCrisisRisk(),
+    ]);
     await migrateWatchStubs();
     renderPortfolio();
     renderWatchlist();
     renderOverview();
+
+    const criToggle = $("[data-ov-cri-toggle]");
+    if (criToggle && !criToggle._bound) {
+      criToggle._bound = true;
+      criToggle.addEventListener("click", () => {
+        state.criDetailOpen = !state.criDetailOpen;
+        renderCrisisCard();
+      });
+    }
   }
 
   boot();

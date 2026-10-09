@@ -12,15 +12,17 @@
   if (typeof module === "object" && module.exports) {
     module.exports = factory(
       require("./invest-fundamentals.js"),
-      require("./invest-explain.js")
+      require("./invest-explain.js"),
+      require("./crisis-risk-ru.js")
     );
   } else {
     root.TrinityInvestPipeline = factory(
       root.TrinityInvestFundamentals,
-      root.TrinityInvestExplain
+      root.TrinityInvestExplain,
+      root.TrinityCrisisRiskRu
     );
   }
-})(typeof globalThis !== "undefined" ? globalThis : this, function (Fund, Explain) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (Fund, Explain, Crisis) {
   "use strict";
 
   const ISS_DEFAULT = "https://iss.moex.com/iss";
@@ -1020,13 +1022,29 @@
     };
   }
 
-  function gateMacro() {
+  function gateMacro(crisisRisk, sector) {
+    if (Crisis && typeof Crisis.toMacroGate === "function") {
+      return Crisis.toMacroGate(crisisRisk || null, sector);
+    }
+    if (!crisisRisk || crisisRisk.score == null || !Number.isFinite(Number(crisisRisk.score))) {
+      return {
+        id: "macro",
+        title: "Макро/сектор",
+        status: "NoData",
+        detail: "CRI_RU — нет снимка",
+        metrics: {},
+      };
+    }
+    const score = Number(crisisRisk.score);
+    let status = "Pass";
+    if (score >= 55) status = "Fail";
+    else if (score >= 35) status = "Weak";
     return {
       id: "macro",
       title: "Макро/сектор",
-      status: "NoData",
-      detail: "macro overlay — на столе",
-      metrics: {},
+      status: status,
+      detail: "CRI_RU " + score,
+      metrics: { criRu: score },
     };
   }
 
@@ -1188,7 +1206,7 @@
       market: gateMarket(quote, candles),
       fund: fundGate,
       liquidity: gateLiquidity(quote),
-      macro: gateMacro(),
+      macro: gateMacro(input.crisisRisk || null, fundScored.sector),
       trend: trend,
       zones: gateZones(zoneEval),
       potential: potCat.potGate,
@@ -1273,6 +1291,7 @@
       candles,
       fundamentals: opts.fundamentals || null,
       riskProfile: opts.riskProfile || null,
+      crisisRisk: opts.crisisRisk || null,
     });
     result.marketVia = opts._issVia || null;
     if (issError) {
